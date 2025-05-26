@@ -311,10 +311,26 @@
 
       .animated-shape {
           position: absolute;
-          background: linear-gradient(120deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+          /* More visible gradient in light mode */
+          background: linear-gradient(120deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.3));
           border-radius: 50%;
-          animation: float-around 25s infinite alternate ease-in-out;
+          animation: float-around 8s infinite alternate ease-in-out;
+          /* Increased base opacity */
+          opacity: 0.7;
+          /* Add subtle shadow for better definition */
+          box-shadow: 0 0 60px rgba(99, 102, 241, 0.15);
+      }
+
+      /* Dark mode version - slightly different treatment */
+      .dark .animated-shape {
+          background: linear-gradient(120deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.2));
           opacity: 0.5;
+          box-shadow: 0 0 40px rgba(99, 102, 241, 0.1);
+      }
+
+      /* Add a subtle border for better definition in light mode */
+      html:not(.dark) .animated-shape {
+          border: 1px solid rgba(99, 102, 241, 0.08);
       }
 
       .shape-1 {
@@ -330,7 +346,7 @@
           height: 30vw;
           top: 30%;
           right: -5%;
-          animation-delay: -5s;
+          animation-delay: -2s; /* Reduced delay from -5s to -2s */
       }
 
       .shape-3 {
@@ -338,7 +354,73 @@
           height: 40vw;
           bottom: -10%;
           right: 20%;
-          animation-delay: -10s;
+          animation-delay: -4s; /* Reduced delay from -10s to -4s */
+      }
+
+      @media (max-width: 768px) {
+          /* Increase size of existing shapes for mobile */
+          .shape-1 {
+              width: 80vw;
+              height: 80vw;
+              top: -15%;
+              left: -20%;
+          }
+
+          .shape-2 {
+              width: 60vw;
+              height: 60vw;
+              top: 25%;
+              right: -15%;
+          }
+
+          .shape-3 {
+              width: 70vw;
+              height: 70vw;
+              bottom: -5%;
+              right: 10%;
+          }
+
+          /* Additional shapes for mobile only */
+          .shape-4, .shape-5 {
+              display: block;
+              position: absolute;
+              background: linear-gradient(120deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.3));
+              border-radius: 50%;
+              animation: float-around 8s infinite alternate ease-in-out;
+              opacity: 0.7;
+              box-shadow: 0 0 60px rgba(99, 102, 241, 0.15);
+          }
+
+          .dark .shape-4, .dark .shape-5 {
+              background: linear-gradient(120deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.2));
+              opacity: 0.5;
+              box-shadow: 0 0 40px rgba(99, 102, 241, 0.1);
+          }
+
+          html:not(.dark) .shape-4, html:not(.dark) .shape-5 {
+              border: 1px solid rgba(99, 102, 241, 0.08);
+          }
+
+          .shape-4 {
+              width: 45vw;
+              height: 45vw;
+              top: 50%;
+              left: 10%;
+              animation-delay: -1.5s;
+          }
+
+          .shape-5 {
+              width: 35vw;
+              height: 35vw;
+              top: 10%;
+              right: 25%;
+              animation-delay: -3s;
+          }
+      }
+
+      /* Default hidden state for mobile-only shapes */
+      .shape-4, .shape-5 {
+          display: none;
       }
 
       @keyframes float-around {
@@ -347,15 +429,15 @@
           }
 
           33% {
-              transform: translate(2%, 2%) rotate(1deg) scale(1.05);
+              transform: translate(5%, 5%) rotate(3deg) scale(1.1); /* More pronounced movement */
           }
 
           66% {
-              transform: translate(-2%, 1%) rotate(-1deg) scale(0.95);
+              transform: translate(-5%, 2%) rotate(-3deg) scale(0.9); /* More pronounced movement */
           }
 
           100% {
-              transform: translate(1%, -1%) rotate(0.5deg) scale(1);
+              transform: translate(3%, -3%) rotate(1.5deg) scale(1.05); /* More pronounced movement */
           }
       }
 
@@ -616,6 +698,8 @@
 		<div class="animated-shape shape-1"></div>
 		<div class="animated-shape shape-2"></div>
 		<div class="animated-shape shape-3"></div>
+		<div class="animated-shape shape-4"></div>
+		<div class="animated-shape shape-5"></div>
 	</div>
 
 	<!-- Content container with max width -->
@@ -1323,6 +1407,30 @@
             ease: 'power2.inOut',
             delay: 0.4
         });
+
+        if (window.innerWidth <= 768) {
+            gsap.to('.shape-4', {
+                x: '-15%',
+                y: '12%',
+                rotation: 15,
+                duration: 2.4,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power2.inOut',
+                delay: 0.3
+            });
+
+            gsap.to('.shape-5', {
+                x: '12%',
+                y: '-10%',
+                rotation: -12,
+                duration: 1.8,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power2.inOut',
+                delay: 0.5
+            });
+        }
 
         function setupLogoAnimations() {
             console.log("Setting up logo animations");
