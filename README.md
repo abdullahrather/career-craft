@@ -56,7 +56,7 @@
 
 ```bash
 # 1. Clone
-git clone https://github.com/<your-org>/career-craft.git
+git clone [https://github.com/<your-org>/career-craft.git](https://github.com/abdullahrather/career-craft.git)
 cd career-craft
 
 # 2. Install PHP deps
