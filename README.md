@@ -79,7 +79,7 @@ php artisan migrate --seed
 
 # 7. Serve
 php artisan serve           # http://127.0.0.1:8000
-```                                  <-- ✨ CLOSES the code fence
+```
 ---
 
 ## 🗂️ Project Structure
@@ -100,7 +100,7 @@ database/
 routes/
 ├── web.php
 └── livewire.php
-
+```
 ---
 
 ## 🛣️ Roadmap
@@ -110,7 +110,6 @@ routes/
 - [ ] **Interview bot** streaming via Reverb  
 - [ ] **Auto-apply** background jobs & Chrome extension  
 - [ ] **Multi-tenant mode** (companies & agencies)
-
 ---
 
 ## 🤝 Contributing
@@ -118,7 +117,6 @@ routes/
 1. Fork & create a branch: `git checkout -b feature/amazing-idea`  
 2. Run `pest` & `phpstan` before opening a PR  
 3. Fill out the PR template (why, screenshots, test coverage)
-
 ---
 
 > Built with ❤️ on the **TALL Stack** — because tall ambitions deserve a tall tech stack!
