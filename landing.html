@@ -2,1147 +2,1401 @@
 <html lang="en" class="scroll-smooth">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CareerCraft — Build your future fast</title>
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>CareerCraft — Build your future fast</title>
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+	<!-- Tailwind CDN -->
+	<script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Tailwind custom config -->
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          fontFamily: { inter: ["Inter", "sans-serif"] },
-          keyframes: {
-            marquee: {
-              "0%": { transform: "translateX(0)" },
-              "100%": { transform: "translateX(-100%)" },
-            },
-            float: {
-              "0%, 100%": { transform: "translateY(0px)" },
-              "50%": { transform: "translateY(-20px)" },
-            },
-            pulse: {
-              "0%, 100%": { opacity: 1 },
-              "50%": { opacity: 0.7 },
-            },
-            shimmer: {
-              "0%": { backgroundPosition: "-500px 0" },
-              "100%": { backgroundPosition: "500px 0" },
-            },
+	<!-- Tailwind custom config -->
+	<script>
+      tailwind.config = {
+          darkMode: "class",
+          theme: {
+              extend: {
+                  fontFamily: {inter: ["Inter", "sans-serif"]},
+                  keyframes: {
+                      marquee: {
+                          "0%": {transform: "translateX(0)"},
+                          "100%": {transform: "translateX(-100%)"},
+                      },
+                      float: {
+                          "0%, 100%": {transform: "translateY(0px)"},
+                          "50%": {transform: "translateY(-20px)"},
+                      },
+                      pulse: {
+                          "0%, 100%": {opacity: 1},
+                          "50%": {opacity: 0.7},
+                      },
+                      shimmer: {
+                          "0%": {backgroundPosition: "-500px 0"},
+                          "100%": {backgroundPosition: "500px 0"},
+                      },
+                  },
+                  animation: {
+                      marquee: "marquee 30s linear infinite",
+                      float: "float 6s ease-in-out infinite",
+                      pulse: "pulse 3s ease-in-out infinite",
+                      shimmer: "shimmer 2s linear infinite",
+                  },
+                  backgroundImage: {
+                      "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+                  },
+              },
           },
-          animation: {
-            marquee: "marquee 30s linear infinite",
-            float: "float 6s ease-in-out infinite",
-            pulse: "pulse 3s ease-in-out infinite",
-            shimmer: "shimmer 2s linear infinite",
-          },
-          backgroundImage: {
-            "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-          },
-        },
-      },
-    };
-  </script>
+      };
+	</script>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet" />
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+	      rel="stylesheet"/>
 
-  <style>
-    body {
-      font-family: "Inter", sans-serif;
-      overflow-x: hidden;
-    }
-
-    .blob {
-      border-radius: 60% 40% 50% 70%;
-      animation: blob 8s ease-in-out infinite;
-      filter: blur(40px);
-      transition: all 1s ease;
-    }
-
-    @keyframes blob {
-      0% {
-        border-radius: 60% 40% 50% 70%;
+	<style>
+      body {
+          font-family: "Inter", sans-serif;
+          overflow-x: hidden;
       }
 
-      25% {
-        border-radius: 40% 60% 70% 50%;
+      .blob {
+          border-radius: 60% 40% 50% 70%;
+          animation: blob 8s ease-in-out infinite;
+          filter: blur(40px);
+          transition: all 1s ease;
       }
 
-      50% {
-        border-radius: 70% 50% 40% 60%;
+      @keyframes blob {
+          0% {
+              border-radius: 60% 40% 50% 70%;
+          }
+
+          25% {
+              border-radius: 40% 60% 70% 50%;
+          }
+
+          50% {
+              border-radius: 70% 50% 40% 60%;
+          }
+
+          75% {
+              border-radius: 50% 70% 60% 40%;
+          }
+
+          100% {
+              border-radius: 60% 40% 50% 70%;
+          }
       }
 
-      75% {
-        border-radius: 50% 70% 60% 40%;
+      .nav-link {
+          position: relative;
+          padding: 0.5rem 0;
+          margin: 0 0.5rem;
+          font-weight: 500;
+          transition: all 0.3s ease;
       }
 
-      100% {
-        border-radius: 60% 40% 50% 70%;
+      .nav-link::after {
+          content: "";
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 0%;
+          height: 2px;
+          background: currentColor;
+          transition: width 0.3s cubic-bezier(0.65, 0, 0.35, 1);
       }
-    }
 
-    .nav-link {
-      position: relative;
-      padding: 0.5rem 0;
-      margin: 0 0.5rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
+      .nav-link:hover {
+          transform: translateY(-1px);
+      }
 
-    .nav-link::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0%;
-      height: 2px;
-      background: currentColor;
-      transition: width 0.3s cubic-bezier(0.65, 0, 0.35, 1);
-    }
+      .nav-link:hover::after {
+          width: 100%;
+      }
 
-    .nav-link:hover {
-      transform: translateY(-1px);
-    }
-
-    .nav-link:hover::after {
-      width: 100%;
-    }
-
-    .shimmer-bg {
-      background: linear-gradient(90deg,
+      .shimmer-bg {
+          background: linear-gradient(90deg,
           rgba(255, 255, 255, 0) 0%,
           rgba(255, 255, 255, 0.2) 50%,
           rgba(255, 255, 255, 0) 100%);
-      background-size: 200% 100%;
-      animation: shimmer 2s linear infinite;
-    }
+          background-size: 200% 100%;
+          animation: shimmer 2s linear infinite;
+      }
 
-    .card {
-      transition: all 0.3s ease;
-    }
+      .card {
+          transition: all 0.3s ease;
+          transform: translateY(12px);
+      }
 
-    .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-        0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
+      .card.animation-complete {
+          transform: translateY(0);
+      }
 
-    .image-track {
-      display: flex;
-      gap: 2rem;
-    }
+      .card:hover {
+          transform: translateY(-8px) !important;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
 
-    .image-track>div {
-      flex: 0 0 auto;
-    }
+      .image-track {
+          display: flex;
+          gap: 2rem;
+      }
 
-    .hidden-overflow {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+      .image-track > div {
+          flex: 0 0 auto;
+      }
 
-    .hidden-overflow::-webkit-scrollbar {
-      display: none;
-    }
+      .hidden-overflow {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+      }
 
-    .logo-text {
-      background: linear-gradient(90deg, #4f46e5, #8b5cf6);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+      .hidden-overflow::-webkit-scrollbar {
+          display: none;
+      }
 
-    .nav-container {
-      position: relative;
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+      .logo-text {
+          background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+      }
 
-    .nav-container::after {
-      content: "";
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg,
+      .nav-container {
+          position: relative;
+          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .nav-container::after {
+          content: "";
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg,
           transparent,
           rgba(148, 163, 184, 0.1) 50%,
           transparent);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
+          opacity: 0;
+          transition: opacity 0.5s ease;
+      }
 
-    .nav-scrolled .nav-container::after {
-      opacity: 1;
-    }
+      .nav-scrolled .nav-container::after {
+          opacity: 1;
+      }
 
-    .btn-primary {
-      position: relative;
-      overflow: hidden;
-      z-index: 1;
-    }
+      .btn-primary {
+          position: relative;
+          overflow: hidden;
+          z-index: 1;
+      }
 
-    .btn-primary::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg,
+      .btn-primary::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg,
           transparent,
           rgba(255, 255, 255, 0.2),
           transparent);
-      transition: left 0.7s ease;
-      z-index: -1;
-    }
+          transition: left 0.7s ease;
+          z-index: -1;
+      }
 
-    .btn-primary:hover::before {
-      left: 100%;
-    }
+      .btn-primary:hover::before {
+          left: 100%;
+      }
 
-    /* Replace these CSS rules in your style section */
-    .text-reveal-container {
-      overflow: hidden;
-    }
+      /* Replace these CSS rules in your style section */
+      .text-reveal-container {
+          overflow: hidden;
+      }
 
-    .text-reveal span {
-      display: inline-block;
-      color: rgba(100, 116, 139, 0.2);
-      /* Very light gray */
-      transition: color 0.3s ease;
-    }
+      .text-reveal span {
+          display: inline-block;
+          color: rgba(100, 116, 139, 0.2);
+          /* Very light gray */
+          transition: color 0.3s ease;
+      }
 
-    .dark .text-reveal span {
-      color: rgba(203, 213, 225, 0.2);
-      /* Darker theme starting color */
-    }
+      .dark .text-reveal span {
+          color: rgba(203, 213, 225, 0.2);
+          /* Darker theme starting color */
+      }
 
-    /* Fix the selector to target spans with this class */
-    span.text-reveal-visible {
-      color: rgb(30, 41, 59) !important;
-      /* Final dark color */
-    }
+      /* Fix the selector to target spans with this class */
+      span.text-reveal-visible {
+          color: rgb(30, 41, 59) !important;
+          /* Final dark color */
+      }
 
-    .dark span.text-reveal-visible {
-      color: rgb(241,
+      .dark span.text-reveal-visible {
+          color: rgb(241,
           245,
           249) !important;
-      /* Final light color for dark mode */
-    }
-
-    /* Keyframes for logo animation */
-    @keyframes logoChange {
-      0% {
-        opacity: 1;
+          /* Final light color for dark mode */
       }
 
-      25% {
-        opacity: 0;
-        transform: translateY(-10px);
+      /* Keyframes for logo animation */
+      @keyframes logoChange {
+          0% {
+              opacity: 1;
+          }
+
+          25% {
+              opacity: 0;
+              transform: translateY(-10px);
+          }
+
+          50% {
+              opacity: 0;
+              transform: translateY(10px);
+          }
+
+          75% {
+              opacity: 1;
+              transform: translateY(0);
+          }
+
+          100% {
+              opacity: 1;
+          }
       }
 
-      50% {
-        opacity: 0;
-        transform: translateY(10px);
+      /* Apply animation to logos */
+      #clients img {
+          animation: logoChange 8s infinite alternate ease-in-out;
       }
 
-      75% {
-        opacity: 1;
-        transform: translateY(0);
+      /* Stagger the logo animations */
+      #clients img:nth-child(2) {
+          animation-delay: 1s;
       }
 
-      100% {
-        opacity: 1;
-      }
-    }
-
-    /* Apply animation to logos */
-    #clients img {
-      animation: logoChange 8s infinite alternate ease-in-out;
-    }
-
-    /* Stagger the logo animations */
-    #clients img:nth-child(2) {
-      animation-delay: 1s;
-    }
-
-    #clients img:nth-child(3) {
-      animation-delay: 2s;
-    }
-
-    #clients img:nth-child(4) {
-      animation-delay: 3s;
-    }
-
-    #clients img:nth-child(5) {
-      animation-delay: 4s;
-    }
-
-    #clients img:nth-child(6) {
-      animation-delay: 5s;
-    }
-
-    #clients img:nth-child(7) {
-      animation-delay: 6s;
-    }
-
-    /* Moving background animation */
-    .animated-background {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      z-index: -1;
-    }
-
-    .animated-shape {
-      position: absolute;
-      background: linear-gradient(120deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
-      border-radius: 50%;
-      animation: float-around 25s infinite alternate ease-in-out;
-      opacity: 0.5;
-    }
-
-    .shape-1 {
-      width: 50vw;
-      height: 50vw;
-      top: -10%;
-      left: -10%;
-      animation-delay: 0s;
-    }
-
-    .shape-2 {
-      width: 30vw;
-      height: 30vw;
-      top: 30%;
-      right: -5%;
-      animation-delay: -5s;
-    }
-
-    .shape-3 {
-      width: 40vw;
-      height: 40vw;
-      bottom: -10%;
-      right: 20%;
-      animation-delay: -10s;
-    }
-
-    @keyframes float-around {
-      0% {
-        transform: translate(0, 0) rotate(0deg) scale(1);
+      #clients img:nth-child(3) {
+          animation-delay: 2s;
       }
 
-      33% {
-        transform: translate(2%, 2%) rotate(1deg) scale(1.05);
+      #clients img:nth-child(4) {
+          animation-delay: 3s;
       }
 
-      66% {
-        transform: translate(-2%, 1%) rotate(-1deg) scale(0.95);
+      #clients img:nth-child(5) {
+          animation-delay: 4s;
       }
 
-      100% {
-        transform: translate(1%, -1%) rotate(0.5deg) scale(1);
+      #clients img:nth-child(6) {
+          animation-delay: 5s;
       }
-    }
-  </style>
+
+      #clients img:nth-child(7) {
+          animation-delay: 6s;
+      }
+
+      /* Moving background animation */
+      .animated-background {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          z-index: -1;
+      }
+
+      .animated-shape {
+          position: absolute;
+          background: linear-gradient(120deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+          border-radius: 50%;
+          animation: float-around 25s infinite alternate ease-in-out;
+          opacity: 0.5;
+      }
+
+      .shape-1 {
+          width: 50vw;
+          height: 50vw;
+          top: -10%;
+          left: -10%;
+          animation-delay: 0s;
+      }
+
+      .shape-2 {
+          width: 30vw;
+          height: 30vw;
+          top: 30%;
+          right: -5%;
+          animation-delay: -5s;
+      }
+
+      .shape-3 {
+          width: 40vw;
+          height: 40vw;
+          bottom: -10%;
+          right: 20%;
+          animation-delay: -10s;
+      }
+
+      @keyframes float-around {
+          0% {
+              transform: translate(0, 0) rotate(0deg) scale(1);
+          }
+
+          33% {
+              transform: translate(2%, 2%) rotate(1deg) scale(1.05);
+          }
+
+          66% {
+              transform: translate(-2%, 1%) rotate(-1deg) scale(0.95);
+          }
+
+          100% {
+              transform: translate(1%, -1%) rotate(0.5deg) scale(1);
+          }
+      }
+
+      /* Modern mobile menu styles */
+      .nav-mobile-item {
+          display: flex;
+          align-items: center;
+          padding: 0.75rem;
+          border-radius: 1rem;
+          color: rgba(30, 41, 59, 0.9);
+          font-weight: 500;
+          background: rgba(255, 255, 255, 0.25);
+          backdrop-filter: blur(4px);
+          transition: all 0.3s ease;
+          transform: translateY(20px);
+          opacity: 0;
+      }
+
+      .dark .nav-mobile-item {
+          color: rgba(255, 255, 255, 0.9);
+          background: rgba(30, 41, 59, 0.4);
+      }
+
+      .nav-mobile-item:hover {
+          transform: translateY(-2px) !important;
+      }
+
+      /* Light mode hover (more visible) */
+      html:not(.dark) .nav-mobile-item:hover {
+          background: rgba(226, 232, 240, 0.8);
+          /* Light slate-200 with opacity */
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Dark mode hover (keep existing style) */
+      html.dark .nav-mobile-item:hover {
+          background: rgba(255, 255, 255, 0.2);
+      }
+
+      .nav-mobile-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.5rem;
+          height: 2.5rem;
+          margin-right: 0.75rem;
+          border-radius: 0.75rem;
+          background: rgba(255, 255, 255, 0.15);
+      }
+
+      #mobileMenu {
+          position: fixed;
+          inset: 0;
+          z-index: 40;
+          min-height: 100vh;
+          max-height: 100vh;
+          display: none;
+          /* Start hidden */
+          flex-direction: column;
+          overflow-y: auto;
+          /* Add this to prevent content showing through */
+          isolation: isolate;
+      }
+
+      /* Ensure backdrop blur is properly styled */
+      #mobileMenu > div:first-of-type {
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          backdrop-filter: blur(12px);
+          /* Increased blur */
+          -webkit-backdrop-filter: blur(12px);
+          /* Increased blur */
+          opacity: 1;
+          /* Must be visible */
+      }
+	</style>
 </head>
 
 <body class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300">
-  <!-- Background blobs -->
-  <div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-    <div class="blob absolute top-20 -left-20 w-96 h-96 bg-indigo-300/30 dark:bg-indigo-600/20"></div>
-    <div class="blob absolute bottom-20 right-20 w-80 h-80 bg-blue-300/20 dark:bg-blue-600/10"></div>
-    <div class="blob absolute top-[40%] right-[30%] w-64 h-64 bg-purple-300/20 dark:bg-purple-600/10"></div>
-  </div>
+<!-- Background blobs -->
+<div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+	<div class="blob absolute top-20 -left-20 w-96 h-96 bg-indigo-300/30 dark:bg-indigo-600/20"></div>
+	<div class="blob absolute bottom-20 right-20 w-80 h-80 bg-blue-300/20 dark:bg-blue-600/10"></div>
+	<div class="blob absolute top-[40%] right-[30%] w-64 h-64 bg-purple-300/20 dark:bg-purple-600/10"></div>
+</div>
 
-  <!-- NAVBAR -->
-  <header id="navbar" class="fixed inset-x-0 top-0 z-50">
-    <div class="nav-container bg-white/70 dark:bg-slate-900/70 backdrop-blur-md py-4 transition-all duration-500">
-      <div class="mx-auto flex max-w-7xl items-center justify-between px-6">
-        <!-- Brand -->
-        <a href="#" class="group flex items-center space-x-2">
-          <div
-            class="relative h-9 w-9 overflow-hidden rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 shadow-md transition-all duration-300 group-hover:scale-110">
-            <div
-              class="absolute inset-0 opacity-0 bg-gradient-to-br from-indigo-500 to-purple-500 transition-opacity duration-300 group-hover:opacity-100">
-            </div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <span class="text-white font-bold text-xl">CC</span>
-            </div>
-          </div>
-          <span
-            class="logo-text text-2xl font-extrabold tracking-tight transition-all duration-300 group-hover:tracking-wider">CareerCraft</span>
-        </a>
+<!-- NAVBAR -->
+<header id="navbar" class="fixed inset-x-0 top-0 z-50">
+	<div
+			class="nav-container bg-white/70 dark:bg-slate-900/70 backdrop-blur-md py-4 px-4 sm:px-6 transition-all duration-500">
+		<div class="mx-auto flex max-w-7xl items-center justify-between px-6">
+			<!-- Brand -->
+			<a href="#" class="group flex items-center space-x-2">
+				<div
+						class="relative h-9 w-9 overflow-hidden rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 shadow-md transition-all duration-300 group-hover:scale-110">
+					<div
+							class="absolute inset-0 opacity-0 bg-gradient-to-br from-indigo-500 to-purple-500 transition-opacity duration-300 group-hover:opacity-100">
+					</div>
+					<div class="absolute inset-0 flex items-center justify-center">
+						<span class="text-white font-bold text-xl">CC</span>
+					</div>
+				</div>
+				<span
+						class="logo-text text-2xl font-extrabold tracking-tight transition-all duration-300 group-hover:tracking-wider">CareerCraft</span>
+			</a>
 
-        <!-- Desktop links -->
-        <nav class="hidden lg:flex items-center">
-          <a href="#features" class="nav-link">Toolkit</a>
-          <a href="#gallery" class="nav-link">Showcase</a>
-          <a href="#support" class="nav-link">Help Center</a>
-          <a href="#blog" class="nav-link">Updates</a>
+			<!-- Desktop links -->
+			<nav class="hidden lg:flex items-center">
+				<a href="#features" class="nav-link text-slate-800 dark:text-slate-200">Toolkit</a>
+				<a href="#gallery" class="nav-link text-slate-800 dark:text-slate-200">Showcase</a>
+				<a href="#support" class="nav-link text-slate-800 dark:text-slate-200">Help Center</a>
+				<a href="#blog" class="nav-link text-slate-800 dark:text-slate-200">Updates</a>
 
-          <div class="ml-8 flex items-center gap-4">
-            <button id="darkModeToggle"
-              class="p-2 rounded-full hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors">
-              <svg id="sunIcon" class="h-5 w-5 stroke-slate-800 dark:hidden" fill="none" stroke-width="2"
-                viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="5" />
-                <path
-                  d="M12 1v2m0 18v2m11-11h-2M3 12H1m16.95-7.05l-1.4 1.4M6.45 17.55l-1.4 1.4m13.9 0l-1.4-1.4M6.45 6.45l-1.4-1.4" />
-              </svg>
-              <svg id="moonIcon" class="hidden h-5 w-5 stroke-slate-200" fill="none" stroke-width="2"
-                viewBox="0 0 24 24">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-              </svg>
-            </button>
-            <a href="#"
-              class="btn-primary rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2 text-sm font-semibold text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 hover:translate-y-[-2px]">
-              Sign in
-            </a>
-          </div>
-        </nav>
+				<div class="ml-8 flex items-center gap-4">
+					<button id="darkModeToggle"
+					        class="p-2 rounded-full hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors">
+						<svg id="sunIcon" class="h-5 w-5 stroke-slate-800 dark:hidden" fill="none" stroke-width="2"
+						     viewBox="0 0 24 24">
+							<circle cx="12" cy="12" r="5"/>
+							<path
+									d="M12 1v2m0 18v2m11-11h-2M3 12H1m16.95-7.05l-1.4 1.4M6.45 17.55l-1.4 1.4m13.9 0l-1.4-1.4M6.45 6.45l-1.4-1.4"/>
+						</svg>
+						<svg id="moonIcon" class="hidden h-5 w-5 stroke-slate-200" fill="none" stroke-width="2"
+						     viewBox="0 0 24 24">
+							<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+						</svg>
+					</button>
+					<a href="#"
+					   class="btn-primary rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2 text-sm font-semibold text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 hover:translate-y-[-2px]">
+						Sign in
+					</a>
+				</div>
+			</nav>
 
-        <!-- Hamburger -->
-        <button id="menuToggle"
-          class="lg:hidden p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none transition-colors"
-          aria-label="Toggle menu">
-          <svg class="h-6 w-6 stroke-slate-800 dark:stroke-slate-200" fill="none" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </div>
-    </div>
+			<!-- Hamburger and mobile dark mode toggle -->
+			<div class="flex items-center lg:hidden gap-2">
+				<!-- Mobile dark mode toggle (hidden on desktop) -->
+				<button id="darkModeToggleMobile"
+				        class="p-2 rounded-full hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors block lg:hidden"
+				        aria-label="Toggle dark mode">
+					<svg id="sunIconMobile" class="h-5 w-5 stroke-slate-800 dark:hidden" fill="none"
+					     stroke-width="2" viewBox="0 0 24 24">
+						<circle cx="12" cy="12" r="5"/>
+						<path
+								d="M12 1v2m0 18v2m11-11h-2M3 12H1m16.95-7.05l-1.4 1.4M6.45 17.55l-1.4 1.4m13.9 0l-1.4-1.4M6.45 6.45l-1.4-1.4"/>
+					</svg>
+					<svg id="moonIconMobile" class="hidden h-5 w-5 stroke-slate-200" fill="none" stroke-width="2"
+					     viewBox="0 0 24 24">
+						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+					</svg>
+				</button>
+				<!-- Hamburger -->
+				<button id="menuToggle"
+				        class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none transition-colors"
+				        aria-label="Toggle menu">
+					<svg class="h-6 w-6 stroke-slate-800 dark:stroke-slate-200" fill="none" stroke-width="2"
+					     viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+					</svg>
+				</button>
+			</div>
+		</div>
+	</div>
 
-    <!-- Mobile drawer -->
-    <div id="mobileMenu"
-      class="fixed inset-0 z-40 hidden flex-col bg-white/95 p-10 pt-24 text-lg dark:bg-slate-900/95 backdrop-blur transition-all duration-300">
-      <button id="closeMenu"
-        class="absolute right-6 top-6 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-        <svg class="h-6 w-6 stroke-slate-800 dark:stroke-slate-200" fill="none" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <a href="#features" class="mb-6 nav-link nav-mobile">Toolkit</a>
-      <a href="#gallery" class="mb-6 nav-link nav-mobile">Showcase</a>
-      <a href="#support" class="mb-6 nav-link nav-mobile">Help Center</a>
-      <a href="#blog" class="mb-6 nav-link nav-mobile">Updates</a>
-      <a href="#"
-        class="mt-8 btn-primary rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-3 font-semibold text-white transition-colors text-center">
-        Start Free
-      </a>
-    </div>
-  </header>
+	<!-- Mobile drawer - redesigned -->
+	<div id="mobileMenu"
+	     class="fixed inset-0 z-40 flex-col bg-white dark:bg-slate-900 transition-colors duration-300">
+		<!-- Backdrop overlay -->
+		<div
+				class="absolute inset-0 bg-white dark:bg-slate-900 backdrop-blur-xl -z-10 transition-colors duration-300">
+		</div>
 
-  <!-- Spacer for fixed nav -->
-  <div class="h-20"></div>
+		<!-- Header with logo -->
+		<div class="flex items-center justify-between p-6 border-b border-white/10 dark:border-slate-700/30">
+			<a href="#" class="group flex items-center space-x-2">
+				<div
+						class="relative h-9 w-9 overflow-hidden rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 shadow-md transition-all duration-300 group-hover:scale-110">
+					<div
+							class="absolute inset-0 opacity-0 bg-gradient-to-br from-indigo-500 to-purple-500 transition-opacity duration-300 group-hover:opacity-100">
+					</div>
+					<div class="absolute inset-0 flex items-center justify-center">
+						<span class="text-white font-bold text-xl">CC</span>
+					</div>
+				</div>
+				<span
+						class="logo-text text-2xl font-extrabold tracking-tight transition-all duration-300 group-hover:tracking-wider">CareerCraft</span>
+			</a>
+			<button id="closeMenu"
+			        class="p-3 rounded-full bg-slate-200/50 dark:bg-white/10 hover:bg-slate-300/70 dark:hover:bg-white/20 transition-colors backdrop-blur-md">
+				<svg class="h-6 w-6 stroke-slate-800 dark:stroke-white" fill="none" stroke-width="2"
+				     viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+				</svg>
+			</button>
+		</div>
 
-  <!-- HERO -->
-  <section class="relative min-h-[85vh] flex flex-col items-center justify-center px-6 text-center">
-    <!-- Make the animated background full-width/height -->
-    <div class="animated-background absolute inset-0 -z-10 overflow-hidden w-full">
-      <div class="animated-shape shape-1"></div>
-      <div class="animated-shape shape-2"></div>
-      <div class="animated-shape shape-3"></div>
-    </div>
+		<!-- Menu items container -->
+		<div class="flex flex-col p-6 space-y-4 mt-4">
+			<a href="#features" class="nav-mobile-item">
+				<div class="nav-mobile-icon">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+						      d="M3 3h18v4H3zm0 7h18v4H3zm0 7h18v4H3z"/>
+					</svg>
+				</div>
+				<span>Toolkit</span>
+			</a>
 
-    <!-- Content container with max width -->
-    <div class="mx-auto max-w-7xl">
-      <h1 id="heroHeadline"
-        class="max-w-5xl mx-auto overflow-hidden text-5xl font-extrabold leading-tight tracking-tight sm:text-6xl lg:text-7xl opacity-0">
-        Accelerate your career with<br />
-        an <span class="text-indigo-600 dark:text-indigo-400">AI-crafted</span> portfolio
-      </h1>
+			<a href="#gallery" class="nav-mobile-item">
+				<div class="nav-mobile-icon">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+						      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+					</svg>
+				</div>
+				<span>Showcase</span>
+			</a>
 
-      <p id="heroSubline" class="mt-6 max-w-xl mx-auto text-lg text-slate-600 dark:text-slate-300 opacity-0"></p>
+			<a href="#support" class="nav-mobile-item">
+				<div class="nav-mobile-icon">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+						      d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+					</svg>
+				</div>
+				<span>Help Center</span>
+			</a>
 
-      <div id="heroButtons" class="mt-10 flex flex-wrap justify-center gap-4 opacity-0">
-        <a href="#"
-          class="btn-primary group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-3 text-base font-semibold text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 hover:translate-y-[-2px]">
-          <span
-            class="absolute inset-0 rounded-full bg-indigo-700 opacity-0 transition-opacity group-hover:opacity-10"></span>
-          Try for free
-        </a>
-        <a href="#features"
-          class="rounded-full bg-white/60 px-8 py-3 text-base font-semibold text-slate-800 ring-1 ring-slate-300 backdrop-blur transition-all duration-300 hover:bg-white/80 hover:shadow-lg hover:translate-y-[-2px] dark:bg-slate-800/60 dark:text-slate-100 dark:ring-slate-600">
-          Learn more
-        </a>
-      </div>
-  </section>
+			<a href="#blog" class="nav-mobile-item">
+				<div class="nav-mobile-icon">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+						      d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+					</svg>
+				</div>
+				<span>Updates</span>
+			</a>
+		</div>
 
-  <!-- CLIENTS SECTION -->
-  <section id="clients" class="bg-gradient-to-b from-slate-50 to-white py-16 dark:from-slate-800 dark:to-slate-900">
-    <div class="mx-auto max-w-7xl px-6 text-center">
-      <p class="text-slate-500 dark:text-slate-400">
-        Over 20,000 creative teams use CareerCraft to accelerate their job search.
-      </p>
+		<!-- Bottom action -->
+		<div class="mt-auto p-6 border-t border-white/10">
+			<a href="#"
+			   class="flex items-center justify-center w-full py-3 px-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-lg">
+				Get Started
+			</a>
+		</div>
+	</div>
+</header>
 
-      <!-- Logo container -->
-      <div class="mt-8 flex flex-wrap items-center justify-center gap-8">
-        <svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
-          viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="40" rx="4" fill="#4F46E5" />
-          <path d="M30 20L45 12V28L30 20Z" fill="white" />
-          <rect x="50" y="12" width="40" height="16" rx="2" fill="white" />
-        </svg>
+<!-- Spacer for fixed nav -->
+<div class="h-20"></div>
 
-        <svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
-          viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="40" rx="4" fill="#4F46E5" />
-          <circle cx="40" cy="20" r="10" fill="white" />
-          <rect x="55" y="15" width="30" height="10" rx="2" fill="white" />
-        </svg>
+<!-- HERO -->
+<section class="relative min-h-[85vh] flex flex-col items-center justify-center px-6 text-center">
+	<!-- Make the animated background full-width/height -->
+	<div class="animated-background absolute inset-0 -z-10 overflow-hidden w-full">
+		<div class="animated-shape shape-1"></div>
+		<div class="animated-shape shape-2"></div>
+		<div class="animated-shape shape-3"></div>
+	</div>
 
-        <svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
-          viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="40" rx="4" fill="#4F46E5" />
-          <path d="M30 15H50V25H30L40 20L30 15Z" fill="white" />
-          <rect x="55" y="15" width="30" height="10" rx="5" fill="white" />
-        </svg>
+	<!-- Content container with max width -->
+	<div class="mx-auto max-w-7xl">
+		<h1 id="heroHeadline"
+		    class="max-w-5xl mx-auto overflow-hidden text-5xl font-extrabold leading-tight tracking-tight sm:text-6xl lg:text-7xl opacity-0">
+			Accelerate your career with<br/>
+			an <span class="text-indigo-600 dark:text-indigo-400">AI-crafted</span> portfolio
+		</h1>
 
-        <svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
-          viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="40" rx="4" fill="#4F46E5" />
-          <rect x="30" y="12" width="5" height="16" fill="white" />
-          <rect x="40" y="12" width="5" height="16" fill="white" />
-          <rect x="50" y="12" width="5" height="16" fill="white" />
-          <rect x="60" y="12" width="30" height="5" fill="white" />
-          <rect x="60" y="20" width="30" height="5" fill="white" />
-        </svg>
+		<p id="heroSubline" class="mt-6 max-w-xl mx-auto text-lg text-slate-600 dark:text-slate-300 opacity-0"></p>
 
-        <svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
-          viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="40" rx="4" fill="#4F46E5" />
-          <circle cx="40" cy="20" r="10" stroke="white" stroke-width="3" />
-          <circle cx="80" cy="20" r="10" fill="white" />
-        </svg>
+		<div id="heroButtons" class="mt-10 flex flex-col sm:flex-row flex-wrap justify-center gap-4 opacity-0">
+			<a href="#"
+			   class="btn-primary group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-3 text-base font-semibold text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 hover:translate-y-[-2px]">
+                    <span
+		                    class="absolute inset-0 rounded-full bg-indigo-700 opacity-0 transition-opacity group-hover:opacity-10"></span>
+				Try for free
+			</a>
+			<a href="#features"
+			   class="rounded-full bg-white/60 px-8 py-3 text-base font-semibold text-slate-800 ring-1 ring-slate-300 backdrop-blur transition-all duration-300 hover:bg-white/80 hover:shadow-lg hover:translate-y-[-2px] dark:bg-slate-800/60 dark:text-slate-100 dark:ring-slate-600">
+				Learn more
+			</a>
+		</div>
+	</div>
+</section>
 
-        <svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
-          viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="40" rx="4" fill="#4F46E5" />
-          <path d="M35 12L45 20L35 28M55 12L65 20L55 28M75 12L85 20L75 28" stroke="white" stroke-width="3" />
-        </svg>
+<!-- CLIENTS SECTION -->
+<section id="clients" class="bg-gradient-to-b from-slate-50 to-white py-16 dark:from-slate-800 dark:to-slate-900">
+	<div class="mx-auto max-w-7xl px-6 text-center">
+		<p class="text-slate-500 dark:text-slate-400">
+			Over 20,000 creative teams use CareerCraft to accelerate their job search.
+		</p>
 
-        <svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
-          viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="40" rx="4" fill="#4F46E5" />
-          <rect x="30" y="15" width="60" height="10" rx="5" stroke="white" stroke-width="3" />
-        </svg>
-      </div>
-    </div>
-  </section>
+		<!-- Logo container -->
+		<div class="mt-8 flex flex-wrap items-center justify-center gap-8">
+			<svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
+			     viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect width="120" height="40" rx="4" fill="#4F46E5"/>
+				<path d="M30 20L45 12V28L30 20Z" fill="white"/>
+				<rect x="50" y="12" width="40" height="16" rx="2" fill="white"/>
+			</svg>
 
-  <!-- MISSION STATEMENT -->
-  <section id="mission"
-    class="relative overflow-hidden bg-gradient-to-b from-white to-slate-50 py-24 dark:from-slate-900 dark:to-slate-800">
-    <div class="max-w-5xl mx-auto px-6">
-      <div class="text-reveal-container">
-        <p class="text-reveal text-3xl md:text-4xl font-medium leading-relaxed opacity-0 transform translate-y-8">
-          <span>CareerCraft</span> <span>makes</span>
-          <span>professional</span> <span>development</span>
-          <span>accessible</span> <span>to</span> <span>every</span>
-          <span>job</span> <span>seeker,</span> <span>enabling</span>
-          <span>candidates</span> <span>to</span> <span>craft</span>
-          <span>compelling</span> <span>portfolios</span> <span>and</span>
-          <span>land</span> <span>their</span> <span>dream</span>
-          <span>roles</span> <span>in</span> <span>record</span>
-          <span>time.</span>
-        </p>
-      </div>
-    </div>
-  </section>
+			<svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
+			     viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect width="120" height="40" rx="4" fill="#4F46E5"/>
+				<circle cx="40" cy="20" r="10" fill="white"/>
+				<rect x="55" y="15" width="30" height="10" rx="2" fill="white"/>
+			</svg>
 
-  <!-- IMAGE SLIDER -->
-  <section id="gallery" class="relative overflow-hidden bg-slate-50 py-14 dark:bg-slate-800">
-    <div class="max-w-7xl mx-auto px-6">
-      <h2 class="text-3xl font-bold mb-8 opacity-0 transform translate-y-8" id="galleryTitle">
-        Success stories
-      </h2>
-    </div>
+			<svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
+			     viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect width="120" height="40" rx="4" fill="#4F46E5"/>
+				<path d="M30 15H50V25H30L40 20L30 15Z" fill="white"/>
+				<rect x="55" y="15" width="30" height="10" rx="5" fill="white"/>
+			</svg>
 
-    <!-- Scrolling image track -->
-    <div class="image-track-container overflow-hidden">
-      <div class="image-track animate-marquee">
-        <!-- We'll populate this dynamically -->
-      </div>
-    </div>
-  </section>
+			<svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
+			     viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect width="120" height="40" rx="4" fill="#4F46E5"/>
+				<rect x="30" y="12" width="5" height="16" fill="white"/>
+				<rect x="40" y="12" width="5" height="16" fill="white"/>
+				<rect x="50" y="12" width="5" height="16" fill="white"/>
+				<rect x="60" y="12" width="30" height="5" fill="white"/>
+				<rect x="60" y="20" width="30" height="5" fill="white"/>
+			</svg>
 
-  <!-- FEATURE CARDS -->
-  <section id="features" class="mx-auto max-w-7xl px-6 py-28">
-    <h2 class="mb-16 text-center text-4xl font-extrabold transform opacity-0 translate-y-6" id="featuresTitle">
-      The full arsenal
-    </h2>
+			<svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
+			     viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect width="120" height="40" rx="4" fill="#4F46E5"/>
+				<circle cx="40" cy="20" r="10" stroke="white" stroke-width="3"/>
+				<circle cx="80" cy="20" r="10" fill="white"/>
+			</svg>
 
-    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      <div
-        class="card rounded-3xl bg-white/60 p-8 shadow-xl backdrop-blur ring-1 ring-white/20 dark:bg-slate-800/60 opacity-0 transform translate-y-12">
-        <svg class="mb-6 h-8 w-8 stroke-indigo-600" fill="none" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v4H3zm0 7h18v4H3zm0 7h18v4H3" />
-        </svg>
-        <h3 class="mb-3 text-xl font-semibold">Dynamic resumes</h3>
-        <p class="text-sm text-slate-600 dark:text-slate-300">
-          Generate keyword-optimized resumes in seconds—tailored for every job
-          post.
-        </p>
-      </div>
+			<svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
+			     viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect width="120" height="40" rx="4" fill="#4F46E5"/>
+				<path d="M35 12L45 20L35 28M55 12L65 20L55 28M75 12L85 20L75 28" stroke="white" stroke-width="3"/>
+			</svg>
 
-      <div
-        class="card rounded-3xl bg-white/60 p-8 shadow-xl backdrop-blur ring-1 ring-white/20 dark:bg-slate-800/60 opacity-0 transform translate-y-12">
-        <svg class="mb-6 h-8 w-8 stroke-indigo-600" fill="none" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M14.828 9.172a4 4 0 010 5.656M17.657 6.343a8 8 0 010 11.314M9.172 14.828a4 4 0 010-5.656M6.343 17.657a8 8 0 010-11.314" />
-          <circle cx="12" cy="12" r="2" />
-        </svg>
-        <h3 class="mb-3 text-xl font-semibold">Auto-apply engine</h3>
-        <p class="text-sm text-slate-600 dark:text-slate-300">
-          Let the bot scan listings & submit your profile while you sleep.
-        </p>
-      </div>
+			<svg class="h-12 w-auto grayscale transition-all duration-300 hover:grayscale-0 hover:scale-110"
+			     viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect width="120" height="40" rx="4" fill="#4F46E5"/>
+				<rect x="30" y="15" width="60" height="10" rx="5" stroke="white" stroke-width="3"/>
+			</svg>
+		</div>
+	</div>
+</section>
 
-      <div
-        class="card rounded-3xl bg-white/60 p-8 shadow-xl backdrop-blur ring-1 ring-white/20 dark:bg-slate-800/60 opacity-0 transform translate-y-12">
-        <svg class="mb-6 h-8 w-8 stroke-indigo-600" fill="none" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v16h16V4H4zm4 4h8v8H8V8z" />
-        </svg>
-        <h3 class="mb-3 text-xl font-semibold">Interview drills</h3>
-        <p class="text-sm text-slate-600 dark:text-slate-300">
-          Battle-test your answers with an adaptive AI interviewer that never
-          sleeps.
-        </p>
-      </div>
-    </div>
-  </section>
+<!-- MISSION STATEMENT -->
+<section id="mission"
+         class="relative overflow-hidden bg-gradient-to-b from-white to-slate-50 py-24 dark:from-slate-900 dark:to-slate-800">
+	<div class="max-w-5xl mx-auto px-6">
+		<div class="text-reveal-container">
+			<p
+					class="text-reveal text-3xl md:text-4xl font-medium leading-relaxed opacity-0 transform translate-y-8">
+				<span>CareerCraft</span> <span>makes</span>
+				<span>professional</span> <span>development</span>
+				<span>accessible</span> <span>to</span> <span>every</span>
+				<span>job</span> <span>seeker,</span> <span>enabling</span>
+				<span>candidates</span> <span>to</span> <span>craft</span>
+				<span>compelling</span> <span>portfolios</span> <span>and</span>
+				<span>land</span> <span>their</span> <span>dream</span>
+				<span>roles</span> <span>in</span> <span>record</span>
+				<span>time.</span>
+			</p>
+		</div>
+	</div>
+</section>
 
-  <!-- FOOTER -->
-  <footer
-    class="border-t border-slate-200 bg-white/70 px-6 py-12 text-center text-sm dark:border-slate-700 dark:bg-slate-900/70">
-    <div class="mx-auto max-w-7xl">
-      <p class="opacity-75">© 2025 CareerCraft Inc. All rights reserved.</p>
-    </div>
-  </footer>
+<!-- IMAGE SLIDER -->
+<section id="gallery" class="relative overflow-hidden bg-slate-50 py-14 dark:bg-slate-800">
+	<div class="max-w-7xl mx-auto px-6">
+		<h2 class="text-3xl font-bold mb-8 opacity-0 transform translate-y-8" id="galleryTitle">
+			Success stories
+		</h2>
+	</div>
 
-  <!-- Load motion libraries -->
-  <script src="https://unpkg.com/split-type"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/ScrollTrigger.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/TextPlugin.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+	<!-- Scrolling image track -->
+	<div class="image-track-container overflow-hidden">
+		<div class="image-track animate-marquee">
+			<!-- We'll populate this dynamically -->
+		</div>
+	</div>
+</section>
 
-  <!-- JS: Animations & interactions -->
-  <script>
-    // Wait for DOM and resources to load
+<!-- FEATURE CARDS -->
+<section id="features" class="mx-auto max-w-7xl px-6 py-28">
+	<h2 class="mb-16 text-center text-4xl font-extrabold transform opacity-0 translate-y-6" id="featuresTitle">
+		The full arsenal
+	</h2>
+
+	<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+		<div
+				class="card rounded-3xl bg-white/60 p-8 shadow-xl backdrop-blur ring-1 ring-white/20 dark:bg-slate-800/60 opacity-0 transform translate-y-12">
+			<svg class="mb-6 h-8 w-8 stroke-indigo-600" fill="none" stroke-width="2" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v4H3zm0 7h18v4H3zm0 7h18v4H3"/>
+			</svg>
+			<h3 class="mb-3 text-xl font-semibold">Dynamic resumes</h3>
+			<p class="text-sm text-slate-600 dark:text-slate-300">
+				Generate keyword-optimized resumes in seconds—tailored for every job
+				post.
+			</p>
+		</div>
+
+		<div
+				class="card rounded-3xl bg-white/60 p-8 shadow-xl backdrop-blur ring-1 ring-white/20 dark:bg-slate-800/60 opacity-0 transform translate-y-12">
+			<svg class="mb-6 h-8 w-8 stroke-indigo-600" fill="none" stroke-width="2" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round"
+				      d="M14.828 9.172a4 4 0 010 5.656M17.657 6.343a8 8 0 010 11.314M9.172 14.828a4 4 0 010-5.656M6.343 17.657a8 8 0 010-11.314"/>
+				<circle cx="12" cy="12" r="2"/>
+			</svg>
+			<h3 class="mb-3 text-xl font-semibold">Auto-apply engine</h3>
+			<p class="text-sm text-slate-600 dark:text-slate-300">
+				Let the bot scan listings & submit your profile while you sleep.
+			</p>
+		</div>
+
+		<div
+				class="card rounded-3xl bg-white/60 p-8 shadow-xl backdrop-blur ring-1 ring-white/20 dark:bg-slate-800/60 opacity-0 transform translate-y-12">
+			<svg class="mb-6 h-8 w-8 stroke-indigo-600" fill="none" stroke-width="2" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v16h16V4H4zm4 4h8v8H8V8z"/>
+			</svg>
+			<h3 class="mb-3 text-xl font-semibold">Interview drills</h3>
+			<p class="text-sm text-slate-600 dark:text-slate-300">
+				Battle-test your answers with an adaptive AI interviewer that never
+				sleeps.
+			</p>
+		</div>
+	</div>
+</section>
+
+<!-- FOOTER -->
+<footer
+		class="border-t border-slate-200 bg-white/70 px-6 py-12 text-center text-sm dark:border-slate-700 dark:bg-slate-900/70">
+	<div class="mx-auto max-w-7xl">
+		<p class="opacity-75">© 2025 CareerCraft Inc. All rights reserved.</p>
+	</div>
+</footer>
+
+<!-- Load motion libraries -->
+<script src="https://unpkg.com/split-type"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/TextPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+<!-- JS: Animations & interactions -->
+<script>
     window.addEventListener("DOMContentLoaded", () => {
-      // Register GSAP plugins
-      gsap.registerPlugin(ScrollTrigger, TextPlugin);
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
-      // Smooth scrolling with Lenis (optimized for performance)
-      const lenis = new Lenis({
-        lerp: 0.01, // Almost no smoothing for immediate response
-        wheelMultiplier: 1.2, // Slightly faster wheel speed
-        smoothWheel: false, // Disable smooth wheel for native-like scrolling
-        smoothTouch: false, // Disable smooth touch for better performance
-        syncTouch: true, // Keep in sync with native touch scrolling
-      });
+        // Smooth scrolling with Lenis (optimized for performance)
+        const lenis = new Lenis({
+            lerp: 0.01, // Almost no smoothing for immediate response
+            wheelMultiplier: 1.2, // Slightly faster wheel speed
+            smoothWheel: false, // Disable smooth wheel for native-like scrolling
+            smoothTouch: false, // Disable smooth touch for better performance
+            syncTouch: true, // Keep in sync with native touch scrolling
+        });
 
-      function raf(time) {
-        lenis.raf(time);
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+
         requestAnimationFrame(raf);
-      }
 
-      requestAnimationFrame(raf);
+        // Text reveal effect with optimized approach
+        const textReveal = document.querySelector(".text-reveal");
 
-      // Text reveal effect with optimized approach
-      const textReveal = document.querySelector(".text-reveal");
-
-      if (textReveal) {
-        // Add scroll trigger for initial reveal animation
-        gsap.to(".text-reveal", {
-          scrollTrigger: {
-            trigger: ".text-reveal",
-            start: "top 80%",
-          },
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-        });
-
-        // Get all words
-        const words = textReveal.querySelectorAll("span");
-        const totalWords = words.length;
-
-        // Create a single ScrollTrigger for the entire paragraph
-        // that controls the sequential word reveal
-        ScrollTrigger.create({
-          trigger: ".text-reveal-container",
-          start: "top 80%",
-          end: "bottom 20%",
-          onUpdate: (self) => {
-            // Calculate how many words should be visible based on scroll progress
-            // This maps the scroll progress (0-1) to the number of words (0-totalWords)
-            const wordIndex = Math.round(self.progress * totalWords);
-
-            // Update each word's visibility sequentially
-            words.forEach((word, i) => {
-              if (i < wordIndex) {
-                // Words before the current index are visible
-                word.classList.add("text-reveal-visible");
-              } else {
-                // Words after the current index are not visible
-                word.classList.remove("text-reveal-visible");
-              }
+        if (textReveal) {
+            // Add scroll trigger for initial reveal animation
+            gsap.to(".text-reveal", {
+                scrollTrigger: {
+                    trigger: ".text-reveal",
+                    start: "top 80%",
+                },
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
             });
-          },
-          markers: false,
-        });
-      }
 
-      // Navbar scroll effect
-      const navbar = document.getElementById("navbar");
+            // Get all words
+            const words = textReveal.querySelectorAll("span");
+            const totalWords = words.length;
 
-      function updateNavbar() {
-        if (window.scrollY > 20) {
-          navbar.classList.add("nav-scrolled");
-        } else {
-          navbar.classList.remove("nav-scrolled");
-        }
-      }
+            // Create a single ScrollTrigger for the entire paragraph
+            // that controls the sequential word reveal
+            ScrollTrigger.create({
+                trigger: ".text-reveal-container",
+                start: "top 80%",
+                end: "bottom 20%",
+                onUpdate: (self) => {
+                    // Calculate how many words should be visible based on scroll progress
+                    const wordIndex = Math.round(self.progress * totalWords);
 
-      window.addEventListener("scroll", updateNavbar);
-      updateNavbar(); // Initialize state
-
-      // Image slider
-      const imageTrack = document.querySelector(".image-track");
-
-      // Use reliable placeholder images
-      const imageSources = [
-        "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3184287/pexels-photo-3184287.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3184405/pexels-photo-3184405.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3184603/pexels-photo-3184603.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/3184310/pexels-photo-3184310.jpeg?auto=compress&cs=tinysrgb&w=800",
-      ];
-
-      // Create the images for the track with preloading
-      function createImageElements() {
-        function createImageElement(src) {
-          return new Promise((resolve) => {
-            const imgWrap = document.createElement("div");
-            const img = document.createElement("img");
-
-            img.onload = () => resolve({ imgWrap, img });
-            img.onerror = () => {
-              // Fallback for any loading errors
-              img.src =
-                'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"%3E%3Crect width="800" height="600" fill="%23f3f4f6"/%3E%3Ctext x="400" y="300" font-family="Arial" font-size="24" text-anchor="middle" dominant-baseline="middle" fill="%236b7280"%3EPortfolio Image%3C/text%3E%3C/svg%3E';
-              resolve({ imgWrap, img });
-            };
-
-            img.src = src;
-            img.alt = "Portfolio showcase";
-            img.className =
-              "h-72 w-auto rounded-xl object-cover shadow-lg transition-all duration-500 hover:shadow-xl hover:scale-[1.02]";
-            imgWrap.appendChild(img);
-            imgWrap.className = "px-2";
-          });
+                    // Update each word's visibility sequentially
+                    words.forEach((word, i) => {
+                        if (i < wordIndex) {
+                            // Words before the current index are visible
+                            word.classList.add("text-reveal-visible");
+                        } else {
+                            // Words after the current index are not visible
+                            word.classList.remove("text-reveal-visible");
+                        }
+                    });
+                },
+                markers: false,
+            });
         }
 
-        // Load all images with a loading indicator
-        Promise.all(imageSources.map(createImageElement)).then((elements) => {
-          // Add first set
-          elements.forEach(({ imgWrap }) => {
-            imageTrack.appendChild(imgWrap);
-          });
+        // Navbar scroll effect
+        const navbar = document.getElementById("navbar");
 
-          // Duplicate for continuous loop
-          elements.forEach(({ imgWrap }) => {
-            imageTrack.appendChild(imgWrap.cloneNode(true));
-          });
-        });
-      }
-
-      createImageElements();
-
-      // Dark mode toggle
-      const darkModeToggle = document.getElementById("darkModeToggle");
-      const htmlEl = document.documentElement;
-      const sunIcon = document.getElementById("sunIcon");
-      const moonIcon = document.getElementById("moonIcon");
-
-      function setDarkMode(isDark) {
-        htmlEl.classList.toggle("dark", isDark);
-        sunIcon.classList.toggle("hidden", isDark);
-        moonIcon.classList.toggle("hidden", !isDark);
-        localStorage.theme = isDark ? "dark" : "light";
-      }
-
-      // Check for saved preference or system preference
-      const isDarkMode =
-        localStorage.theme === "dark" ||
-        (!("theme" in localStorage) &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-      // Set initial mode
-      setDarkMode(isDarkMode);
-
-      // Toggle mode on click with animation
-      darkModeToggle.addEventListener("click", () => {
-        const willBeDark = !htmlEl.classList.contains("dark");
-
-        // Animate transition
-        gsap.to("body", {
-          backgroundColor: willBeDark ? "#0f172a" : "#ffffff",
-          color: willBeDark ? "#f1f5f9" : "#1e293b",
-          duration: 0.3,
-        });
-
-        setDarkMode(willBeDark);
-      });
-
-      // Mobile menu functionality with enhanced animations
-      const menuToggle = document.getElementById("menuToggle");
-      const closeMenu = document.getElementById("closeMenu");
-      const mobileMenu = document.getElementById("mobileMenu");
-      const mobileLinks = document.querySelectorAll(".nav-mobile");
-
-      menuToggle.addEventListener("click", () => {
-        mobileMenu.classList.remove("hidden");
-        gsap.fromTo(
-          mobileMenu,
-          { opacity: 0, y: -20 },
-          { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
-        );
-        // Stagger in the nav links
-        gsap.fromTo(
-          ".nav-mobile",
-          { opacity: 0, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            stagger: 0.1,
-            delay: 0.2,
-            ease: "back.out(1.7)",
-          }
-        );
-      });
-
-      function closeMobileMenu() {
-        gsap.to(mobileMenu, {
-          opacity: 0,
-          y: -20,
-          duration: 0.3,
-          ease: "power1.in",
-          onComplete: () => mobileMenu.classList.add("hidden"),
-        });
-      }
-
-      closeMenu.addEventListener("click", closeMobileMenu);
-
-      mobileLinks.forEach((link) => {
-        link.addEventListener("click", closeMobileMenu);
-      });
-
-      // Text animations
-      const heroHeadline = document.getElementById("heroHeadline");
-      const heroSubline = document.getElementById("heroSubline");
-      const heroButtons = document.getElementById("heroButtons");
-
-      // Hero headline animation with SplitType
-      setTimeout(() => {
-        if (window.SplitType) {
-          const headlineSplit = new SplitType(heroHeadline, {
-            types: "words, chars",
-          });
-
-          gsap.set(heroHeadline, { opacity: 1 });
-          gsap.from(headlineSplit.chars, {
-            opacity: 0,
-            y: 100,
-            rotateX: -90,
-            stagger: 0.02,
-            duration: 0.8,
-            ease: "back.out(1.7)",
-          });
-
-          // Subline typing animation
-          gsap.to(heroSubline, {
-            delay: 0.5,
-            opacity: 1,
-            duration: 0.5,
-          });
-
-          gsap.to(heroSubline, {
-            delay: 0.7,
-            text: {
-              value:
-                "Your ultimate toolkit for CVs, cover letters & interview preparation powered by AI.",
-              delimiter: "",
-            },
-            duration: 2,
-            ease: "none",
-          });
-
-          // Button fade in
-          gsap.to(heroButtons, {
-            delay: 2.5,
-            opacity: 1,
-            duration: 0.8,
-          });
-        } else {
-          console.error(
-            "SplitType not loaded! Falling back to basic animation"
-          );
-
-          // Fallback animations if SplitType fails
-          gsap.to(heroHeadline, {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-          });
-
-          gsap.to(heroSubline, {
-            opacity: 1,
-            duration: 1,
-            delay: 0.3,
-          });
-
-          gsap.to(heroSubline, {
-            text: {
-              value:
-                "Your ultimate toolkit for CVs, cover letters & interview preparation powered by AI.",
-              delimiter: "",
-            },
-            delay: 0.5,
-            duration: 2,
-          });
-
-          gsap.to(heroButtons, {
-            opacity: 1,
-            duration: 1,
-            delay: 2.5,
-          });
-        }
-      }, 300);
-
-      // Scroll-triggered animations
-
-      // Gallery title
-      gsap.to("#galleryTitle", {
-        scrollTrigger: {
-          trigger: "#galleryTitle",
-          start: "top 80%",
-        },
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-      });
-
-      // Features title
-      gsap.to("#featuresTitle", {
-        scrollTrigger: {
-          trigger: "#featuresTitle",
-          start: "top 80%",
-        },
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-      });
-
-      // Card animations
-      gsap.utils.toArray(".card").forEach((card, i) => {
-        gsap.to(card, {
-          scrollTrigger: {
-            trigger: card,
-            start: "top 85%",
-          },
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          delay: i * 0.15,
-        });
-      });
-
-      // Header animation on load
-      gsap.fromTo(
-        "header",
-        { y: -100, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: "power3.out", delay: 0.2 }
-      );
-
-      // Animated nav links on load
-      gsap.fromTo(
-        ".nav-link",
-        { y: -10, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.1,
-          duration: 0.6,
-          ease: "power2.out",
-          delay: 0.6,
-        }
-      );
-      // Hero headline animation
-      gsap.to("#heroHeadline", {
-        y: 0, // No vertical movement
-        duration: 0.8,
-        ease: "power2.out"
-      });
-
-      // Add a subtle background gradient animation to the hero section
-      gsap.to("section#hero", {
-        backgroundPosition: "400% 0",
-        duration: 10,
-        repeat: -1,
-        ease: "none"
-      });
-
-      // Enhanced 3D tilt effect with mouse interaction
-      const highlightBox = document.querySelector('.highlight-box');
-      const highlightContainer = document.querySelector('.highlight-container');
-
-      if (highlightContainer && highlightBox) {
-        // Tilt effect on mouse move
-        document.addEventListener('mousemove', e => {
-          // Only apply if not on mobile
-          if (window.innerWidth > 768) {
-            const rect = highlightContainer.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-
-            // Calculate tilt angle (max 10 degrees)
-            const tiltX = y / (rect.height / 2) * 5;
-            const tiltY = -(x / (rect.width / 2) * 5);
-
-            // Apply transform with enhanced perspective
-            highlightBox.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-          }
-        });
-
-        // Reset when mouse leaves
-        document.addEventListener('mouseleave', () => {
-          // Return to animation state
-          highlightBox.style.transform = '';
-        });
-      }
-
-      // Create a more dynamic floating animation for the background shapes
-      gsap.to('.shape-1', {
-        x: '20%', // Extreme movement
-        y: '15%', // Extreme movement
-        rotation: 25, // Extreme rotation
-        duration: 2, // Ultra fast
-        repeat: -1,
-        yoyo: true,
-        ease: 'power2.inOut'
-      });
-
-      gsap.to('.shape-2', {
-        x: '-18%', // Extreme movement
-        y: '-16%', // Extreme movement
-        rotation: -20, // Extreme rotation
-        duration: 2.5, // Ultra fast
-        repeat: -1,
-        yoyo: true,
-        ease: 'power2.inOut',
-        delay: 0.2
-      });
-
-      gsap.to('.shape-3', {
-        x: '16%', // Extreme movement
-        y: '-12%', // Extreme movement
-        rotation: 18, // Extreme rotation
-        duration: 2.2, // Ultra fast
-        repeat: -1,
-        yoyo: true,
-        ease: 'power2.inOut',
-        delay: 0.4
-      });
-      function setupLogoAnimations() {
-        console.log("Setting up logo animations");
-
-        // Target the correct container with a more specific selector
-        const logoContainer = document.querySelector("#clients .mt-8.flex");
-        if (!logoContainer) {
-          console.warn("Logo container not found");
-          return;
+        function updateNavbar() {
+            if (window.scrollY > 20) {
+                navbar.classList.add("nav-scrolled");
+            } else {
+                navbar.classList.remove("nav-scrolled");
+            }
         }
 
-        console.log("Found logo container with", logoContainer.querySelectorAll('svg').length, "SVGs");
+        window.addEventListener("scroll", updateNavbar);
+        updateNavbar(); // Initialize state
 
-        const logos = Array.from(logoContainer.querySelectorAll('svg'));
-        const totalLogos = logos.length;
+        // Image slider
+        const imageTrack = document.querySelector(".image-track");
 
-        // Create completely separate additional set of logos (different designs)
-        const alternateSVGs = [
-          `<rect width="120" height="40" rx="4" fill="#8B5CF6"/><circle cx="60" cy="20" r="12" fill="white"/><rect x="30" y="16" width="60" height="8" rx="2" fill="white"/>`,
-          `<rect width="120" height="40" rx="4" fill="#6366F1"/><polygon points="30,12 50,28 30,28" fill="white"/><rect x="55" y="12" width="35" height="16" rx="2" fill="white"/>`,
-          `<rect width="120" height="40" rx="4" fill="#4F46E5"/><rect x="30" y="12" width="16" height="16" rx="8" fill="white"/><rect x="54" y="16" width="36" height="8" rx="4" fill="white"/>`,
-          `<rect width="120" height="40" rx="4" fill="#7C3AED"/><path d="M30,20 L40,12 L50,20 L40,28 Z" fill="white"/><rect x="55" y="12" width="35" height="16" rx="8" stroke="white" stroke-width="2" fill="none"/>`,
-          `<rect width="120" height="40" rx="4" fill="#8B5CF6"/><rect x="30" y="12" width="60" height="16" rx="3" stroke="white" stroke-width="3" fill="none"/>`,
-          `<rect width="120" height="40" rx="4" fill="#6366F1"/><circle cx="40" cy="20" r="10" fill="white"/><circle cx="80" cy="20" r="8" stroke="white" stroke-width="2" fill="none"/>`,
-          `<rect width="120" height="40" rx="4" fill="#4F46E5"/><path d="M30,12 L45,20 L30,28 M75,12 L60,20 L75,28" stroke="white" stroke-width="2" fill="none"/>`
+        // Use reliable placeholder images
+        const imageSources = [
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800",
+            "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=800",
+            "https://images.pexels.com/photos/3184287/pexels-photo-3184287.jpeg?auto=compress&cs=tinysrgb&w=800",
+            "https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg?auto=compress&cs=tinysrgb&w=800",
+            "https://images.pexels.com/photos/3184405/pexels-photo-3184405.jpeg?auto=compress&cs=tinysrgb&w=800",
+            "https://images.pexels.com/photos/3184603/pexels-photo-3184603.jpeg?auto=compress&cs=tinysrgb&w=800",
+            "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=800",
+            "https://images.pexels.com/photos/3184310/pexels-photo-3184310.jpeg?auto=compress&cs=tinysrgb&w=800",
         ];
 
-        // Set up animation for each logo
-        logos.forEach((logo, index) => {
-          // Store the original content immediately
-          const originalContent = logo.innerHTML;
-          logo.dataset.originalContent = originalContent;
+        // Create the images for the track with preloading
+        function createImageElements() {
+            function createImageElement(src) {
+                return new Promise((resolve) => {
+                    const imgWrap = document.createElement("div");
+                    const img = document.createElement("img");
 
-          // Create a timeline with faster transitions
-          const tl = gsap.timeline({ repeat: -1, repeatDelay: 1 });
+                    img.onload = () => resolve({imgWrap, img});
+                    img.onerror = () => {
+                        // Fallback for any loading errors
+                        img.src =
+                            'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"%3E%3Crect width="800" height="600" fill="%23f3f4f6"/%3E%3Ctext x="400" y="300" font-family="Arial" font-size="24" text-anchor="middle" dominant-baseline="middle" fill="%236b7280"%3EPortfolio Image%3C/text%3E%3C/svg%3E';
+                        resolve({imgWrap, img});
+                    };
 
-          // Faster animation with guaranteed content swap
-          tl.to(logo, {
-            opacity: 0,
-            y: -10,
-            duration: 0.3,
-            delay: index * 0.15, // Shorter stagger
-            onComplete: function () {
-              // Always pick a new SVG that's different from current
-              let randomIndex = Math.floor(Math.random() * alternateSVGs.length);
-
-              // Check if we're currently showing original or alternate content
-              const isShowingOriginal = !logo.dataset.isAlternate || logo.dataset.isAlternate === "false";
-
-              if (isShowingOriginal) {
-                // Switch to an alternate design
-                logo.innerHTML = alternateSVGs[randomIndex];
-                logo.dataset.isAlternate = "true";
-              } else {
-                // Switch back to original design
-                logo.innerHTML = logo.dataset.originalContent;
-                logo.dataset.isAlternate = "false";
-              }
-
-              console.log(`Logo ${index} switched to ${isShowingOriginal ? "alternate" : "original"} design`);
+                    img.src = src;
+                    img.alt = "Portfolio showcase";
+                    img.className =
+                        "h-72 w-auto rounded-xl object-cover shadow-lg transition-all duration-500 hover:shadow-xl hover:scale-[1.02]";
+                    imgWrap.appendChild(img);
+                    imgWrap.className = "px-2";
+                });
             }
-          })
-            .to(logo, {
-              opacity: 1,
-              y: 0,
-              duration: 0.3
+
+            // Load all images with a loading indicator
+            Promise.all(imageSources.map(createImageElement)).then((elements) => {
+                // Add first set
+                elements.forEach(({imgWrap}) => {
+                    imageTrack.appendChild(imgWrap);
+                });
+
+                // Duplicate for continuous loop
+                elements.forEach(({imgWrap}) => {
+                    imageTrack.appendChild(imgWrap.cloneNode(true));
+                });
+            });
+        }
+
+        createImageElements();
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const htmlEl = document.documentElement;
+        const sunIcon = document.getElementById("sunIcon");
+        const moonIcon = document.getElementById("moonIcon");
+
+        // Mobile dark mode toggle
+        const darkModeToggleMobile = document.getElementById("darkModeToggleMobile");
+        const sunIconMobile = document.getElementById("sunIconMobile");
+        const moonIconMobile = document.getElementById("moonIconMobile");
+
+        function setDarkMode(isDark) {
+            htmlEl.classList.toggle("dark", isDark);
+            sunIcon.classList.toggle("hidden", isDark);
+            moonIcon.classList.toggle("hidden", !isDark);
+            // Mobile icons
+            sunIconMobile.classList.toggle("hidden", isDark);
+            moonIconMobile.classList.toggle("hidden", !isDark);
+            localStorage.theme = isDark ? "dark" : "light";
+        }
+
+        // Check for saved preference or system preference
+        const isDarkMode =
+            localStorage.theme === "dark" ||
+            (!("theme" in localStorage) &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+        // Set initial mode
+        setDarkMode(isDarkMode);
+
+        // Toggle mode on click with animation
+        darkModeToggle.addEventListener("click", () => {
+            const willBeDark = !htmlEl.classList.contains("dark");
+
+            // Animate transition
+            gsap.to("body", {
+                backgroundColor: willBeDark ? "#0f172a" : "#ffffff",
+                color: willBeDark ? "#f1f5f9" : "#1e293b",
+                duration: 0.3,
+            });
+
+            setDarkMode(willBeDark);
+        });
+
+        // Mobile toggle
+        darkModeToggleMobile.addEventListener("click", () => {
+            const willBeDark = !htmlEl.classList.contains("dark");
+            gsap.to("body", {
+                backgroundColor: willBeDark ? "#0f172a" : "#ffffff",
+                color: willBeDark ? "#f1f5f9" : "#1e293b",
+                duration: 0.3,
+            });
+            setDarkMode(willBeDark);
+        });
+
+        // Mobile menu functionality with enhanced animations
+        const menuToggle = document.getElementById("menuToggle");
+        const closeMenu = document.getElementById("closeMenu");
+        const mobileMenu = document.getElementById("mobileMenu");
+        const mobileLinks = document.querySelectorAll(".nav-mobile-item");
+
+        // Combined menu toggle event handler
+        menuToggle.addEventListener("click", () => {
+            // Make visible first
+            mobileMenu.style.display = "flex";
+
+            // Force a reflow before animations start
+            void mobileMenu.offsetWidth;
+
+            // Prevent background scrolling
+            document.body.style.overflow = "hidden";
+
+            // Explicitly set initial state for all elements
+            gsap.set(mobileMenu, {opacity: 0});
+            gsap.set("#mobileMenu > div:first-of-type", {opacity: 0});
+            gsap.set("#mobileMenu > div:nth-child(2)", {opacity: 0, y: -20});
+            gsap.set(".nav-mobile-item", {opacity: 0, y: 20});
+            gsap.set("#mobileMenu > div:last-child", {opacity: 0, y: 20});
+
+            // Fade in backdrop first
+            gsap.to("#mobileMenu > div:first-of-type", {
+                opacity: 1,
+                duration: 0.2,
+                onComplete: () => {
+                    // Then fade in the menu
+                    gsap.to(mobileMenu, {
+                        opacity: 1,
+                        duration: 0.2
+                    });
+
+                    // Header animation
+                    gsap.to("#mobileMenu > div:nth-child(2)", {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.4,
+                        ease: "back.out(1.7)"
+                    });
+
+                    // Menu items animation
+                    gsap.to(".nav-mobile-item", {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        stagger: 0.08,
+                        ease: "back.out(1.7)"
+                    });
+
+                    // Bottom action animation
+                    gsap.to("#mobileMenu > div:last-child", {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.4,
+                        ease: "back.out(1.7)"
+                    });
+                }
             });
         });
-      }
 
-      // Call the function with a slight delay to ensure all elements are rendered
-      setTimeout(setupLogoAnimations, 500);
+        function closeMobileMenu() {
+            // Animate out
+            gsap.to(".nav-mobile-item", {
+                opacity: 0,
+                y: 20,
+                duration: 0.3,
+                stagger: 0.05
+            });
+
+            gsap.to("#mobileMenu > div:nth-child(2)", {
+                opacity: 0,
+                y: -20,
+                duration: 0.3
+            });
+
+            gsap.to("#mobileMenu > div:last-child", {
+                opacity: 0,
+                y: 20,
+                duration: 0.3
+            });
+
+            // Fade out backdrop last
+            gsap.to(mobileMenu, {
+                opacity: 0,
+                duration: 0.3,
+                delay: 0.1,
+                onComplete: () => {
+                    // Actually hide the menu when animation completes
+                    mobileMenu.style.display = "none";
+
+                    // Re-enable scrolling
+                    document.body.style.overflow = "";
+                }
+            });
+        }
+
+        closeMenu.addEventListener("click", closeMobileMenu);
+
+        mobileLinks.forEach((link) => {
+            link.addEventListener("click", (e) => {
+                closeMobileMenu();
+            });
+        });
+
+        // Text animations
+        const heroHeadline = document.getElementById("heroHeadline");
+        const heroSubline = document.getElementById("heroSubline");
+        const heroButtons = document.getElementById("heroButtons");
+
+        // Hero headline animation with SplitType
+        setTimeout(() => {
+            if (window.SplitType) {
+                const headlineSplit = new SplitType(heroHeadline, {
+                    types: "words, chars",
+                });
+
+                gsap.set(heroHeadline, {opacity: 1});
+                gsap.from(headlineSplit.chars, {
+                    opacity: 0,
+                    y: 100,
+                    rotateX: -90,
+                    stagger: 0.02,
+                    duration: 0.8,
+                    ease: "back.out(1.7)",
+                });
+
+                // Subline typing animation
+                gsap.to(heroSubline, {
+                    delay: 0.5,
+                    opacity: 1,
+                    duration: 0.5,
+                });
+
+                gsap.to(heroSubline, {
+                    delay: 0.7,
+                    text: {
+                        value:
+                            "Your ultimate toolkit for CVs, cover letters & interview preparation powered by AI.",
+                        delimiter: "",
+                    },
+                    duration: 2,
+                    ease: "none",
+                });
+
+                // Button fade in
+                gsap.to(heroButtons, {
+                    delay: 2.5,
+                    opacity: 1,
+                    duration: 0.8,
+                });
+            } else {
+                console.error(
+                    "SplitType not loaded! Falling back to basic animation"
+                );
+
+                // Fallback animations if SplitType fails
+                gsap.to(heroHeadline, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                });
+
+                gsap.to(heroSubline, {
+                    opacity: 1,
+                    duration: 1,
+                    delay: 0.3,
+                });
+
+                gsap.to(heroSubline, {
+                    text: {
+                        value:
+                            "Your ultimate toolkit for CVs, cover letters & interview preparation powered by AI.",
+                        delimiter: "",
+                    },
+                    delay: 0.5,
+                    duration: 2,
+                });
+
+                gsap.to(heroButtons, {
+                    opacity: 1,
+                    duration: 1,
+                    delay: 2.5,
+                });
+            }
+        }, 300);
+
+        // Scroll-triggered animations
+
+        // Gallery title
+        gsap.to("#galleryTitle", {
+            scrollTrigger: {
+                trigger: "#galleryTitle",
+                start: "top 80%",
+            },
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+        });
+
+        // Features title
+        gsap.to("#featuresTitle", {
+            scrollTrigger: {
+                trigger: "#featuresTitle",
+                start: "top 80%",
+            },
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+        });
+
+        // Card animations
+        gsap.utils.toArray(".card").forEach((card, i) => {
+            const originalTransform = card.style.transform;
+
+            gsap.to(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 85%",
+                },
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                delay: i * 0.15,
+                onComplete: function () {
+                    card.style.transform = "";
+
+                    card.classList.add("animation-complete");
+                }
+            });
+        });
+
+        // Header animation on load
+        gsap.fromTo(
+            "header",
+            {y: -100, opacity: 0},
+            {y: 0, opacity: 1, duration: 1, ease: "power3.out", delay: 0.2}
+        );
+
+        // Animated nav links on load
+        gsap.fromTo(
+            ".nav-link",
+            {y: -10, opacity: 0},
+            {
+                y: 0,
+                opacity: 1,
+                stagger: 0.1,
+                duration: 0.6,
+                ease: "power2.out",
+                delay: 0.6,
+            }
+        );
+        // Hero headline animation
+        gsap.to("#heroHeadline", {
+            y: 0, // No vertical movement
+            duration: 0.8,
+            ease: "power2.out"
+        });
+
+        // Add a subtle background gradient animation to the hero section
+        gsap.to("section#hero", {
+            backgroundPosition: "400% 0",
+            duration: 10,
+            repeat: -1,
+            ease: "none"
+        });
+
+        // Enhanced 3D tilt effect with mouse interaction
+        const highlightBox = document.querySelector('.highlight-box');
+        const highlightContainer = document.querySelector('.highlight-container');
+
+        if (highlightContainer && highlightBox) {
+            // Tilt effect on mouse move
+            document.addEventListener('mousemove', e => {
+                // Only apply if not on mobile
+                if (window.innerWidth > 768) {
+                    const rect = highlightContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+
+                    // Calculate tilt angle (max 10 degrees)
+                    const tiltX = y / (rect.height / 2) * 5;
+                    const tiltY = -(x / (rect.width / 2) * 5);
+
+                    // Apply transform with enhanced perspective
+                    highlightBox.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+                }
+            });
+
+            // Reset when mouse leaves
+            document.addEventListener('mouseleave', () => {
+                // Return to animation state
+                highlightBox.style.transform = '';
+            });
+        }
+
+        // Create a more dynamic floating animation for the background shapes
+        gsap.to('.shape-1', {
+            x: '20%', // Extreme movement
+            y: '15%', // Extreme movement
+            rotation: 25, // Extreme rotation
+            duration: 2, // Ultra fast
+            repeat: -1,
+            yoyo: true,
+            ease: 'power2.inOut'
+        });
+
+        gsap.to('.shape-2', {
+            x: '-18%', // Extreme movement
+            y: '-16%', // Extreme movement
+            rotation: -20, // Extreme rotation
+            duration: 2.5, // Ultra fast
+            repeat: -1,
+            yoyo: true,
+            ease: 'power2.inOut',
+            delay: 0.2
+        });
+
+        gsap.to('.shape-3', {
+            x: '16%', // Extreme movement
+            y: '-12%', // Extreme movement
+            rotation: 18, // Extreme rotation
+            duration: 2.2, // Ultra fast
+            repeat: -1,
+            yoyo: true,
+            ease: 'power2.inOut',
+            delay: 0.4
+        });
+
+        function setupLogoAnimations() {
+            console.log("Setting up logo animations");
+
+            // Target the correct container with a more specific selector
+            const logoContainer = document.querySelector("#clients .mt-8.flex");
+            if (!logoContainer) {
+                console.warn("Logo container not found");
+                return;
+            }
+
+            console.log("Found logo container with", logoContainer.querySelectorAll('svg').length, "SVGs");
+
+            const logos = Array.from(logoContainer.querySelectorAll('svg'));
+            const totalLogos = logos.length;
+
+            // Create completely separate additional set of logos (different designs)
+            const alternateSVGs = [
+                `<rect width="120" height="40" rx="4" fill="#8B5CF6"/><circle cx="60" cy="20" r="12" fill="white"/><rect x="30" y="16" width="60" height="8" rx="2" fill="white"/>`,
+                `<rect width="120" height="40" rx="4" fill="#6366F1"/><polygon points="30,12 50,28 30,28" fill="white"/><rect x="55" y="12" width="35" height="16" rx="2" fill="white"/>`,
+                `<rect width="120" height="40" rx="4" fill="#4F46E5"/><rect x="30" y="12" width="16" height="16" rx="8" fill="white"/><rect x="54" y="16" width="36" height="8" rx="4" fill="white"/>`,
+                `<rect width="120" height="40" rx="4" fill="#7C3AED"/><path d="M30,20 L40,12 L50,20 L40,28 Z" fill="white"/><rect x="55" y="12" width="35" height="16" rx="8" stroke="white" stroke-width="2" fill="none"/>`,
+                `<rect width="120" height="40" rx="4" fill="#8B5CF6"/><rect x="30" y="12" width="60" height="16" rx="3" stroke="white" stroke-width="3" fill="none"/>`,
+                `<rect width="120" height="40" rx="4" fill="#6366F1"/><circle cx="40" cy="20" r="10" fill="white"/><circle cx="80" cy="20" r="8" stroke="white" stroke-width="2" fill="none"/>`,
+                `<rect width="120" height="40" rx="4" fill="#4F46E5"/><path d="M30,12 L45,20 L30,28 M75,12 L60,20 L75,28" stroke="white" stroke-width="2" fill="none"/>`
+            ];
+
+            // Set up animation for each logo
+            logos.forEach((logo, index) => {
+                // Store the original content immediately
+                const originalContent = logo.innerHTML;
+                logo.dataset.originalContent = originalContent;
+
+                // Create a timeline with faster transitions
+                const tl = gsap.timeline({repeat: -1, repeatDelay: 1});
+
+                // Faster animation with guaranteed content swap
+                tl.to(logo, {
+                    opacity: 0,
+                    y: -10,
+                    duration: 0.3,
+                    delay: index * 0.15, // Shorter stagger
+                    onComplete: function () {
+                        // Always pick a new SVG that's different from current
+                        let randomIndex = Math.floor(Math.random() * alternateSVGs.length);
+
+                        // Check if we're currently showing original or alternate content
+                        const isShowingOriginal = !logo.dataset.isAlternate || logo.dataset.isAlternate === "false";
+
+                        if (isShowingOriginal) {
+                            // Switch to an alternate design
+                            logo.innerHTML = alternateSVGs[randomIndex];
+                            logo.dataset.isAlternate = "true";
+                        } else {
+                            // Switch back to original design
+                            logo.innerHTML = logo.dataset.originalContent;
+                            logo.dataset.isAlternate = "false";
+                        }
+
+                        console.log(`Logo ${index} switched to ${isShowingOriginal ? "alternate" : "original"} design`);
+                    }
+                })
+                    .to(logo, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.3
+                    });
+            });
+        }
+
+        // Call the function with a slight delay to ensure all elements are rendered
+        setTimeout(setupLogoAnimations, 500);
     });
-  </script>
+</script>
 </body>
 
 </html>
