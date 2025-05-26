@@ -79,27 +79,27 @@ php artisan migrate --seed
 
 # 7. Serve
 php artisan serve           # http://127.0.0.1:8000
-
+```                                  <-- ✨ CLOSES the code fence
 ---
 
 ## 🗂️ Project Structure
 
+```text
 app/
-├─ Livewire/ # Interactive components
-├─ Models/
+├── Livewire/          # Interactive components
+├── Models/
 resources/
-├─ views/
-│ ├─ components/ # Blade components
-│ └─ livewire/ # Livewire blade views
-└─ js/
-└─ alpine/ # Alpine stores/plugins
+├── views/
+│   ├── components/    # Blade components
+│   └── livewire/      # Livewire blade views
+└── js/
+    └── alpine/        # Alpine stores/plugins
 database/
-├─ migrations/
-└─ seeders/
+├── migrations/
+└── seeders/
 routes/
-├─ web.php
-└─ livewire.php
-
+├── web.php
+└── livewire.php
 
 ---
 
