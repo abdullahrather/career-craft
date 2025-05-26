@@ -120,16 +120,3 @@ routes/
 ---
 
 > Built with ❤️ on the **TALL Stack** — because tall ambitions deserve a tall tech stack!
-
-<details>
-<summary>What changed vs. the React prototype?</summary>
-
-| Section | Old | New |
-|---------|-----|-----|
-| **Tech Stack** | React, Node, Prisma | Laravel 11, Livewire 3, Alpine.js |
-| **Dev commands** | `pnpm dev` | `php artisan serve`, `npm run dev` |
-| **Project structure** | `apps/web`, `apps/api` monorepo | Laravel folder tree |
-| **Realtime layer** | WebSockets via Node | Laravel Reverb presence channels |
-| **Charts** | D3/Recharts | Livewire + Filament Charts |
-
-</details>
