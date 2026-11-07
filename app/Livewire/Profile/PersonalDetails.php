@@ -40,23 +40,35 @@ final class PersonalDetails extends Component
         $this->country = $profile->country;
     }
 
-    public function save(): void
+    /** @return array<string, list<mixed>> Also used when an import fills these fields. */
+    public static function rules(): array
     {
-        $this->validate([
+        return [
             'headline' => ['nullable', 'string', 'max:120'],
             'summary' => ['nullable', 'string', 'max:2000'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:40', 'regex:/^[0-9 +()\/.-]*$/'],
             'city' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', Rule::in(Countries::codes())],
-        ], attributes: [
+        ];
+    }
+
+    /** @return array<string, string> */
+    public static function labels(): array
+    {
+        return [
             'headline' => __('Headline'),
             'summary' => __('Summary'),
             'email' => __('Email'),
             'phone' => __('Phone'),
             'city' => __('City'),
             'country' => __('Country'),
-        ]);
+        ];
+    }
+
+    public function save(): void
+    {
+        $this->validate(self::rules(), attributes: self::labels());
 
         // The properties are typed strings and have just passed validation.
         $this->profile()->update([

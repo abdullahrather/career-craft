@@ -10,6 +10,9 @@ x-php: &php
   image: careercraft-php
   volumes:
     - .:/app
+  # Reaches Ollama on the host. Docker Desktop has this name already; Linux needs it set.
+  extra_hosts:
+    - 'host.docker.internal:host-gateway'
   depends_on:
     postgres:
       condition: service_healthy

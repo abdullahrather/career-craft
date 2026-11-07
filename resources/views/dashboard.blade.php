@@ -19,7 +19,12 @@
             @if ($completeness['next'] !== [])
                 <p class="mt-4 text-sm">{{ $completeness['next'][0]['text'] }}</p>
             @endif
-            <a href="{{ route('profile') }}" class="button button-primary mt-5">{{ __('Open your profile') }}</a>
+            <div class="mt-5 flex flex-wrap gap-3">
+                <a href="{{ route('profile') }}" class="button button-primary">{{ __('Open your profile') }}</a>
+                @if ($completeness['score'] < 100)
+                    <a href="{{ route('profile.import') }}" class="button">{{ __('Import a CV or LinkedIn') }}</a>
+                @endif
+            </div>
         </section>
 
         <section class="card">

@@ -22,6 +22,20 @@ final class Countries
         return array_values(IntlCountries::getCountryCodes());
     }
 
+    /** The ISO code for a country name in English or German, such as "Germany" or "Deutschland". */
+    public static function code(string $name): string
+    {
+        $name = mb_strtolower(trim($name));
+        foreach (['en', 'de'] as $locale) {
+            $code = array_search($name, array_map('mb_strtolower', IntlCountries::getNames($locale)), true);
+            if (is_string($code)) {
+                return $code;
+            }
+        }
+
+        return '';
+    }
+
     public static function name(string $code): string
     {
         return $code !== '' && IntlCountries::exists($code) ? IntlCountries::getName($code, App::getLocale()) : '';

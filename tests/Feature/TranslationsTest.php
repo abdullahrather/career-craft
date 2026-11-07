@@ -45,7 +45,7 @@ function translatableTexts(): array
         base_path('routes'),
     ])->name(['*.php']);
 
-    $pattern = '/(?:__|trans|@lang)\(\s*(?:\'((?:[^\'\\\\]|\\\\.)*)\'|"((?:[^"\\\\]|\\\\.)*)")/';
+    $pattern = '/(?:__|trans_choice|trans|@lang)\(\s*(?:\'((?:[^\'\\\\]|\\\\.)*)\'|"((?:[^"\\\\]|\\\\.)*)")/';
     foreach ($files as $file) {
         preg_match_all($pattern, $file->getContents(), $matches, PREG_SET_ORDER);
         foreach ($matches as $match) {
