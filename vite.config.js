@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import { bunny } from 'laravel-vite-plugin/fonts';
+import { bunny, local } from 'laravel-vite-plugin/fonts';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
@@ -16,17 +16,18 @@ export default defineConfig({
                 bunny('Fraunces', {
                     weights: [500, 600, 700],
                 }),
-                // Fonts for CVs. Only CV pages load them, so they aren't preloaded.
-                bunny('IBM Plex Sans', {
-                    weights: [400, 600, 700],
+                // Fonts for CVs, kept in resources/fonts so PDF exports can use the same files.
+                // Only CV pages load them, so they aren't preloaded.
+                local('IBM Plex Sans', {
+                    variants: [400, 600, 700].map((weight) => ({ src: `resources/fonts/ibm-plex-sans-${weight}.woff2`, weight })),
                     preload: false,
                 }),
-                bunny('Source Serif 4', {
-                    weights: [400, 600, 700],
+                local('Source Serif 4', {
+                    variants: [400, 600, 700].map((weight) => ({ src: `resources/fonts/source-serif-4-${weight}.woff2`, weight })),
                     preload: false,
                 }),
-                bunny('Lora', {
-                    weights: [400, 600, 700],
+                local('Lora', {
+                    variants: [400, 600, 700].map((weight) => ({ src: `resources/fonts/lora-${weight}.woff2`, weight })),
                     preload: false,
                 }),
             ],

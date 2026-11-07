@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Livewire\Resumes;
 
 use App\Models\Resume;
+use App\Models\ResumeVersion;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
@@ -44,9 +46,23 @@ final class Index extends Component
         $this->redirectRoute('resumes.edit', ['id' => $resume->id]);
     }
 
+    /** A copy of a CV's choices, to start a variant from. Its versions stay with the original. */
+    public function duplicate(int $id): void
+    {
+        $resume = $this->user()->resumes()->findOrFail($id);
+        $this->user()->resumes()->create([
+            'name' => mb_substr(__(':name (copy)', ['name' => $resume->name]), 0, 120),
+            'language' => $resume->language,
+            'template' => $resume->template,
+            'settings' => $resume->settings,
+        ]);
+    }
+
+    /** Deletes the CV with its saved versions and their files. The profile stays. */
     public function delete(int $id): void
     {
         $this->user()->resumes()->findOrFail($id)->delete();
+        Storage::disk('local')->deleteDirectory(ResumeVersion::directory($id));
     }
 
     public function render(): View

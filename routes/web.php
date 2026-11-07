@@ -28,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::view('/resumes', 'resumes.index')->name('resumes');
     Route::get('/resumes/{id}', [ResumeController::class, 'edit'])->whereNumber('id')->name('resumes.edit');
     Route::get('/resumes/{id}/preview', [ResumeController::class, 'preview'])->whereNumber('id')->name('resumes.preview');
+    Route::view('/resumes/compare', 'resumes.compare')->name('resumes.compare');
+    Route::get('/resume-versions/{id}/{format}', [ResumeController::class, 'download'])->whereNumber('id')->whereIn('format', ['pdf', 'docx'])->name('resume-versions.download');
 
     // The CV photo is private: only its owner sees it.
     Route::get('/profile/photo', function (): StreamedResponse {

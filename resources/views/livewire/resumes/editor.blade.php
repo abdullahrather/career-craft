@@ -11,7 +11,7 @@
         'certifications' => __('Certificates'),
         'links' => __('Links'),
     ];
-    $fontNames = ['instrument-sans' => 'Instrument Sans', 'ibm-plex-sans' => 'IBM Plex Sans', 'source-serif-4' => 'Source Serif 4', 'lora' => 'Lora'];
+    $fontNames = Resume::FONT_NAMES;
     $accentNames = [
         '#1f2937' => __('Ink'),
         '#0f766e' => __('Teal'),
@@ -127,9 +127,51 @@
                 @endif
             </section>
 
-            @if ($errors->any())
-                <p class="alert" role="alert">{{ $errors->first() }}</p>
+            {{-- Errors for the settings above; the version error shows in its own card. --}}
+            @php($settingErrors = array_values(array_diff($errors->keys(), ['version'])))
+            @if ($settingErrors !== [])
+                <p class="alert" role="alert">{{ $errors->first($settingErrors[0]) }}</p>
             @endif
+
+            <section class="card" aria-labelledby="cv-versions">
+                <h2 id="cv-versions" class="card-title">{{ __('Versions') }}</h2>
+                <p class="muted mt-1 text-sm">{{ __('Save a version to download it as PDF and Word. Each one is kept as it was, so you always know what you sent.') }}</p>
+                <button type="button" wire:click="saveVersion" wire:loading.attr="disabled" wire:target="saveVersion" class="button button-primary mt-4">
+                    <span wire:loading.remove wire:target="saveVersion">{{ __('Save a version') }}</span>
+                    <span wire:loading wire:target="saveVersion">{{ __('Making the PDF…') }}</span>
+                </button>
+                @error('version')
+                    <p class="alert mt-3" role="alert">{{ $message }}</p>
+                @enderror
+
+                @if ($versions->isNotEmpty())
+                    <ol class="mt-4 flex flex-col gap-3">
+                        @foreach ($versions as $version)
+                            <li wire:key="version-{{ $version->id }}" class="rounded-xl border border-stone-200 p-3 text-sm dark:border-stone-800">
+                                <p class="font-semibold">{{ __('Version :number', ['number' => $version->number]) }}</p>
+                                <p class="muted text-xs">
+                                    {{ $version->created_at->translatedFormat('j M Y, H:i') }} ·
+                                    {{ \App\Models\Resume::templateOptions()[$version->template]['name'] ?? $version->template }} ·
+                                    {{ $version->language === 'de' ? 'Deutsch' : 'English' }} ·
+                                    {{ trans_choice('{1} 1 page|[2,*] :count pages', $version->pages) }}
+                                </p>
+                                @if ($version->missing === [])
+                                    <p class="mt-2 text-brand-800 dark:text-brand-300">✓ {{ __('All :count checked items read back as text.', ['count' => $version->checked]) }}</p>
+                                @else
+                                    <p class="mt-2 text-amber-800 dark:text-amber-300">{{ __(':missing of :count items did not read back as text: :items', ['missing' => count($version->missing), 'count' => $version->checked, 'items' => implode(', ', $version->missing)]) }}</p>
+                                @endif
+                                <p class="mt-2 flex flex-wrap gap-2">
+                                    <a href="{{ route('resume-versions.download', ['id' => $version->id, 'format' => 'pdf']) }}" class="button button-small">PDF</a>
+                                    <a href="{{ route('resume-versions.download', ['id' => $version->id, 'format' => 'docx']) }}" class="button button-small">Word</a>
+                                    @if (! $loop->last)
+                                        <a href="{{ route('resumes.compare', ['a' => $versions[$loop->index + 1]->id, 'b' => $version->id]) }}" class="button button-small">{{ __('Compare with the one before') }}</a>
+                                    @endif
+                                </p>
+                            </li>
+                        @endforeach
+                    </ol>
+                @endif
+            </section>
         </div>
 
         {{-- Livewire leaves the preview alone: Alpine owns the frame and reloads it after each save. --}}
