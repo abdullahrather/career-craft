@@ -13,6 +13,7 @@ use App\Resumes\ResumeDocument;
 use App\Support\TextDiff;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -71,6 +72,31 @@ describe('Saving a version', function (): void {
                 && ! str_contains($page, '5173')
                 && ! str_contains($page, 'resume-pages');
         });
+    });
+
+    it('takes the next number when another save gets there first, without leaving files behind', function (): void {
+        fakeGotenberg();
+        $resume = resumeFor(candidate());
+        // Another save (a double click, a second tab) takes the same number just before this one.
+        $clashed = false;
+        ResumeVersion::creating(function (ResumeVersion $version) use (&$clashed): void {
+            if (! $clashed) {
+                $clashed = true;
+                DB::table('resume_versions')->insert([
+                    ...collect($version->getAttributes())->except(['missing'])->all(),
+                    'missing' => '[]',
+                    'pdf_path' => 'elsewhere.pdf',
+                    'docx_path' => 'elsewhere.docx',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
+        $version = ResumeVersion::saveFrom($resume);
+
+        expect($resume->versions()->count())->toBe(1)
+            ->and(Storage::disk('local')->allFiles(ResumeVersion::directory($resume->id)))->toBe([$version->docx_path, $version->pdf_path]);
     });
 
     it('numbers the versions and says so when the PDF service is down', function (): void {

@@ -11,9 +11,12 @@ use App\Resumes\ResumeDocument;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * A saved version of a CV: its PDF and Word files as they were when saved, and how
@@ -45,14 +48,34 @@ final class ResumeVersion extends Model
         $docx = (new DocxWriter)->write($doc);
         $check = AtsCheck::run($pdf, $doc);
 
+        // Two saves at once (a double click, a second tab) could pick the same number.
+        // The lock makes them take turns; if a number is still taken, try the next one.
+        for ($attempt = 1; ; $attempt++) {
+            try {
+                return DB::transaction(fn (): self => self::store($resume, $pdf, $docx, $check));
+            } catch (UniqueConstraintViolationException $exception) {
+                if ($attempt === 3) {
+                    throw $exception;
+                }
+            }
+        }
+    }
+
+    /**
+     * Numbers the version, then saves its row and files together: when either fails,
+     * neither is left behind.
+     *
+     * @param  array{text: string, pages: int, checked: int, missing: list<string>}  $check
+     */
+    private static function store(Resume $resume, string $pdf, string $docx, array $check): self
+    {
+        Resume::query()->whereKey($resume->id)->lockForUpdate()->first();
         $last = $resume->versions()->max('number');
         $number = (is_numeric($last) ? (int) $last : 0) + 1;
         // A random part, so a file name can't be guessed from the number.
         $base = self::directory($resume->id).'/'.$number.'-'.Str::random(16);
-        Storage::disk('local')->put("{$base}.pdf", $pdf);
-        Storage::disk('local')->put("{$base}.docx", $docx);
 
-        return $resume->versions()->create([
+        $version = $resume->versions()->create([
             'number' => $number,
             'name' => $resume->name,
             'language' => $resume->language,
@@ -64,6 +87,16 @@ final class ResumeVersion extends Model
             'checked' => $check['checked'],
             'missing' => $check['missing'],
         ]);
+
+        try {
+            Storage::disk('local')->put("{$base}.pdf", $pdf);
+            Storage::disk('local')->put("{$base}.docx", $docx);
+        } catch (Throwable $exception) {
+            Storage::disk('local')->delete(["{$base}.pdf", "{$base}.docx"]);
+            throw $exception;
+        }
+
+        return $version;
     }
 
     /** Where a CV's version files are kept, so deleting the CV can remove them all. */
