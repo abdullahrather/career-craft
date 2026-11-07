@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Two-factor login')" narrow>
+<x-layouts.guest :title="__('Two-factor login')" narrow>
     <div class="card">
         <h1 class="text-2xl font-semibold">{{ __('Two-factor login') }}</h1>
         <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
@@ -12,4 +12,4 @@
             <button type="submit" class="button button-primary">{{ __('Sign in') }}</button>
         </form>
     </div>
-</x-layouts.app>
+</x-layouts.guest>

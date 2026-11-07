@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Reset your password')" narrow>
+<x-layouts.guest :title="__('Reset your password')" narrow>
     <div class="card">
         <h1 class="text-2xl font-semibold">{{ __('Reset your password') }}</h1>
         <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{{ __("We'll email you a link to choose a new one.") }}</p>
@@ -15,4 +15,4 @@
 
         <p class="mt-6 text-sm"><a href="{{ route('login') }}" class="link">{{ __('Back to sign in') }}</a></p>
     </div>
-</x-layouts.app>
+</x-layouts.guest>

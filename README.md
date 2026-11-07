@@ -2,7 +2,17 @@
 
 An AI-assisted job search platform. You keep one structured career profile, and CareerCraft turns it into tailored CVs and cover letters, finds jobs that fit, tracks every application, reads employer replies and helps you prepare for interviews. It's built for the German job market first, in English and German.
 
-**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, and the landing page, in English and German with a dark theme.
+**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page and the career profile, in English and German with a dark theme.
+
+## Career profile
+
+One structured record of everything you have done, which every CV, cover letter and job match will be built from:
+
+- About you: headline, summary and contact details
+- Work experience, with achievements as the bullet points a CV shows
+- Education, skills with levels, projects, certificates, and languages at CEFR levels (A1 to C2, or native)
+- Links, such as LinkedIn or a portfolio
+- Entries can be added, edited, reordered and deleted, and a profile strength score lists what to add next
 
 ## Accounts
 
