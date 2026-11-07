@@ -12,5 +12,5 @@
         }
     } catch {}
 </script>
-@fonts
+@fonts(['instrument-sans', 'fraunces'])
 @vite(['resources/css/app.css', 'resources/js/app.js'])

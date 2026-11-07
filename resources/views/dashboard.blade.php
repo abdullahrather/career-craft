@@ -28,6 +28,12 @@
         </section>
 
         <section class="card">
+            <h2 class="card-title">{{ __('Your CVs') }}</h2>
+            <p class="muted mt-2">{{ __('Turn your profile into a CV in English or German, with a template that suits the role.') }}</p>
+            <a href="{{ route('resumes') }}" class="button mt-5">{{ __('Go to your CVs') }}</a>
+        </section>
+
+        <section class="card">
             <h2 class="card-title">{{ __('Keep your account safe') }}</h2>
             <p class="muted mt-2">{{ __('Turn on two-factor login, so a stolen password alone is not enough to get in.') }}</p>
             <a href="{{ route('settings') }}" class="button mt-5">{{ __('Go to settings') }}</a>

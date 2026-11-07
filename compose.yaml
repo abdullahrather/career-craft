@@ -22,7 +22,11 @@ x-php: &php
 services:
   app:
     <<: *php
-    command: php artisan serve --host=0.0.0.0 --port=8000
+    # Several requests at once, so the CV preview doesn't wait behind the editor's own requests.
+    # Workers need --no-reload, so restart the app after changing .env.
+    command: php artisan serve --host=0.0.0.0 --port=8000 --no-reload
+    environment:
+      PHP_CLI_SERVER_WORKERS: 4
     ports:
       - '8000:8000'
 

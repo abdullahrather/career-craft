@@ -2,7 +2,7 @@
 
 An AI-assisted job search platform. You keep one structured career profile, and CareerCraft turns it into tailored CVs and cover letters, finds jobs that fit, tracks every application, reads employer replies and helps you prepare for interviews. It's built for the German job market first, in English and German.
 
-**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page, the career profile and importing an existing CV, in English and German with a dark theme.
+**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page, the career profile, importing an existing CV, and the CV builder, in English and German with a dark theme.
 
 ## Career profile
 
@@ -20,6 +20,13 @@ One structured record of everything you have done, which every CV, cover letter 
 - **From a CV:** upload a PDF or Word file. A local AI model reads the text and suggests what goes where. The file isn't kept, and its text is deleted once it has been read.
 - **From LinkedIn:** upload the data export LinkedIn lets you download (a ZIP of CSV files). It's read directly, without AI.
 - Either way, you check every field before anything is saved. Personal details you already filled in are only replaced if you tick them, entries the profile already has are marked, and anything that doesn't fit the profile, such as a job without a start date, is listed as left out.
+
+## CV builder
+
+- Several CVs from the same profile, each with its own name, template and settings. A change in the profile shows up in all of them.
+- Four templates: Classic, Modern and Compact, all single-column with plain text in reading order so applicant tracking systems read them as written, and a German tabular Lebenslauf with personal details, photo and a signature line with place and date.
+- Headings and dates follow the CV's language, so one profile gives an English CV ("Mar 2021 – Present") and a German one ("03/2021 – heute").
+- A live A4 preview that shows where pages end, with a choice of font and colour, one page or two, and sections that can be hidden and reordered. Empty sections are left out by themselves.
 
 ## Accounts
 

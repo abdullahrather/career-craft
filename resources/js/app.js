@@ -118,6 +118,49 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
+// The CV preview: an A4 page scaled to fit, reloaded after every change.
+document.addEventListener('alpine:init', () => {
+    window.Alpine.data('resumePreview', (url) => ({
+        version: 0,
+        pages: null,
+        scale: 1,
+        height: 1123,
+
+        init() {
+            this.fit();
+            new ResizeObserver(() => this.fit()).observe(this.$refs.box);
+            // The preview page reports its length; only messages from it count.
+            window.addEventListener('message', (event) => {
+                if (event.origin !== location.origin || event.source !== this.$refs.frame.contentWindow) return;
+                if (event.data?.type !== 'resume-pages') return;
+                this.pages = event.data.pages;
+                this.loaded();
+            });
+        },
+
+        get src() {
+            return `${url}?v=${this.version}`;
+        },
+
+        get target() {
+            return Number(this.$wire.pages);
+        },
+
+        reload() {
+            this.version++;
+        },
+
+        fit() {
+            this.scale = Math.min(1, this.$refs.box.clientWidth / 794);
+        },
+
+        loaded() {
+            const page = this.$refs.frame.contentDocument?.documentElement;
+            if (page) this.height = page.scrollHeight;
+        },
+    }));
+});
+
 // The theme toggle in the header: switch, and remember the choice.
 document.addEventListener('click', (event) => {
     const toggle = event.target.closest('[data-theme-toggle]');
