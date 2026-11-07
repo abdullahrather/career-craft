@@ -128,7 +128,8 @@ final class Import extends Component
         $draft = $this->draft();
         abort_if($draft === null, 404);
 
-        $chosen = array_intersect_key($this->personal, array_filter($this->usePersonal));
+        // The browser can add keys to these arrays, so only the profile's personal fields count.
+        $chosen = array_intersect_key($this->personal, array_filter($this->usePersonal), PersonalDetails::rules());
         $rules = array_intersect_key(PersonalDetails::rules(), $chosen);
         // Livewire refuses to validate with no rules, which is the case when nothing personal is ticked.
         if ($rules !== []) {

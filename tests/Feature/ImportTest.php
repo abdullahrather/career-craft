@@ -222,6 +222,19 @@ describe('Importing a CV', function (): void {
             ->and($user->careerProfile()->skills()->count())->toBe(3);
     });
 
+    it('only saves the personal fields the form has, whatever the browser sends', function (): void {
+        CvReader::fake([aiAnswer()]);
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test(Import::class)
+            ->set('cv', UploadedFile::fake()->createWithContent('cv.docx', docxWith(cvLines())))
+            ->set('personal.photo_path', 'photos/1-someone-else.jpg')
+            ->set('usePersonal.photo_path', true)
+            ->call('apply');
+
+        expect($user->careerProfile()->fresh()->photo_path)->toBeNull();
+    });
+
     it('asks for a text file instead of sending a scan to the AI', function (): void {
         CvReader::fake();
         $user = User::factory()->create();

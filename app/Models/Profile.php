@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * A person's career profile: the one record every CV, cover letter and job match is
- * built from.
+ * built from. photo_path isn't fillable on purpose: only the photo upload sets it.
  *
  * @property int $id
  * @property int $user_id
@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $photo_path
  * @property-read ProfileImport|null $import
  */
-#[Fillable(['headline', 'summary', 'email', 'phone', 'city', 'country', 'photo_path'])]
+#[Fillable(['headline', 'summary', 'email', 'phone', 'city', 'country'])]
 final class Profile extends Model
 {
     /** A summary shorter than this reads as unfinished. */

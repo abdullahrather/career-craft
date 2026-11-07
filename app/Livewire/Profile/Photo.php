@@ -53,7 +53,7 @@ final class Photo extends Component
         $old = $profile->photo_path;
         $path = 'photos/'.$profile->id.'-'.Str::random(24).'.jpg';
         Storage::disk('local')->put($path, self::portrait($image));
-        $profile->update(['photo_path' => $path]);
+        $profile->forceFill(['photo_path' => $path])->save();
         if ($old !== null) {
             Storage::disk('local')->delete($old);
         }
@@ -64,7 +64,7 @@ final class Photo extends Component
         $profile = $this->profile();
         if ($profile->photo_path !== null) {
             Storage::disk('local')->delete($profile->photo_path);
-            $profile->update(['photo_path' => null]);
+            $profile->forceFill(['photo_path' => null])->save();
         }
     }
 

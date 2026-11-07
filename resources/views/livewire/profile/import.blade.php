@@ -81,7 +81,7 @@
                 <section class="card" aria-labelledby="found-personal">
                     <h2 id="found-personal" class="card-title">{{ __('About you') }}</h2>
                     <div class="mt-4 flex flex-col gap-4">
-                        @foreach ($personal as $field => $value)
+                        @foreach (array_intersect_key($personal, $labels) as $field => $value)
                             <div wire:key="personal-{{ $field }}" class="flex items-start gap-3">
                                 <input type="checkbox" id="use-{{ $field }}" wire:model="usePersonal.{{ $field }}" class="mt-9 rounded border-stone-300" aria-label="{{ __('Use :field', ['field' => $labels[$field]]) }}">
                                 <div class="min-w-0 flex-1">
