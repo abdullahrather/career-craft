@@ -1,122 +1,55 @@
-<div align="center">
+# CareerCraft
 
-# CareerCraft 🚀  
-*Your all-in-one platform for crafting careers, now powered by the **TALL Stack***  
+An AI-assisted job search platform. You keep one structured career profile, and CareerCraft turns it into tailored CVs and cover letters, finds jobs that fit, tracks every application, reads employer replies and helps you prepare for interviews. It's built for the German job market first, in English and German.
 
-[![Laravel](https://img.shields.io/badge/Laravel-11.x-red)](https://laravel.com) 
-[![Livewire](https://img.shields.io/badge/Livewire-3.x-purple)](https://livewire.laravel.com) 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](#-license)
+**Status:** in development. This first version is the foundation: the app, its services, tests and CI, and a home page in English and German.
 
-</div>
+## Stack
 
----
+| Part | Choice |
+|---|---|
+| Backend | PHP 8.5, Laravel 13 |
+| Interface | Livewire 4, Alpine.js, Tailwind CSS 4, Vite 8 |
+| Data | PostgreSQL 18, Redis 8 |
+| Email in development | Mailpit |
+| Quality | Pest 5, Larastan 3 at the strictest level, Pint |
 
-## ✨ Key Features
+Everything runs in Docker, so PHP doesn't need to be installed on your machine.
 
-| Module / Page | What it does |
-| --------------| ------------ |
-| **Landing & Signup** | Social auth, AppSumo coupon flow (Laravel Jetstream) |
-| **Generator Dashboard** | AI-powered résumé, LinkedIn & cover-letter builders (Livewire components) |
-| **Interview Prep** | Real-time Q&A bot (streamed with Livewire + Laravel Reverb) |
-| **Email Monitoring** | IMAP listener + queue workers *(coming soon)* |
-| **Smart / Auto Apply** | Background job submissions & tracking *(coming soon)* |
-| **User Dashboard** | Application stats, profile completeness, saved docs |
-| **Admin Panel** | Live metrics, role management, ticketing & feedback |
-| **Settings** | Account, billing, notification preferences |
+## Run it
 
----
-
-## 🏗️ Tech Stack
-
-| Layer | Choice | Why |
-| ----- | ------ | --- |
-| **Backend + SSR** | **Laravel 11** | Robust routing, queues, policies, event broadcasting |
-| **Realtime Components** | **Livewire 3** | Server-driven UI updates without SPA overhead |
-| **Frontend Interactions** | **Alpine.js** | Lightweight JS for toggles, modals, etc. |
-| **Styling** | **Tailwind CSS v3** | Utility-first, works seamlessly with Blade & Livewire |
-| **Database** | PostgreSQL 15 | Strong JSON/CTE support for analytics queries |
-| **Auth** | Laravel Jetstream (Fortify + Sanctum) |
-| **AI Integration** | OpenAI (gpt-4o) via Laravel HTTP client |
-| **Dev-Ops** | Docker Compose → Fly.io / Laravel Forge |
-| **CI/CD** | GitHub Actions + Pest tests |
-
----
-
-## 📊 Admin Analytics
-
-* Live counters: **Total Sign-ups**, **AppSumo cohort**, **Active Sessions** (Laravel Reverb presence channel)  
-* Livewire charts (e.g. Filament Charts) to compare **sign-ups vs active sessions**  
-* **Industry** & **Role** breakdown (Healthcare, Tech, Software Eng., etc.)  
-* **Support Tickets** with assignment & status (Polymorphic `ticketables` table)  
-* **Role & permission** control (Laravel Permissions package)
-
----
-
-## 🚀 Getting Started (local)
+You need Docker.
 
 ```bash
-# 1. Clone
-git clone https://github.com/abdullahrather/career-craft.git
-cd career-craft
-
-# 2. Install PHP deps
-composer install
-
-# 3. Install JS deps & compile assets
-npm install
-npm run dev          # uses Vite + Tailwind JIT
-
-# 4. Environment
 cp .env.example .env
-php artisan key:generate
-# add DB_URL, OPENAI_API_KEY, APP_URL, etc.
-
-# 5. Spin up containers (optional)
-docker compose up -d
-
-# 6. Migrate & seed
-php artisan migrate --seed
-
-# 7. Serve
-php artisan serve           # http://127.0.0.1:8000
+docker compose run --rm app composer install
+docker compose run --rm app php artisan key:generate
+docker compose run --rm app php artisan migrate
+docker compose up
 ```
----
 
-## 🗂️ Project Structure
+| Address | What |
+|---|---|
+| http://localhost:8000 | The app |
+| http://localhost:8025 | Mailpit, which catches every email the app sends |
+| localhost:5433 | PostgreSQL, for a database tool (user and password `careercraft`) |
 
-```text
-app/
-├── Livewire/          # Interactive components
-├── Models/
-resources/
-├── views/
-│   ├── components/    # Blade components
-│   └── livewire/      # Livewire blade views
-└── js/
-    └── alpine/        # Alpine stores/plugins
-database/
-├── migrations/
-└── seeders/
-routes/
-├── web.php
-└── livewire.php
+The first `docker compose up` installs the frontend packages, which takes a minute.
+
+## Checks
+
+The same checks run in CI on every pull request:
+
+```bash
+docker compose run --rm app vendor/bin/pest               # tests
+docker compose run --rm app vendor/bin/phpstan analyse    # static analysis
+docker compose run --rm app vendor/bin/pint --test        # code style
 ```
----
 
-## 🛣️ Roadmap
+Tests use their own database, `careercraft_test`, so they never touch your development data.
 
-- [ ] **MVP** – résumé generator + basic dashboards  
-- [ ] **Admin analytics graphs** with Filament Charts  
-- [ ] **Interview bot** streaming via Reverb  
-- [ ] **Auto-apply** background jobs & Chrome extension  
-- [ ] **Multi-tenant mode** (companies & agencies)
----
+## Languages
 
-## 🤝 Contributing
+Every screen is in English and German. Text is written in English inside `__()`, and `lang/de.json` holds the German. A test fails when a text has no German, when German is no longer used, or when a `:placeholder` differs between the two.
 
-1. Fork & create a branch: `git checkout -b feature/amazing-idea`  
-2. Run `pest` & `phpstan` before opening a PR  
-3. Fill out the PR template (why, screenshots, test coverage)
----
-
-> Built with ❤️ on the **TALL Stack** — because tall ambitions deserve a tall tech stack!
+The app follows the browser's language until someone picks one from the header.

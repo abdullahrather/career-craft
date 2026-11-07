@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    name: Tests and static analysis
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: careercraft_test
+          POSTGRES_USER: careercraft
+          POSTGRES_PASSWORD: careercraft
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U careercraft"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # The services run on the runner itself, not under their Docker Compose names.
+      DB_HOST: 127.0.0.1
+      REDIS_HOST: 127.0.0.1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, redis, intl, zip, bcmath, pcntl, gd, exif
+          coverage: none
+      - name: Install Composer packages
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare the environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+      - name: Check code style
+        run: vendor/bin/pint --test
+      - name: Static analysis
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+      - name: Tests, including the German translation check
+        run: vendor/bin/pest
+      - name: Audit Composer packages
+        run: composer audit
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high
