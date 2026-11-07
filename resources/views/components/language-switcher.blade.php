@@ -1,5 +1,5 @@
 {{-- One button per language. The current one is marked, so screen readers announce it. --}}
-<form method="POST" action="{{ route('locale') }}" class="flex gap-1">
+<form method="POST" action="{{ route('locale') }}" class="flex gap-0.5 rounded-full border border-stone-300 p-0.5 dark:border-stone-700">
     @csrf
     @foreach (config('app.locales') as $code => $name)
         <button
@@ -7,8 +7,9 @@
             name="locale"
             value="{{ $code }}"
             lang="{{ $code }}"
+            title="{{ $name }}"
             @if ($code === app()->getLocale()) aria-current="true" @endif
-            class="rounded-md px-2 py-1 text-sm font-medium hover:bg-zinc-100 aria-[current]:bg-zinc-900 aria-[current]:text-white dark:hover:bg-zinc-800 dark:aria-[current]:bg-zinc-100 dark:aria-[current]:text-zinc-900"
-        >{{ $name }}</button>
+            class="rounded-full px-2.5 py-1 text-xs font-bold uppercase text-stone-600 hover:text-stone-900 aria-[current]:bg-brand-700 aria-[current]:text-white dark:text-stone-400 dark:hover:text-stone-100 dark:aria-[current]:bg-brand-500 dark:aria-[current]:text-brand-950"
+        ><span class="sr-only">{{ $name }}</span><span aria-hidden="true">{{ $code }}</span></button>
     @endforeach
 </form>

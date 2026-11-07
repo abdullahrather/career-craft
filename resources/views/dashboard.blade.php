@@ -1,11 +1,31 @@
-<x-layouts.app :title="__('Dashboard')">
-    <h1 class="text-3xl font-semibold">{{ __('Welcome, :name', ['name' => auth()->user()?->name]) }}</h1>
+@php($completeness = auth()->user()->careerProfile()->completeness())
 
-    <section class="card mt-8 max-w-2xl">
-        <h2 class="card-title">{{ __('Your career profile comes next') }}</h2>
-        <p class="mt-2 text-zinc-600 dark:text-zinc-400">
-            {{ __('Your account is ready. The profile, CV builder and job tools are being built, and they will appear here.') }}
-        </p>
-        <a href="{{ route('settings') }}" class="link mt-4 inline-block">{{ __('Review your settings and turn on two-factor login') }}</a>
-    </section>
+<x-layouts.app :title="__('Dashboard')">
+    <h1 class="text-3xl font-semibold sm:text-4xl">{{ __('Welcome, :name', ['name' => auth()->user()?->name]) }}</h1>
+
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+        <section class="card">
+            <h2 class="card-title">{{ __('Your career profile') }}</h2>
+            <p class="muted mt-2">
+                @if ($completeness['score'] === 100)
+                    {{ __('Complete. Every CV you make starts from a strong profile.') }}
+                @else
+                    {{ __('Your profile is :score% complete.', ['score' => $completeness['score']]) }}
+                @endif
+            </p>
+            <div class="mt-4 h-2 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-800" role="progressbar" aria-valuenow="{{ $completeness['score'] }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ __('Profile strength') }}">
+                <div class="h-full rounded-full bg-brand-600 dark:bg-brand-400" style="width: {{ $completeness['score'] }}%"></div>
+            </div>
+            @if ($completeness['next'] !== [])
+                <p class="mt-4 text-sm">{{ $completeness['next'][0]['text'] }}</p>
+            @endif
+            <a href="{{ route('profile') }}" class="button button-primary mt-5">{{ __('Open your profile') }}</a>
+        </section>
+
+        <section class="card">
+            <h2 class="card-title">{{ __('Keep your account safe') }}</h2>
+            <p class="muted mt-2">{{ __('Turn on two-factor login, so a stolen password alone is not enough to get in.') }}</p>
+            <a href="{{ route('settings') }}" class="button mt-5">{{ __('Go to settings') }}</a>
+        </section>
+    </div>
 </x-layouts.app>

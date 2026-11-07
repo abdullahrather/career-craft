@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Choose a new password')" narrow>
+<x-layouts.guest :title="__('Choose a new password')" narrow>
     <div class="card">
         <h1 class="text-2xl font-semibold">{{ __('Choose a new password') }}</h1>
 
@@ -11,4 +11,4 @@
             <button type="submit" class="button button-primary">{{ __('Save new password') }}</button>
         </form>
     </div>
-</x-layouts.app>
+</x-layouts.guest>

@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Sign in')" narrow>
+<x-layouts.guest :title="__('Sign in')" narrow>
     <div class="card">
         <h1 class="text-2xl font-semibold">{{ __('Sign in') }}</h1>
 
@@ -26,4 +26,4 @@
             <a href="{{ route('register') }}" class="link">{{ __('Create account') }}</a>
         </div>
     </div>
-</x-layouts.app>
+</x-layouts.guest>

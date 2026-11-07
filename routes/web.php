@@ -19,6 +19,7 @@ Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'callback
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::view('/settings', 'settings')->name('settings');
+    Route::view('/profile', 'profile')->name('profile');
 
     // Only while another way in remains: a password or another connected account.
     Route::delete('/settings/connections/{provider}', function (string $provider): RedirectResponse {

@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Confirm your email')" narrow>
+<x-layouts.guest :title="__('Confirm your email')" narrow>
     <div class="card">
         <h1 class="text-2xl font-semibold">{{ __('Confirm your email') }}</h1>
         <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
@@ -14,4 +14,4 @@
             <button type="submit" class="button">{{ __('Send the link again') }}</button>
         </form>
     </div>
-</x-layouts.app>
+</x-layouts.guest>
