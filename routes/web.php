@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\SocialLoginController;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -23,6 +24,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::view('/settings', 'settings')->name('settings');
     Route::view('/profile', 'profile')->name('profile');
     Route::view('/profile/import', 'profile-import')->name('profile.import');
+
+    Route::view('/resumes', 'resumes.index')->name('resumes');
+    Route::get('/resumes/{id}', [ResumeController::class, 'edit'])->whereNumber('id')->name('resumes.edit');
+    Route::get('/resumes/{id}/preview', [ResumeController::class, 'preview'])->whereNumber('id')->name('resumes.preview');
 
     // The CV photo is private: only its owner sees it.
     Route::get('/profile/photo', function (): StreamedResponse {

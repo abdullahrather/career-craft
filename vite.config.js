@@ -16,6 +16,19 @@ export default defineConfig({
                 bunny('Fraunces', {
                     weights: [500, 600, 700],
                 }),
+                // Fonts for CVs. Only CV pages load them, so they aren't preloaded.
+                bunny('IBM Plex Sans', {
+                    weights: [400, 600, 700],
+                    preload: false,
+                }),
+                bunny('Source Serif 4', {
+                    weights: [400, 600, 700],
+                    preload: false,
+                }),
+                bunny('Lora', {
+                    weights: [400, 600, 700],
+                    preload: false,
+                }),
             ],
         }),
         tailwindcss(),

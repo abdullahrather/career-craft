@@ -39,6 +39,12 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
         return $this->hasMany(SocialAccount::class);
     }
 
+    /** @return HasMany<Resume, $this> */
+    public function resumes(): HasMany
+    {
+        return $this->hasMany(Resume::class)->latest('updated_at');
+    }
+
     /** @return HasOne<Profile, $this> */
     public function profile(): HasOne
     {
