@@ -25,6 +25,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $locale
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $two_factor_confirmed_at
+ * @property bool $is_admin Not fillable: set with `php artisan careercraft:admin`.
  */
 #[Fillable(['name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
@@ -32,6 +33,11 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
+
+    /** The database default, so a new account has it before it is saved and reloaded. */
+    protected $attributes = [
+        'is_admin' => false,
+    ];
 
     /** @return HasMany<SocialAccount, $this> */
     public function socialAccounts(): HasMany
@@ -70,6 +76,7 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
     {
         return [
             'email_verified_at' => 'datetime',
+            'is_admin' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
             'password' => 'hashed',
         ];

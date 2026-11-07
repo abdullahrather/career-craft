@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 final class AppServiceProvider extends ServiceProvider
@@ -21,6 +23,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Platform settings, such as the AI provider. Accounts become admins with `php artisan careercraft:admin`.
+        Gate::define('admin', fn (User $user): bool => $user->is_admin);
     }
 }

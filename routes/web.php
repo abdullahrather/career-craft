@@ -31,6 +31,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::view('/resumes/compare', 'resumes.compare')->name('resumes.compare');
     Route::get('/resume-versions/{id}/{format}', [ResumeController::class, 'download'])->whereNumber('id')->whereIn('format', ['pdf', 'docx'])->name('resume-versions.download');
 
+    Route::view('/admin/ai', 'admin.ai')->middleware('can:admin')->name('admin.ai');
+
     // The CV photo is private: only its owner sees it.
     Route::get('/profile/photo', function (): StreamedResponse {
         $user = request()->user();

@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $status
  * @property string|null $text
  * @property Draft|null $data
+ * @property-read Profile $profile
  */
 #[Fillable(['source', 'filename', 'status', 'text', 'data'])]
 final class ProfileImport extends Model

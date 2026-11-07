@@ -133,5 +133,18 @@
         @endif
 
         <livewire:settings.devices />
+
+        @php($usedToday = \App\Models\AiUsage::tokensToday(auth()->user()))
+        @php($dailyLimit = \App\Ai\AiSettings::current()->dailyTokens)
+        <section class="card">
+            <h2 class="card-title">{{ __('AI use today') }}</h2>
+            <p class="muted mt-2 text-sm">
+                @if ($dailyLimit === 0)
+                    {{ __(':used tokens so far. There is no daily limit.', ['used' => number_format($usedToday)]) }}
+                @else
+                    {{ __(':used of :limit tokens. The allowance starts again at midnight.', ['used' => number_format($usedToday), 'limit' => number_format($dailyLimit)]) }}
+                @endif
+            </p>
+        </section>
     </div>
 </x-layouts.app>

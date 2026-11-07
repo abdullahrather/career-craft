@@ -50,7 +50,7 @@ One structured record of everything you have done, which every CV, cover letter 
 | Email in development | Mailpit |
 | PDF | Gotenberg (headless Chromium), PhpWord for Word files |
 | Accounts | Laravel Fortify, Laravel Socialite |
-| AI | Laravel AI SDK with Ollama, running a free model on your own machine |
+| AI | Laravel AI SDK: Ollama (free, local) by default, or Claude or an OpenAI-compatible API |
 | Quality | Pest 5, Larastan 3 at the strictest level, Pint |
 
 Everything runs in Docker, so PHP doesn't need to be installed on your machine.
@@ -76,15 +76,23 @@ docker compose up
 
 The first `docker compose up` installs the frontend packages, which takes a minute.
 
-### Reading CVs with AI
+### AI
 
-CV import uses [Ollama](https://ollama.com) on your machine, outside Docker. Install it, then download the model once:
+By default the AI runs on [Ollama](https://ollama.com) on your machine, outside Docker, for free. Install it, then download the model once:
 
 ```bash
 ollama pull qwen2.5:7b
 ```
 
 A CV takes about 10 to 30 seconds on a laptop with a graphics card. `OLLAMA_URL` and `OLLAMA_MODEL` in `.env` change where Ollama runs and which model it uses. LinkedIn import and everything else work without it.
+
+To change the AI, make your account an admin and open **AI settings** in the sidebar (`/admin/ai`):
+
+```bash
+docker compose exec app php artisan careercraft:admin you@example.com
+```
+
+There you choose Ollama, Claude or any OpenAI-compatible API, the model, a timeout, a daily token allowance per person and token prices, and send a test that streams the answer. Keys for paid providers go in `.env` (`ANTHROPIC_API_KEY`, `OPENAI_COMPATIBLE_API_KEY`) and are never stored in the database. Every AI request is recorded with its tokens and cost, by person and by model.
 
 ### Sign in with Google or GitHub (optional)
 

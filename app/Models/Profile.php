@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $country
  * @property string|null $photo_path
  * @property-read ProfileImport|null $import
+ * @property-read User $user
  */
 #[Fillable(['headline', 'summary', 'email', 'phone', 'city', 'country'])]
 final class Profile extends Model
