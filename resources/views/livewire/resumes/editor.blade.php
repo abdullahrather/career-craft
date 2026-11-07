@@ -118,10 +118,13 @@
                         @endunless
                     </span>
                 </label>
-                <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" wire:model.live="signature" class="rounded border-stone-300">
-                    {{ __('Add a place, date and signature line at the end') }}
-                </label>
+                {{-- Signing a CV is a German custom, so only the Lebenslauf has the line. --}}
+                @if ($template === 'lebenslauf')
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" wire:model.live="signature" class="rounded border-stone-300">
+                        {{ __('Add a place, date and signature line at the end') }}
+                    </label>
+                @endif
             </section>
 
             @if ($errors->any())

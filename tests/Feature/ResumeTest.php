@@ -157,6 +157,15 @@ describe('The editor', function (): void {
             ->and($resume->fresh()->template)->toBe('modern');
     });
 
+    it('only offers the signature line where the template has one', function (): void {
+        $user = candidate();
+
+        Livewire::actingAs($user)->test(Editor::class, ['resumeId' => resumeFor($user)->id])
+            ->assertDontSee('Add a place, date and signature line')
+            ->set('template', 'lebenslauf')
+            ->assertSee('Add a place, date and signature line');
+    });
+
     it('keeps saving the other settings while one field is invalid', function (): void {
         $user = candidate();
         $resume = resumeFor($user);
