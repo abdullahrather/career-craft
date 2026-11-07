@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Ai\Agents\CvReader;
+use App\Ai\AiRunner;
 use App\Import\ProfileDraft;
 use App\Models\ProfileImport;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Laravel\Ai\Responses\StructuredAgentResponse;
 use Throwable;
 
 /**
@@ -24,18 +26,18 @@ final class ReadCv implements ShouldQueue
     /** A second try rarely helps a model that has failed once; the person can upload again. */
     public int $tries = 1;
 
-    /** A local model on a laptop can take a few minutes for a long CV. */
-    public int $timeout = 240;
+    /** Room for three tries at the longest AI timeout the admin can set (180 seconds). */
+    public int $timeout = 600;
 
     public function __construct(public ProfileImport $import) {}
 
-    public function handle(): void
+    public function handle(AiRunner $ai): void
     {
-        $response = (new CvReader)->prompt("CV text:\n\n".$this->import->text);
+        $response = $ai->prompt(new CvReader, "CV text:\n\n".$this->import->text, $this->import->profile->user, 'cv_import');
 
         $this->import->update([
             'status' => ProfileImport::READY,
-            'data' => ProfileDraft::normalise($response->toArray()),
+            'data' => ProfileDraft::normalise($response instanceof StructuredAgentResponse ? $response->toArray() : []),
             'text' => null,
         ]);
     }

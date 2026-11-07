@@ -70,8 +70,8 @@ return [
             'driver' => 'redis',
             'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
             'queue' => env('REDIS_QUEUE', 'default'),
-            // Longer than the slowest job (reading a CV with the local AI), so it isn't started twice.
-            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 300),
+            // Longer than the slowest job (reading a CV: up to 600 seconds), so it isn't started twice.
+            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 660),
             'block_for' => null,
             'after_commit' => false,
         ],

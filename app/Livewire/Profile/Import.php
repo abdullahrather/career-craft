@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Profile;
 
+use App\Ai\AiLimitReached;
+use App\Ai\AiRunner;
 use App\Import\CvText;
 use App\Import\LinkedInExport;
 use App\Import\ProfileDraft;
@@ -63,6 +65,12 @@ final class Import extends Component
         // Under a few lines means a scan or a picture of a CV, which has no text to read.
         if (mb_strlen($text) < 100) {
             $this->addError('cv', __('We could not find any text in this file. If it is a scan or a picture, upload the Word file or a PDF exported from your CV tool instead.'));
+
+            return;
+        }
+        $user = $this->profile()->user;
+        if (app(AiRunner::class)->remaining($user) === 0) {
+            $this->addError('cv', (new AiLimitReached)->getMessage());
 
             return;
         }
