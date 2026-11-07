@@ -67,6 +67,25 @@ it('will not link to an account whose email was never confirmed', function (): v
         ->and($squatter->fresh()?->hasVerifiedEmail())->toBeFalse();
 });
 
+it('finds an account whose email was typed with capitals at sign-up', function (): void {
+    $this->post('/register', [
+        'name' => 'Lena Fischer',
+        'email' => 'Lena@Example.com',
+        'password' => 'correct-horse-battery',
+        'password_confirmation' => 'correct-horse-battery',
+    ]);
+    $user = User::query()->sole();
+    $user->markEmailAsVerified();
+    auth()->logout();
+
+    returnsFromGoogle(providerUser('g-5', 'lena@example.com'));
+    $this->get('/auth/google/callback');
+
+    expect($user->email)->toBe('lena@example.com')
+        ->and(User::query()->count())->toBe(1);
+    $this->assertAuthenticatedAs($user);
+});
+
 it('replaces the link when someone reconnects with a different account', function (): void {
     $user = User::factory()->create();
     $user->socialAccounts()->create(['provider' => 'github', 'provider_id' => 'gh-old']);
