@@ -55,6 +55,28 @@ it('will not take over an existing account when Google has not confirmed the ema
     $this->assertGuest();
 });
 
+it('will not link to an account whose email was never confirmed', function (): void {
+    // Someone signed up with another person's email and a password they know, and never confirmed it.
+    $squatter = User::factory()->create(['email' => 'jonas@example.com', 'email_verified_at' => null]);
+    returnsFromGoogle(providerUser('g-4', 'jonas@example.com'));
+
+    $this->get('/auth/google/callback')->assertRedirect('/login')->assertSessionHasErrors('email');
+
+    $this->assertGuest();
+    expect($squatter->socialAccounts()->count())->toBe(0)
+        ->and($squatter->fresh()?->hasVerifiedEmail())->toBeFalse();
+});
+
+it('replaces the link when someone reconnects with a different account', function (): void {
+    $user = User::factory()->create();
+    $user->socialAccounts()->create(['provider' => 'github', 'provider_id' => 'gh-old']);
+
+    Socialite::shouldReceive('driver->user')->andReturn(providerUser('gh-new', $user->email));
+    $this->actingAs($user)->get('/auth/github/callback')->assertSessionHas('status');
+
+    expect($user->socialAccounts()->where('provider', 'github')->value('provider_id'))->toBe('gh-new');
+});
+
 it('still asks for the two-factor code', function (): void {
     $user = User::factory()->create(['email' => 'jonas@example.com', 'two_factor_confirmed_at' => now()]);
     returnsFromGoogle(providerUser('g-3', 'jonas@example.com'));

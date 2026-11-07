@@ -60,7 +60,8 @@ final class SocialLoginController
             if ($account && $account->user_id !== $current->id) {
                 return redirect()->route('settings')->with('error', __('That :provider account is already connected to another CareerCraft account.', ['provider' => $this->label($provider)]));
             }
-            $current->socialAccounts()->firstOrCreate(['provider' => $provider], ['provider_id' => (string) $remote->getId()]);
+            // A different account for the same provider replaces the old link.
+            $current->socialAccounts()->updateOrCreate(['provider' => $provider], ['provider_id' => (string) $remote->getId()]);
 
             return redirect()->route('settings')->with('status', __(':provider is connected.', ['provider' => $this->label($provider)]));
         }
@@ -82,7 +83,9 @@ final class SocialLoginController
         }
 
         $user = User::query()->where('email', mb_strtolower($email))->first();
-        if ($user instanceof User && ! $this->emailIsVerified($provider, $remote)) {
+        // Link only when both sides have confirmed the address. An account whose email was
+        // never confirmed may have been set up by someone else, with a password they know.
+        if ($user instanceof User && (! $user->hasVerifiedEmail() || ! $this->emailIsVerified($provider, $remote))) {
             return null;
         }
 
