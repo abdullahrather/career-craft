@@ -33,7 +33,7 @@ final class Photo extends Component
     public function save(): void
     {
         $this->validate(
-            ['photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:min_width=150,min_height=200']],
+            ['photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:min_width=150,min_height=200,max_width=8000,max_height=8000']],
             attributes: ['photo' => __('Photo')],
         );
         $file = $this->photo;

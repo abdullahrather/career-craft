@@ -30,6 +30,10 @@ it('refuses files that are not pictures, and tiny ones', function (): void {
         ->assertHasErrors('photo')
         ->set('photo', UploadedFile::fake()->image('me.jpg', 60, 80))
         ->call('save')
+        ->assertHasErrors('photo')
+        // A small file can still have more pixels than the server can decode.
+        ->set('photo', UploadedFile::fake()->image('huge.png', 8001, 200))
+        ->call('save')
         ->assertHasErrors('photo');
 });
 
