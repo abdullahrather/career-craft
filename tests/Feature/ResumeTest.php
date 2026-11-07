@@ -157,6 +157,24 @@ describe('The editor', function (): void {
             ->and($resume->fresh()->template)->toBe('modern');
     });
 
+    it('keeps saving the other settings while one field is invalid', function (): void {
+        $user = candidate();
+        $resume = resumeFor($user);
+
+        Livewire::actingAs($user)->test(Editor::class, ['resumeId' => $resume->id])
+            ->set('name', '')
+            ->assertHasErrors('name')
+            ->set('accent', '#166534')
+            ->call('toggle', 'skills')
+            ->assertHasErrors('name')
+            ->assertDispatched('resume-saved');
+
+        $resume->refresh();
+        expect($resume->name)->toBe('Design roles')
+            ->and($resume->look()['accent'])->toBe('#166534')
+            ->and($resume->look()['hidden'])->toBe(['skills']);
+    });
+
     it('only takes the fonts, colours and sections it offers', function (): void {
         $user = candidate();
         $resume = resumeFor($user);

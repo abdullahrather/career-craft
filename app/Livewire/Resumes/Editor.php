@@ -8,6 +8,7 @@ use App\Models\Resume;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -106,9 +107,24 @@ final class Editor extends Component
         ]);
     }
 
+    /**
+     * Saves every valid field. An invalid one (say, an emptied name) keeps its saved
+     * value and shows its error, without holding up the rest.
+     */
     private function save(): void
     {
-        $this->validate([
+        $validator = Validator::make([
+            'name' => $this->name,
+            'language' => $this->language,
+            'template' => $this->template,
+            'font' => $this->font,
+            'accent' => $this->accent,
+            'pages' => $this->pages,
+            'sections' => $this->sections,
+            'hidden' => $this->hidden,
+            'photo' => $this->photo,
+            'signature' => $this->signature,
+        ], [
             'name' => ['required', 'string', 'max:120'],
             'language' => ['required', Rule::in(Resume::LANGUAGES)],
             'template' => ['required', Rule::in(array_keys(Resume::TEMPLATES))],
@@ -123,16 +139,27 @@ final class Editor extends Component
             'signature' => ['boolean'],
         ], attributes: ['name' => __('Name')]);
 
-        $this->resume()->update([
-            'name' => trim($this->name),
-            'language' => $this->language,
-            'template' => $this->template,
+        $this->resetErrorBag();
+        $failed = [];
+        foreach ($validator->errors()->messages() as $field => $messages) {
+            $this->addError($field, $messages[0]);
+            // A failing "sections.0" counts against all of "sections".
+            $failed[explode('.', $field)[0]] = true;
+        }
+        $resume = $this->resume();
+        $look = $resume->look();
+        $ok = fn (string $field): bool => ! isset($failed[$field]);
+
+        $resume->update([
+            'name' => $ok('name') ? trim($this->name) : $resume->name,
+            'language' => $ok('language') ? $this->language : $resume->language,
+            'template' => $ok('template') ? $this->template : $resume->template,
             'settings' => [
-                'font' => $this->font,
-                'accent' => $this->accent,
-                'pages' => $this->pages,
-                'sections' => $this->sections,
-                'hidden' => $this->hidden,
+                'font' => $ok('font') ? $this->font : $look['font'],
+                'accent' => $ok('accent') ? $this->accent : $look['accent'],
+                'pages' => $ok('pages') ? $this->pages : $look['pages'],
+                'sections' => $ok('sections') ? $this->sections : $look['sections'],
+                'hidden' => $ok('hidden') ? $this->hidden : $look['hidden'],
                 'photo' => $this->photo,
                 'signature' => $this->signature,
             ],
