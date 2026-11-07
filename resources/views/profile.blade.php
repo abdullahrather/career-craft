@@ -1,12 +1,20 @@
 <x-layouts.app :title="__('Career profile')">
-    <header class="max-w-2xl">
-        <h1 class="text-3xl font-semibold sm:text-4xl">{{ __('Career profile') }}</h1>
-        <p class="muted mt-2">{{ __('Everything you have done, in one place. Every CV and cover letter you make starts from here, so the more complete it is, the less you type later.') }}</p>
+    <header class="flex flex-wrap items-end justify-between gap-4">
+        <div class="max-w-2xl">
+            <h1 class="text-3xl font-semibold sm:text-4xl">{{ __('Career profile') }}</h1>
+            <p class="muted mt-2">{{ __('Everything you have done, in one place. Every CV and cover letter you make starts from here, so the more complete it is, the less you type later.') }}</p>
+        </div>
+        <a href="{{ route('profile.import') }}" class="button">{{ __('Import a CV or LinkedIn') }}</a>
     </header>
+
+    @if (session('status'))
+        <p class="notice mt-6" role="status">{{ session('status') }}</p>
+    @endif
 
     <div class="mt-8 grid items-start gap-6 xl:grid-cols-[1fr_18rem]">
         <div class="flex flex-col gap-6">
             <livewire:profile.personal-details />
+            <livewire:profile.photo />
             <livewire:profile.experiences />
             <livewire:profile.educations />
             <livewire:profile.skills />
@@ -22,6 +30,7 @@
                 <ul class="space-y-1 text-sm">
                     @foreach ([
                         'personal' => __('About you'),
+                        'photo' => __('Photo'),
                         'experience' => __('Work experience'),
                         'education' => __('Education'),
                         'skills' => __('Skills'),

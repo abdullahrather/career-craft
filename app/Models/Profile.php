@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * A person's career profile: the one record every CV, cover letter and job match is
- * built from.
+ * built from. photo_path isn't fillable on purpose: only the photo upload sets it.
  *
  * @property int $id
  * @property int $user_id
@@ -21,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $phone
  * @property string $city
  * @property string $country
+ * @property string|null $photo_path
+ * @property-read ProfileImport|null $import
  */
 #[Fillable(['headline', 'summary', 'email', 'phone', 'city', 'country'])]
 final class Profile extends Model
@@ -41,6 +44,12 @@ final class Profile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return HasOne<ProfileImport, $this> */
+    public function import(): HasOne
+    {
+        return $this->hasOne(ProfileImport::class);
     }
 
     /** @return HasMany<Experience, $this> */

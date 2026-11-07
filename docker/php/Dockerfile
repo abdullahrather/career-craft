@@ -7,6 +7,9 @@ RUN install-php-extensions pdo_pgsql redis intl zip bcmath pcntl gd exif opcache
     && apt-get update && apt-get install -y --no-install-recommends git unzip \
     && rm -rf /var/lib/apt/lists/*
 
+# CV files and LinkedIn exports are bigger than PHP's 2 MB upload default.
+COPY uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Files the app writes belong to the host user, not root.

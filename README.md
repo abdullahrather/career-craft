@@ -2,7 +2,7 @@
 
 An AI-assisted job search platform. You keep one structured career profile, and CareerCraft turns it into tailored CVs and cover letters, finds jobs that fit, tracks every application, reads employer replies and helps you prepare for interviews. It's built for the German job market first, in English and German.
 
-**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page and the career profile, in English and German with a dark theme.
+**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page, the career profile and importing an existing CV, in English and German with a dark theme.
 
 ## Career profile
 
@@ -13,6 +13,13 @@ One structured record of everything you have done, which every CV, cover letter 
 - Education, skills with levels, projects, certificates, and languages at CEFR levels (A1 to C2, or native)
 - Links, such as LinkedIn or a portfolio
 - Entries can be added, edited, reordered and deleted, and a profile strength score lists what to add next
+- An optional photo for German CVs, framed in the browser and saved as a 600 × 800 JPEG without the original file's metadata
+
+## Import
+
+- **From a CV:** upload a PDF or Word file. A local AI model reads the text and suggests what goes where. The file isn't kept, and its text is deleted once it has been read.
+- **From LinkedIn:** upload the data export LinkedIn lets you download (a ZIP of CSV files). It's read directly, without AI.
+- Either way, you check every field before anything is saved. Personal details you already filled in are only replaced if you tick them, entries the profile already has are marked, and anything that doesn't fit the profile, such as a job without a start date, is listed as left out.
 
 ## Accounts
 
@@ -31,6 +38,7 @@ One structured record of everything you have done, which every CV, cover letter 
 | Data | PostgreSQL 18, Redis 8 |
 | Email in development | Mailpit |
 | Accounts | Laravel Fortify, Laravel Socialite |
+| AI | Laravel AI SDK with Ollama, running a free model on your own machine |
 | Quality | Pest 5, Larastan 3 at the strictest level, Pint |
 
 Everything runs in Docker, so PHP doesn't need to be installed on your machine.
@@ -54,6 +62,16 @@ docker compose up
 | localhost:5433 | PostgreSQL, for a database tool (user and password `careercraft`) |
 
 The first `docker compose up` installs the frontend packages, which takes a minute.
+
+### Reading CVs with AI
+
+CV import uses [Ollama](https://ollama.com) on your machine, outside Docker. Install it, then download the model once:
+
+```bash
+ollama pull qwen2.5:7b
+```
+
+A CV takes about 10 to 30 seconds on a laptop with a graphics card. `OLLAMA_URL` and `OLLAMA_MODEL` in `.env` change where Ollama runs and which model it uses. LinkedIn import and everything else work without it.
 
 ### Sign in with Google or GitHub (optional)
 
