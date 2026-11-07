@@ -68,6 +68,10 @@ services:
       timeout: 5s
       retries: 10
 
+  # Turns CV pages into PDFs with headless Chromium. Only the app talks to it.
+  gotenberg:
+    image: gotenberg/gotenberg:8
+
   mailpit:
     image: axllent/mailpit:v1.29
     ports:

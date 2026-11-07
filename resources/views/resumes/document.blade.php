@@ -10,7 +10,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $doc->name() }} · {{ $doc->resume->name }}</title>
-    @fonts([$look['font']])
+    @if ($pdf ?? false)
+        {{-- The PDF service gets the font files next to this page, so it needs nothing else. --}}
+        <style>
+            @foreach ($doc->fontFiles() as $weight => $file)
+                @font-face { font-family: '{{ \App\Models\Resume::FONT_NAMES[$look['font']] }}'; font-weight: {{ $weight }}; src: url('{{ $file }}') format('woff2'); }
+            @endforeach
+        </style>
+    @else
+        @fonts([$look['font']])
+    @endif
     <style>
         /* A4, the same on screen and on paper. One page uses a smaller size and tighter spacing. */
         @page { size: A4; margin: 16mm 18mm; }

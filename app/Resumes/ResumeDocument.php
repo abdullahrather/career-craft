@@ -35,17 +35,50 @@ final class ResumeDocument
         return new self($resume, $resume->user->careerProfile(), $resume->user);
     }
 
-    /** The whole CV as an HTML page, in the CV's language. The preview adds page markers. */
-    public function render(bool $preview = false): string
+    /**
+     * The whole CV as an HTML page, in the CV's language. The preview adds page markers;
+     * the PDF version loads its fonts from files sent along with it (see fontFiles()).
+     */
+    public function render(bool $preview = false, bool $pdf = false): string
+    {
+        return $this->inLanguage(fn (): string => view('resumes.document', ['doc' => $this, 'preview' => $preview, 'pdf' => $pdf])->render());
+    }
+
+    /**
+     * Runs something in the CV's language, then switches back.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $callback
+     * @return T
+     */
+    public function inLanguage(callable $callback): mixed
     {
         $locale = App::getLocale();
         App::setLocale($this->resume->language);
 
         try {
-            return view('resumes.document', ['doc' => $this, 'preview' => $preview])->render();
+            return $callback();
         } finally {
             App::setLocale($locale);
         }
+    }
+
+    /** @return array<int, string> Font weight => file name, for the CV's font. */
+    public function fontFiles(): array
+    {
+        $files = [];
+        foreach ([400, 600, 700] as $weight) {
+            $files[$weight] = "{$this->look['font']}-{$weight}.woff2";
+        }
+
+        return $files;
+    }
+
+    /** "Lena Brandt – CV" or "Lena Brandt – Lebenslauf". */
+    public function title(): string
+    {
+        return $this->name().' – '.($this->resume->language === 'de' ? 'Lebenslauf' : 'CV');
     }
 
     public function name(): string

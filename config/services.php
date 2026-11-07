@@ -50,4 +50,9 @@ return [
         'redirect' => env('APP_URL').'/auth/github/callback',
     ],
 
+    // Makes the PDF of a CV with headless Chromium.
+    'gotenberg' => [
+        'url' => env('GOTENBERG_URL', 'http://gotenberg:3000'),
+    ],
+
 ];

@@ -12,31 +12,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
-/** A fictional person with a filled-in profile. */
-function candidate(): User
-{
-    $user = User::factory()->create(['name' => 'Lena Brandt']);
-    $profile = $user->careerProfile();
-    $profile->update(['headline' => 'Product designer', 'summary' => 'I design tools that people in logistics use every day.', 'city' => 'Hamburg', 'country' => 'DE', 'phone' => '+49 40 7654321']);
-    $profile->experiences()->create(['title' => 'Senior product designer', 'employer' => 'Hafenblick Studio', 'city' => 'Hamburg', 'starts_on' => '2021-03-01', 'achievements' => ['Raised task completion by 25%'], 'position' => 1]);
-    $profile->educations()->create(['institution' => 'HAW Hamburg', 'degree' => 'Bachelor of Arts', 'field' => 'Communication design', 'starts_on' => '2014-10-01', 'ends_on' => '2018-07-01', 'grade' => '1.7', 'position' => 1]);
-    $profile->skills()->create(['name' => 'Figma', 'level' => 4, 'position' => 1]);
-    $profile->skills()->create(['name' => 'User research', 'level' => 3, 'position' => 2]);
-    $profile->languages()->create(['name' => 'German', 'level' => 'native', 'position' => 1]);
-
-    return $user;
-}
-
-function resumeFor(User $user, string $template = 'classic', string $language = 'en', array $settings = []): Resume
-{
-    return $user->resumes()->create([
-        'name' => 'Design roles',
-        'language' => $language,
-        'template' => $template,
-        'settings' => [...Resume::defaults($template), ...$settings],
-    ]);
-}
-
 describe('CV pages', function (): void {
     it('are for signed-in people, and each CV only for its owner', function (): void {
         $resume = resumeFor(candidate());

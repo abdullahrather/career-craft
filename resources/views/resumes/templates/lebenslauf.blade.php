@@ -12,6 +12,7 @@
     .lebenslauf .row { display: grid; grid-template-columns: 34mm 1fr; gap: 5mm; }
     .lebenslauf .row + .row { margin-top: calc(var(--space) * 0.5); }
     .lebenslauf .label { color: #57534e; }
+    /* Each label ends in a non-breaking space: invisible, but it keeps a parser from reading "08/2019Working" as one word. */
     .lebenslauf .row ul { margin-top: 1mm; }
     .lebenslauf .signature { margin-top: calc(var(--space) * 2); break-inside: avoid; }
     .lebenslauf .signature-line { width: 65mm; margin-top: 14mm; padding-top: 1mm; border-top: 0.6pt solid #1c1917; }
@@ -33,7 +34,7 @@
     <section class="section">
         <h2>{{ __('Personal details') }}</h2>
         @foreach (array_filter([__('Place of residence') => $doc->place(), __('Phone') => $doc->profile->phone, __('Email') => $doc->profile->email]) as $label => $value)
-            <div class="row"><span class="label">{{ $label }}</span><span>{{ $value }}</span></div>
+            <div class="row"><span class="label">{{ $label }}&nbsp;</span><span>{{ $value }}</span></div>
         @endforeach
     </section>
 
@@ -47,7 +48,7 @@
                 @case('experiences')
                     @foreach ($section['content'] as $job)
                         <div class="row">
-                            <span class="label">{{ $doc->period($job->starts_on, $job->ends_on) }}</span>
+                            <span class="label">{{ $doc->period($job->starts_on, $job->ends_on) }}&nbsp;</span>
                             <div>
                                 <h3>{{ $job->title }}</h3>
                                 <p>{{ implode(', ', array_filter([$job->employer, $job->city])) }}</p>
@@ -68,7 +69,7 @@
                 @case('educations')
                     @foreach ($section['content'] as $education)
                         <div class="row">
-                            <span class="label">{{ $doc->period($education->starts_on, $education->ends_on) }}</span>
+                            <span class="label">{{ $doc->period($education->starts_on, $education->ends_on) }}&nbsp;</span>
                             <div>
                                 <h3>{{ implode(', ', array_filter([$education->degree, $education->field])) }}</h3>
                                 <p>{{ implode(', ', array_filter([$education->institution, $education->city])) }}</p>
@@ -83,20 +84,20 @@
                     {{-- Grouped by level, best first, as German CVs usually list them. --}}
                     @foreach ($section['content']->sortByDesc('level')->groupBy('level') as $level => $skills)
                         <div class="row">
-                            <span class="label">{{ Skills::levels()[$level] ?? '' }}</span>
+                            <span class="label">{{ Skills::levels()[$level] ?? '' }}&nbsp;</span>
                             <span>{{ $skills->pluck('name')->implode(', ') }}</span>
                         </div>
                     @endforeach
                     @break
                 @case('languages')
                     @foreach ($section['content'] as $language)
-                        <div class="row"><span class="label">{{ $language->name }}</span><span>{{ Languages::levels()[$language->level] ?? $language->level }}</span></div>
+                        <div class="row"><span class="label">{{ $language->name }}&nbsp;</span><span>{{ Languages::levels()[$language->level] ?? $language->level }}</span></div>
                     @endforeach
                     @break
                 @case('projects')
                     @foreach ($section['content'] as $project)
                         <div class="row">
-                            <span class="label">{{ $doc->period($project->starts_on, $project->ends_on, ongoing: false) }}</span>
+                            <span class="label">{{ $doc->period($project->starts_on, $project->ends_on, ongoing: false) }}&nbsp;</span>
                             <div>
                                 <h3>{{ implode(', ', array_filter([$project->name, $project->role])) }}</h3>
                                 @if ($project->description)
@@ -112,14 +113,14 @@
                 @case('certifications')
                     @foreach ($section['content'] as $certificate)
                         <div class="row">
-                            <span class="label">{{ $doc->month($certificate->issued_on) }}</span>
+                            <span class="label">{{ $doc->month($certificate->issued_on) }}&nbsp;</span>
                             <span>{{ implode(', ', array_filter([$certificate->name, $certificate->issuer])) }}</span>
                         </div>
                     @endforeach
                     @break
                 @default
                     @foreach ($section['content'] as $link)
-                        <div class="row"><span class="label">{{ $link->label }}</span><a href="{{ $link->url }}">{{ $link->url }}</a></div>
+                        <div class="row"><span class="label">{{ $link->label }}&nbsp;</span><a href="{{ $link->url }}">{{ $link->url }}</a></div>
                     @endforeach
             @endswitch
         </section>

@@ -17,8 +17,9 @@
                             </p>
                             <p class="muted mt-2 text-xs">{{ __('Changed :time', ['time' => $resume->updated_at->diffForHumans()]) }}</p>
                         </div>
-                        <div class="mt-auto flex gap-2">
+                        <div class="mt-auto flex flex-wrap gap-2">
                             <a href="{{ route('resumes.edit', ['id' => $resume->id]) }}" class="button button-small">{{ __('Edit') }}</a>
+                            <button type="button" wire:click="duplicate({{ $resume->id }})" class="button button-small">{{ __('Duplicate') }}</button>
                             <button type="button" wire:click="delete({{ $resume->id }})" wire:confirm="{{ __('Delete :name? Your profile stays as it is.', ['name' => $resume->name]) }}" class="button button-danger button-small">{{ __('Delete') }}</button>
                         </div>
                     </li>

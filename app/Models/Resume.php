@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -42,6 +43,14 @@ final class Resume extends Model
         'lora' => "'Lora', Georgia, serif",
     ];
 
+    /** Font alias => family name, as in the font files and Word documents. */
+    public const array FONT_NAMES = [
+        'instrument-sans' => 'Instrument Sans',
+        'ibm-plex-sans' => 'IBM Plex Sans',
+        'source-serif-4' => 'Source Serif 4',
+        'lora' => 'Lora',
+    ];
+
     /** Accent colours dark enough to read as text on white. */
     public const array ACCENTS = ['#1f2937', '#0f766e', '#1e3a8a', '#881337', '#166534', '#6b21a8', '#9a3412'];
 
@@ -65,6 +74,12 @@ final class Resume extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return HasMany<ResumeVersion, $this> Newest first. */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(ResumeVersion::class)->orderByDesc('number');
     }
 
     /**

@@ -27,6 +27,10 @@ One structured record of everything you have done, which every CV, cover letter 
 - Four templates: Classic, Modern and Compact, all single-column with plain text in reading order so applicant tracking systems read them as written, and a German tabular Lebenslauf with personal details, photo and a signature line with place and date.
 - Headings and dates follow the CV's language, so one profile gives an English CV ("Mar 2021 – Present") and a German one ("03/2021 – heute").
 - A live A4 preview that shows where pages end, with a choice of font and colour, one page or two, and sections that can be hidden and reordered. Empty sections are left out by themselves.
+- Saved versions: each one keeps the PDF (made by Gotenberg from the same page as the preview) and a Word file exactly as they were, so it's always clear what was sent. CVs can be duplicated to start a variant.
+- A parser check on every version: the PDF is read back as plain text, the way an applicant tracking system reads it, and anything from the CV that doesn't come through as whole words is listed.
+- Compare any two versions line by line, as a parser sees them.
+- Word files use Arial or Georgia, which every computer has, since Word can't carry the CV's web fonts along.
 
 ## Accounts
 
@@ -44,6 +48,7 @@ One structured record of everything you have done, which every CV, cover letter 
 | Interface | Livewire 4, Alpine.js, Tailwind CSS 4, Vite 8 |
 | Data | PostgreSQL 18, Redis 8 |
 | Email in development | Mailpit |
+| PDF | Gotenberg (headless Chromium), PhpWord for Word files |
 | Accounts | Laravel Fortify, Laravel Socialite |
 | AI | Laravel AI SDK with Ollama, running a free model on your own machine |
 | Quality | Pest 5, Larastan 3 at the strictest level, Pint |
@@ -66,6 +71,7 @@ docker compose up
 |---|---|
 | http://localhost:8000 | The app |
 | http://localhost:8025 | Mailpit, which catches every email the app sends |
+| (inside Docker only) | Gotenberg, which makes the PDFs |
 | localhost:5433 | PostgreSQL, for a database tool (user and password `careercraft`) |
 
 The first `docker compose up` installs the frontend packages, which takes a minute.

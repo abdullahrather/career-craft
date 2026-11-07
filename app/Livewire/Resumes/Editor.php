@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Resumes;
 
 use App\Models\Resume;
+use App\Models\ResumeVersion;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -99,11 +102,25 @@ final class Editor extends Component
         $this->save();
     }
 
+    /** Saves the CV as it is now: PDF, Word file and the read-back check. */
+    public function saveVersion(): void
+    {
+        try {
+            ResumeVersion::saveFrom($this->resume());
+        } catch (ConnectionException|RequestException $exception) {
+            report($exception);
+            $this->addError('version', __('The PDF could not be made. Check that the PDF service is running: docker compose up -d gotenberg'));
+        }
+    }
+
     public function render(): View
     {
+        $resume = $this->resume();
+
         return view('livewire.resumes.editor', [
-            'resume' => $this->resume(),
-            'hasPhoto' => $this->resume()->user->careerProfile()->photo_path !== null,
+            'resume' => $resume,
+            'versions' => $resume->versions()->get(),
+            'hasPhoto' => $resume->user->careerProfile()->photo_path !== null,
         ]);
     }
 
