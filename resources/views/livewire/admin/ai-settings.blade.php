@@ -53,10 +53,12 @@
                                 <label class="field">
                                     <span>{{ __('Input price') }}</span>
                                     <input type="number" step="0.01" min="0" wire:model="prices.{{ $key }}.0">
+                                    @error("prices.{$key}.0") <span class="field-error">{{ $message }}</span> @enderror
                                 </label>
                                 <label class="field">
                                     <span>{{ __('Output price') }}</span>
                                     <input type="number" step="0.01" min="0" wire:model="prices.{{ $key }}.1">
+                                    @error("prices.{$key}.1") <span class="field-error">{{ $message }}</span> @enderror
                                 </label>
                                 <span class="field-hint col-span-2">{{ __('US dollars per million tokens, from your provider\'s price list. Used to track cost; 0 for free models.') }}</span>
                             </div>

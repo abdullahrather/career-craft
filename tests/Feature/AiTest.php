@@ -177,6 +177,14 @@ describe('The admin page', function (): void {
         $page->set('timeout', 5)->call('save')->assertHasErrors('timeout');
     });
 
+    it('says what is wrong with a price', function (): void {
+        Livewire::actingAs(admin())->test(AiSettingsPage::class)
+            ->set('prices.ollama.0', '')
+            ->call('save')
+            ->assertHasErrors('prices.ollama.0')
+            ->assertSee('The Price field is required.');
+    });
+
     it('tests the provider, showing the answer', function (): void {
         ProviderCheck::fake(['I am working.']);
         $admin = admin();
