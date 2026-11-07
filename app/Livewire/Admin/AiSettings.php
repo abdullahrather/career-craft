@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Admin;
 
 use App\Ai\Agents\ProviderCheck;
+use App\Ai\AiLimitReached;
 use App\Ai\AiRunner;
 use App\Ai\AiSettings as Settings;
 use App\Models\AiUsage;
@@ -42,9 +43,13 @@ final class AiSettings extends Component
 
     public string $answer = '';
 
+    /** @var list<string> Asked for once when the page opens: Ollama may be off, and every check waits for it. */
+    public array $ollamaModels = [];
+
     public function mount(): void
     {
         Gate::authorize('admin');
+        $this->ollamaModels = $this->ollamaModels();
         $settings = Settings::current();
         $this->provider = $settings->provider;
         $this->compatibleUrl = $settings->compatibleUrl;
@@ -96,6 +101,9 @@ final class AiSettings extends Component
             $this->answer = $ai->stream(new ProviderCheck, 'Are you working?', $user instanceof User ? $user : null, 'provider_check', function (string $text): void {
                 $this->stream($text, name: 'answer');
             });
+        } catch (AiLimitReached $exception) {
+            // The admin's own allowance, not a provider problem: say so plainly.
+            $this->addError('test', $exception->getMessage());
         } catch (Throwable $exception) {
             // Shown to the admin as it is: the provider's own message is the most useful.
             report($exception);
@@ -109,7 +117,6 @@ final class AiSettings extends Component
 
         return view('livewire.admin.ai-settings', [
             'ready' => array_combine(Settings::PROVIDERS, array_map(fn (string $provider): bool => $this->settings()->ready($provider), Settings::PROVIDERS)),
-            'ollamaModels' => $this->ollamaModels(),
             'byPerson' => AiUsage::query()
                 ->where('created_at', '>=', $since)
                 ->select('user_id', DB::raw('count(*) as requests'), DB::raw('sum(input_tokens + output_tokens) as tokens'), DB::raw('sum(cost) as cost'))

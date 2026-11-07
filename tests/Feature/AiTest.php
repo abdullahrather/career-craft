@@ -177,6 +177,26 @@ describe('The admin page', function (): void {
         $page->set('timeout', 5)->call('save')->assertHasErrors('timeout');
     });
 
+    it('asks Ollama for its models once, not on every change', function (): void {
+        Livewire::actingAs(admin())->test(AiSettingsPage::class)
+            ->set('provider', 'anthropic')
+            ->set('provider', 'ollama')
+            ->assertSee('Installed: qwen2.5:7b, llama3.2:3b');
+
+        Http::assertSentCount(1);
+    });
+
+    it('says so when the admin has used their own allowance, rather than blaming the provider', function (): void {
+        ProviderCheck::fake(['I am working.']);
+        (new AiSettings(dailyTokens: 100))->save();
+        $admin = admin();
+        useToday($admin, 100);
+
+        Livewire::actingAs($admin)->test(AiSettingsPage::class)
+            ->call('test')
+            ->assertHasErrors(['test' => "You have used today's AI allowance. It starts again at midnight."]);
+    });
+
     it('says what is wrong with a price', function (): void {
         Livewire::actingAs(admin())->test(AiSettingsPage::class)
             ->set('prices.ollama.0', '')
