@@ -8,7 +8,7 @@
             value="{{ $code }}"
             lang="{{ $code }}"
             @if ($code === app()->getLocale()) aria-current="true" @endif
-            class="rounded-md px-2 py-1 text-sm font-medium aria-[current]:bg-zinc-900 aria-[current]:text-white hover:bg-zinc-100 aria-[current]:hover:bg-zinc-900"
+            class="rounded-md px-2 py-1 text-sm font-medium hover:bg-zinc-100 aria-[current]:bg-zinc-900 aria-[current]:text-white dark:hover:bg-zinc-800 dark:aria-[current]:bg-zinc-100 dark:aria-[current]:text-zinc-900"
         >{{ $name }}</button>
     @endforeach
 </form>
