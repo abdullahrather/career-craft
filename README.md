@@ -2,7 +2,7 @@
 
 An AI-assisted job search platform. You keep one structured career profile, and CareerCraft turns it into tailored CVs and cover letters, finds jobs that fit, tracks every application, reads employer replies and helps you prepare for interviews. It's built for the German job market first, in English and German.
 
-**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page, the career profile, importing an existing CV, the CV builder, and an AI writing assistant with a fact guard, in English and German with a dark theme.
+**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page, the career profile, importing an existing CV, the CV builder, an AI writing assistant with a fact guard, and job analysis, in English and German with a dark theme.
 
 ## Career profile
 
@@ -50,6 +50,14 @@ The check combines rules and the AI: numbers and, in English, names are compared
 - A parser check on every version: the PDF is read back as plain text, the way an applicant tracking system reads it, and anything from the CV that doesn't come through as whole words is listed.
 - Compare any two versions line by line, as a parser sees them.
 - Word files use Arial or Georgia, which every computer has, since Word can't carry the CV's web fonts along.
+
+## Job analysis
+
+Paste a job post, or its web address, under **Jobs**. In the background, the AI reads the role, company, location, work mode (on site, hybrid, remote), seniority and the required and nice-to-have skills, in English or German.
+
+- **Only what the post says:** a skill, title, company or place the AI names but the post doesn't is dropped. The post's language is worked out from its text.
+- **Linked posts:** many job boards describe a post as structured data (schema.org `JobPosting`), which is used first; otherwise the page's text. Pages built in the browser can't be read, so paste those. Only public web pages are opened: no private or internal addresses, and every redirect is checked.
+- **Your match, calculated:** each skill is looked up in your skills and languages, then in the rest of your profile, with common other names treated as the same (Postgres and PostgreSQL, Deutsch and German, REST-APIs and REST API). Required skills count three times as much as nice-to-have ones. The page shows which skills you have, where they were found, and which are missing, and the score updates as your profile changes.
 
 ## Accounts
 

@@ -20,12 +20,6 @@ use Laravel\Ai\Exceptions\ProviderOverloadedException;
 use Livewire\Livewire;
 use Symfony\Component\Finder\Finder;
 
-function useToday(User $user, int $tokens, ?DateTimeInterface $at = null): void
-{
-    AiUsage::query()->create(['user_id' => $user->id, 'feature' => 'test', 'provider' => 'ollama', 'model' => 'qwen2.5:7b', 'input_tokens' => $tokens, 'output_tokens' => 0, 'cost' => 0])
-        ->forceFill(['created_at' => $at ?? now()])->save();
-}
-
 function admin(): User
 {
     $user = User::factory()->create();
