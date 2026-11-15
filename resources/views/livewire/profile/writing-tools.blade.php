@@ -18,7 +18,7 @@
                     <button type="button" wire:click="suggest('{{ $tool }}')" wire:loading.attr="disabled" wire:target="suggest" class="button button-small">{{ $labels[$tool] }}</button>
                 @endif
             @endforeach
-            <span wire:loading wire:target="suggest" class="muted text-xs" role="status">{{ __('Writing a suggestion…') }}</span>
+            <span wire:loading wire:target="suggest" class="muted text-xs" role="status">{{ __('Writing and checking a suggestion…') }}</span>
         </div>
 
         @error('writing')
@@ -43,7 +43,11 @@
                     </div>
                     <ul class="mt-2 divide-y divide-stone-200 dark:divide-stone-800">
                         @foreach ($changes as $index => $change)
+                            @php
+                                $waiting = ($change['flags'] !== [] || ! $change['checked']) && ! $change['confirmed'];
+                            @endphp
                             <li wire:key="change-{{ md5($change['from']) }}" class="flex flex-col gap-2 py-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div class="min-w-0">
                                 <p class="text-sm font-normal leading-relaxed">
                                     @foreach (\App\Support\TextDiff::words($change['from'], $change['to']) as $part)
                                         @if ($part['text'] === "\n")
@@ -57,8 +61,28 @@
                                         @endif
                                     @endforeach
                                 </p>
+                                @if ($change['flags'] !== [] || ! $change['checked'])
+                                    <div id="facts-{{ $index }}" class="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+                                        @if (! $change['checked'])
+                                            <p>{{ __('This suggestion could not be checked against your profile.') }}</p>
+                                        @else
+                                            <p class="font-semibold">{{ __('Not in your profile:') }}</p>
+                                            <ul class="mt-1 list-disc pl-5">
+                                                @foreach ($change['flags'] as $flag)
+                                                    <li>“{{ $flag['quote'] }}”</li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                        @if ($change['confirmed'])
+                                            <p class="mt-2 font-semibold">{{ __('Confirmed as true.') }}</p>
+                                        @else
+                                            <button type="button" wire:click="confirm({{ $index }})" class="button button-small mt-2">{{ __('This is true, I confirm it') }}</button>
+                                        @endif
+                                    </div>
+                                @endif
+                                </div>
                                 <div class="flex shrink-0 gap-2">
-                                    <button type="button" wire:click="accept({{ $index }})" class="button button-small button-primary">{{ __('Accept') }}</button>
+                                    <button type="button" wire:click="accept({{ $index }})" @disabled($waiting) @if ($waiting) aria-describedby="facts-{{ $index }}" @endif class="button button-small button-primary">{{ __('Accept') }}</button>
                                     <button type="button" wire:click="reject({{ $index }})" class="button button-small">{{ __('Reject') }}</button>
                                 </div>
                             </li>
