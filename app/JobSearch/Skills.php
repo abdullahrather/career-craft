@@ -65,7 +65,13 @@ final class Skills
     public static function in(string $skill, string $text): bool
     {
         foreach (self::names($skill) as $name) {
-            if ($name !== '' && preg_match('/(?<![\p{L}\p{N}])'.preg_quote($name, '/').'(?:kenntnisse)?(?![\p{L}\p{N}])/iu', $text) === 1) {
+            // A name of one or two letters only counts in capitals ("Go", "JS"): in lower case
+            // it's an everyday word, as in "go the extra mile".
+            $short = preg_match('/^\p{L}{1,2}$/u', $name) === 1;
+            $pattern = $short
+                ? '/(?<![\p{L}\p{N}])(?:'.preg_quote(mb_strtoupper($name), '/').'|'.preg_quote(mb_convert_case($name, MB_CASE_TITLE), '/').')(?![\p{L}\p{N}])/u'
+                : '/(?<![\p{L}\p{N}])'.preg_quote($name, '/').'(?:kenntnisse)?(?![\p{L}\p{N}])/iu';
+            if ($name !== '' && preg_match($pattern, $text) === 1) {
                 return true;
             }
         }

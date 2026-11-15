@@ -41,11 +41,17 @@ final class AnalyseJobPost implements ShouldQueue
 
     public function handle(AiRunner $ai): void
     {
-        $found = ['title' => '', 'company' => '', 'location' => '', 'remote' => false];
         try {
             if ($this->post->url !== null && $this->post->text === null) {
                 $found = JobPage::fetch($this->post->url);
-                $this->post->update(['text' => $found['text']]);
+                // Saved straight away, so a try after an AI failure still has the page's own data.
+                $this->post->update([
+                    'text' => $found['text'],
+                    'title' => Str::limit($found['title'], 250, ''),
+                    'company' => Str::limit($found['company'], 250, ''),
+                    'location' => Str::limit($found['location'], 250, ''),
+                    'work_mode' => $found['remote'] ? 'remote' : '',
+                ]);
             }
             $text = (string) $this->post->text;
             $response = $ai->prompt(new JobReader, JobReader::input($text), $this->post->user, 'job_analysis');
@@ -72,16 +78,18 @@ final class AnalyseJobPost implements ShouldQueue
         $required = self::skills($answer['required_skills'] ?? [], $text);
         $requiredKeys = array_map(Skills::key(...), $required);
         $nice = array_values(array_filter(self::skills($answer['nice_skills'] ?? [], $text), fn (string $skill): bool => ! in_array(Skills::key($skill), $requiredKeys, true)));
-        $workMode = $found['remote'] ? 'remote' : $string('work_mode');
+        $post = $this->post;
+        $workMode = $post->work_mode !== '' ? $post->work_mode : $string('work_mode');
         $seniority = $string('seniority');
 
-        $this->post->update([
+        $post->update([
             'status' => JobPost::READY,
             'error' => null,
-            // The page's own data first: it's what the employer wrote, not what the AI read.
-            'title' => $found['title'] !== '' ? Str::limit($found['title'], 250, '') : $said($string('title')),
-            'company' => $found['company'] !== '' ? Str::limit($found['company'], 250, '') : $said($string('company')),
-            'location' => $found['location'] !== '' ? Str::limit($found['location'], 250, '') : $location,
+            // The page's own data first, saved when it was fetched: it's what the employer
+            // wrote, not what the AI read. The AI's answer only fills what's still empty.
+            'title' => $post->title !== '' ? $post->title : $said($string('title')),
+            'company' => $post->company !== '' ? $post->company : $said($string('company')),
+            'location' => $post->location !== '' ? $post->location : $location,
             'work_mode' => in_array($workMode, JobPost::WORK_MODES, true) ? $workMode : '',
             'seniority' => in_array($seniority, JobPost::SENIORITIES, true) ? $seniority : '',
             'language' => Writer::isGerman($text) ? 'de' : 'en',

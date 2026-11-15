@@ -138,6 +138,23 @@ describe('Analysing a job post', function (): void {
             ->work_mode->toBe('remote')->language->toBe('en')->required_skills->toBe(['Python', 'Airflow']);
     });
 
+    it('keeps the page\'s own data when reading is tried again', function (): void {
+        Http::fake(['93.184.216.34/*' => Http::response(jobPage(), 200, ['Content-Type' => 'text/html'])]);
+        JobReader::fake(function (): never {
+            throw new ProviderOverloadedException('Overloaded');
+        });
+        $post = User::factory()->create()->jobPosts()->create(['url' => 'https://93.184.216.34/jobs/42']);
+        AnalyseJobPost::dispatchSync($post);
+        expect($post->fresh()->status)->toBe(JobPost::FAILED);
+
+        JobReader::fake([['title' => 'Engineer', 'company' => 'Someone', 'location' => '', 'work_mode' => 'onsite', 'seniority' => '', 'required_skills' => ['Python'], 'nice_skills' => []]]);
+        AnalyseJobPost::dispatchSync($post->fresh());
+
+        expect($post->fresh())->status->toBe(JobPost::READY)->title->toBe('Data Engineer')->company->toBe('Lumen Analytics')
+            ->location->toBe('Berlin, DE')->work_mode->toBe('remote');
+        Http::assertSentCount(1);
+    });
+
     it('records why a post couldn\'t be read', function (): void {
         $user = User::factory()->create();
         $blocked = $user->jobPosts()->create(['url' => 'http://127.0.0.1/']);
@@ -199,6 +216,10 @@ describe('Matching a profile to a job post', function (): void {
         expect(Skills::in('German', 'Sehr gute Deutschkenntnisse'))->toBeTrue()
             ->and(Skills::in('PHP', 'PHP-Kenntnisse von Vorteil'))->toBeTrue()
             ->and(Skills::in('Go', 'We are a good team'))->toBeFalse()
+            ->and(Skills::in('Go', 'You go the extra mile on our go-to-market work'))->toBeFalse()
+            ->and(Skills::in('Golang', 'Services in Go and Python'))->toBeTrue()
+            ->and(Skills::in('JS', 'Frontend in JS'))->toBeTrue()
+            ->and(Skills::in('ts', 'It ts fine'))->toBeFalse()
             ->and(Skills::in('Java', 'JavaScript and TypeScript'))->toBeFalse()
             ->and(Skills::in('REST-APIs', 'Built a REST API'))->toBeTrue()
             ->and(Skills::in('C#', 'Five years of C# and .NET'))->toBeTrue();
