@@ -2,7 +2,7 @@
 
 An AI-assisted job search platform. You keep one structured career profile, and CareerCraft turns it into tailored CVs and cover letters, finds jobs that fit, tracks every application, reads employer replies and helps you prepare for interviews. It's built for the German job market first, in English and German.
 
-**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page, the career profile, importing an existing CV, the CV builder, and an AI writing assistant, in English and German with a dark theme.
+**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page, the career profile, importing an existing CV, the CV builder, and an AI writing assistant with a fact guard, in English and German with a dark theme.
 
 ## Career profile
 
@@ -24,7 +24,15 @@ Under the summary, achievements and descriptions in the profile, the AI suggests
 - **Fix tone:** professional and confident, without changing the facts.
 - **Translate** between English and German, with the job titles and phrases CVs use in each language.
 
-Each suggestion is shown as a word-by-word diff to accept or reject, bullet by bullet. An accepted suggestion goes into the field, and nothing is saved until you press Save. A suggestion that adds a number your text doesn't have is left out. It works with the free local model; each text goes to the AI on its own, which keeps a small model from mixing bullets up.
+Each suggestion is shown as a word-by-word diff to accept or reject, bullet by bullet. An accepted suggestion goes into the field, and nothing is saved until you press Save. It works with the free local model; each text goes to the AI on its own, which keeps a small model from mixing bullets up.
+
+### Fact guard
+
+Every suggestion is checked against your profile and the text it rewrites, so the AI can't slip an invented fact into your CV. A new employer, customer, school, degree, certificate, job title, technology, number or date is listed under the suggestion, which can't be accepted until you confirm it's true. A suggestion that couldn't be checked is treated the same way.
+
+The check combines rules and the AI: numbers and, in English, names are compared directly; a title moved to another of your employers is caught from your jobs; the AI lists other claims, and a second, narrower question clears honest rewordings. The AI can add a flag but never remove one the rules found. A result told without a number ("improved reliability") isn't flagged: a small model can't tell it from honest rewording.
+
+`vendor/bin/pest tests/Live` runs tricky cases against the real local model (Ollama must be running): every invented fact must be flagged, and honest rewordings must pass.
 
 ## Import
 
