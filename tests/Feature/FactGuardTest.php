@@ -71,6 +71,14 @@ describe('The fact guard', function (): void {
             ->and(guard('Development in PHP and Go', [['quote' => 'PHP and Go', 'kind' => 'skill']]))->toContain(['quote' => 'PHP and Go', 'kind' => 'skill']);
     });
 
+    it('matches the sources on whole words, so a short claim isn\'t found inside another word', function (): void {
+        FactChecker::fake(fn (): array => ['claims' => [['quote' => 'Go', 'kind' => 'skill']]]);
+        FactVerifier::fake(fn (): array => ['fact' => '', 'reason' => 'Not in the facts.', 'backed' => false]);
+
+        expect(app(FactGuard::class)->check('Entwickelte die API mit Go', "Skills: PHP\nText being edited: did good work on the api", null))
+            ->toBe([['quote' => 'Go', 'kind' => 'skill']]);
+    });
+
     it('doesn\'t clear a title or employer just because its words are known', function (): void {
         expect(guard('Backend developer for PostgreSQL', [['quote' => 'Backend developer for PostgreSQL', 'kind' => 'employer']]))
             ->toBe([['quote' => 'Backend developer for PostgreSQL', 'kind' => 'employer']]);

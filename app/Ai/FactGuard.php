@@ -201,10 +201,15 @@ final readonly class FactGuard
         return preg_split('/[^\p{L}\p{N}]+/u', mb_strtolower($text), -1, PREG_SPLIT_NO_EMPTY) ?: [];
     }
 
+    /**
+     * Whether the text has these words, as whole words: "Go" isn't found in "good", or a
+     * short invented claim would pass as known.
+     */
     private static function contains(string $haystack, string $needle): bool
     {
-        $normal = fn (string $text): string => mb_strtolower((string) preg_replace('/\s+/u', ' ', $text));
+        $normal = fn (string $text): string => trim((string) preg_replace('/\s+/u', ' ', $text));
+        $pattern = '/(?<![\p{L}\p{N}])'.preg_quote($normal($needle), '/').'(?![\p{L}\p{N}])/iu';
 
-        return str_contains($normal($haystack), $normal($needle));
+        return $normal($needle) !== '' && preg_match($pattern, $normal($haystack)) === 1;
     }
 }
