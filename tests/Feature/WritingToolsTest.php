@@ -111,6 +111,14 @@ describe('The writing tools', function (): void {
         Writer::assertNeverPrompted();
     });
 
+    it('change every copy of a bullet point that appears twice', function (): void {
+        Writer::fake([['text' => 'Shipped the app'], ['text' => 'Coached new colleagues']]);
+
+        writingTools("did the app\nhelped new colleagues\ndid the app")->call('suggest', 'improve')
+            ->call('accept', 0)
+            ->assertSet('text', "Shipped the app\nhelped new colleagues\nShipped the app");
+    });
+
     it('leave a line alone when it was edited after the suggestion', function (): void {
         Writer::fake([['text' => 'Better first'], ['text' => 'Better second']]);
 

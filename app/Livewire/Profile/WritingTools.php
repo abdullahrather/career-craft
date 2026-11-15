@@ -198,11 +198,11 @@ final class WritingTools extends Component
         }
 
         $lines = $this->lines();
-        $position = array_search($change['from'], $lines, true);
-        if ($position === false) {
+        if (! in_array($change['from'], $lines, true)) {
             return false;
         }
-        $lines[$position] = $change['to'];
+        // Every copy: a line that appears twice was asked about once.
+        $lines = array_map(fn (string $line): string => $line === $change['from'] ? $change['to'] : $line, $lines);
         $this->text = implode("\n", $lines);
 
         return true;
