@@ -118,6 +118,15 @@ describe('Analysing a job post', function (): void {
             ->nice_skills->toBe(['Redis', 'Vue.js']);
     });
 
+    it('keeps a skill that starts with a dot', function (): void {
+        JobReader::fake([['title' => '', 'company' => '', 'location' => '', 'work_mode' => '', 'seniority' => '', 'required_skills' => ['.NET', 'C#.'], 'nice_skills' => []]]);
+        $post = User::factory()->create()->jobPosts()->create(['text' => POST_TEXT.' Erfahrung mit .NET und C# ist ebenfalls gewünscht.']);
+
+        AnalyseJobPost::dispatchSync($post);
+
+        expect($post->fresh()->required_skills)->toBe(['.NET', 'C#']);
+    });
+
     it('leaves out what the AI made up beyond the post', function (): void {
         JobReader::fake([['title' => 'Senior Engineer', 'company' => 'Google', 'location' => '', 'work_mode' => 'office', 'seniority' => 'expert', 'required_skills' => [], 'nice_skills' => []]]);
         $post = User::factory()->create()->jobPosts()->create(['text' => POST_TEXT]);

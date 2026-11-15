@@ -115,7 +115,8 @@ final class AnalyseJobPost implements ShouldQueue
             // "Python and SQL" is two skills.
             $parts = is_string($item) ? preg_split('/\s*(?:,|;|\band\b|\bor\b|\bund\b|\boder\b)\s*/iu', $item) : [];
             foreach ($parts ?: [] as $skill) {
-                $skill = trim($skill, " \t.:-");
+                // Only trailing punctuation: ".NET" starts with a dot.
+                $skill = rtrim(trim($skill), " \t.:-");
                 // A phrase of more than three words is a sentence from the post, not a skill.
                 if ($skill === '' || str_word_count($skill) > 3 || isset($skills[Skills::key($skill)]) || ! Skills::in($skill, $text)) {
                     continue;
