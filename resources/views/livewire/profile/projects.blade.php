@@ -35,9 +35,11 @@
                 <x-wire.input model="form.ends_on" type="month" :label="__('End')" />
                 <div class="sm:col-span-2">
                     <x-wire.textarea model="form.achievements" :label="__('Achievements')" :hint="__('One per line.')" rows="4" />
+                    <livewire:profile.writing-tools wire:model="form.achievements" kind="bullets" :tools="['improve', 'tone', 'translate']" wire:key="project-achievements-{{ $editing ?? 'new' }}" />
                 </div>
                 <div class="sm:col-span-2">
                     <x-wire.textarea model="form.description" :label="__('Description (optional)')" rows="3" />
+                    <livewire:profile.writing-tools wire:model="form.description" :tools="['tone', 'translate']" wire:key="project-description-{{ $editing ?? 'new' }}" />
                 </div>
                 <x-profile.form-buttons />
             </form>

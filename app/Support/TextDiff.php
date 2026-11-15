@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-/** A line-by-line comparison of two texts, for comparing CV versions. */
+/** Comparisons of two texts: line by line for CV versions, word by word for AI suggestions. */
 final class TextDiff
 {
     /**
@@ -14,8 +14,29 @@ final class TextDiff
      */
     public static function lines(string $old, string $new): array
     {
-        $a = self::split($old);
-        $b = self::split($new);
+        return self::compare(self::split($old), self::split($new));
+    }
+
+    /**
+     * Each word of either text, marked the same way. Line breaks count as words, so a
+     * changed line break shows too.
+     *
+     * @return list<array{type: 'same'|'removed'|'added', text: string}>
+     */
+    public static function words(string $old, string $new): array
+    {
+        $words = fn (string $text): array => preg_split('/[ \t]+|(?<=\n)|(?=\n)/u', trim(str_replace(["\r\n", "\r"], "\n", $text)), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return self::compare($words($old), $words($new));
+    }
+
+    /**
+     * @param  list<string>  $a
+     * @param  list<string>  $b
+     * @return list<array{type: 'same'|'removed'|'added', text: string}>
+     */
+    private static function compare(array $a, array $b): array
+    {
         $n = count($a);
         $m = count($b);
 

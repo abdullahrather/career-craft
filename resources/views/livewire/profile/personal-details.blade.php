@@ -8,6 +8,7 @@
         </div>
         <div class="sm:col-span-2">
             <x-wire.textarea model="summary" :label="__('Summary')" :hint="__('Two to four sentences: what you do, what you are good at, and what you want next.')" rows="4" />
+            <livewire:profile.writing-tools wire:model="summary" :tools="['rewrite', 'tone', 'translate']" />
         </div>
         <x-wire.input model="email" type="email" :label="__('Email on your CV')" autocomplete="email" />
         <x-wire.input model="phone" type="tel" :label="__('Phone')" autocomplete="tel" />

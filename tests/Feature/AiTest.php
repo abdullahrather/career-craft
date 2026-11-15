@@ -227,11 +227,13 @@ describe('The admin page', function (): void {
 describe('Prompts', function (): void {
     it('are each used by an agent, with no placeholder left unfilled', function (): void {
         $code = collect(Finder::create()->files()->in(app_path('Ai'))->name('*.php'))->map(fn ($file) => $file->getContents())->implode("\n");
+        // The values agents fill in, by prompt.
+        $values = ['writing-translate' => ['language' => 'German']];
 
         foreach (Finder::create()->files()->in(resource_path('prompts'))->name('*.md') as $file) {
             $name = $file->getBasename('.md');
             expect($code)->toContain("Prompts::get('{$name}'")
-                ->and(Prompts::get($name))->not->toMatch('/(?<![\w])\:[a-z_]+/');
+                ->and(Prompts::get($name, $values[$name] ?? []))->not->toMatch('/(?<![\w])\:[a-z_]+/');
         }
     });
 

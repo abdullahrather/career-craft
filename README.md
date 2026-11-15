@@ -2,7 +2,7 @@
 
 An AI-assisted job search platform. You keep one structured career profile, and CareerCraft turns it into tailored CVs and cover letters, finds jobs that fit, tracks every application, reads employer replies and helps you prepare for interviews. It's built for the German job market first, in English and German.
 
-**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page, the career profile, importing an existing CV, and the CV builder, in English and German with a dark theme.
+**Status:** in development. So far: the foundation (Docker, tests, CI), accounts, the landing page, the career profile, importing an existing CV, the CV builder, and an AI writing assistant, in English and German with a dark theme.
 
 ## Career profile
 
@@ -14,6 +14,17 @@ One structured record of everything you have done, which every CV, cover letter 
 - Links, such as LinkedIn or a portfolio
 - Entries can be added, edited, reordered and deleted, and a profile strength score lists what to add next
 - An optional photo for German CVs, framed in the browser and saved as a 600 × 800 JPEG without the original file's metadata
+
+## Writing assistant
+
+Under the summary, achievements and descriptions in the profile, the AI suggests better wording:
+
+- **Improve bullets:** a strong verb and a clear result for each achievement. Where a result has no number, it leaves a placeholder such as [X%] for you to fill in rather than inventing one.
+- **Rewrite** the summary in two to four plain sentences.
+- **Fix tone:** professional and confident, without changing the facts.
+- **Translate** between English and German, with the job titles and phrases CVs use in each language.
+
+Each suggestion is shown as a word-by-word diff to accept or reject, bullet by bullet. An accepted suggestion goes into the field, and nothing is saved until you press Save. A suggestion that adds a number your text doesn't have is left out. It works with the free local model; each text goes to the AI on its own, which keeps a small model from mixing bullets up.
 
 ## Import
 
