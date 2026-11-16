@@ -23,7 +23,8 @@ final class ListingStore
     {
         $new = 0;
         foreach ($jobs as $job) {
-            if ($job->title === '' || $job->externalId === '') {
+            // The link is shown and may be read: only a web address, never "javascript:".
+            if ($job->title === '' || $job->externalId === '' || preg_match('/^https?:\/\//i', $job->url) !== 1) {
                 continue;
             }
             // Another import can create the same listing between the lookup and the insert:

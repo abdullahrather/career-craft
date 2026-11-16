@@ -157,8 +157,8 @@ describe('Saving listings', function (): void {
         expect(JobListing::query()->value('description'))->toBe('Apply today.');
     });
 
-    it('skips a job without a title or id', function (): void {
-        expect(ListingStore::save([foundJob(['title' => '']), foundJob(['externalId' => ''])]))->toBe(0)
+    it('skips a job without a title, an id or a web address', function (): void {
+        expect(ListingStore::save([foundJob(['title' => '']), foundJob(['externalId' => '']), foundJob(['url' => 'javascript:alert(1)']), foundJob(['url' => 'data:text/html,hi'])]))->toBe(0)
             ->and(JobListing::query()->count())->toBe(0);
     });
 
