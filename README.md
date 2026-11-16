@@ -68,6 +68,14 @@ From a job post, pick one of your CVs and choose **Tailor this CV**. CareerCraft
 - **What the job asks for first:** in a tailored CV, your skills and bullet points that name one of the job's skills come first.
 - **Before and after:** the match score for what this CV shows, before and after its changes. As nothing new may be added, it rises only when a change brings up a skill the CV didn't show yet.
 
+### Cover letters
+
+From a job post, choose **Write the letter**: in English or German (Anschreiben), formal, warm or confident, short or standard, and optionally with one of your CVs. The AI writes the subject and body from the job and your profile. You edit the address block, the person to greet, the subject and the text, with a live preview.
+
+- **Fact guard on every paragraph:** the AI only gets the job's title, company and the skills you already have, never the post's full text, so it has no missing skill to claim. Anything your profile doesn't state is flagged, and the PDF can be made only once each flag is confirmed or taken out of the letter.
+- **DIN 5008 layout:** the address field where a window envelope expects it, place and date, subject, greeting and closing in the letter's language, and "Anlage: Lebenslauf" when a CV goes with it. The letter takes its font and colour from that CV.
+- **One PDF to send:** download the letter alone, or the letter followed by its CV as one file.
+
 ## Accounts
 
 - Sign up with email confirmation, sign in, and reset a forgotten password. The reset form answers the same whether or not an account exists, so it can't be used to find out who has one.

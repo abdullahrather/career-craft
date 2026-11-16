@@ -7,8 +7,11 @@ namespace App\Livewire\Jobs;
 use App\Ai\AiLimitReached;
 use App\Ai\AiRunner;
 use App\Jobs\AnalyseJobPost;
+use App\Jobs\WriteCoverLetter;
 use App\JobSearch\JobMatch;
+use App\Models\CoverLetter;
 use App\Models\JobPost;
+use App\Models\Resume;
 use App\Models\User;
 use App\Resumes\Tailoring;
 use Illuminate\Contracts\View\View;
@@ -60,6 +63,34 @@ final class Show extends Component
         $this->redirectRoute('resumes.edit', ['id' => Tailoring::start($base, $post)->id]);
     }
 
+    /** Has the AI write a cover letter for this job, optionally sent with one of the person's CVs. */
+    public function writeLetter(AiRunner $ai, string $language, string $tone, string $length, ?int $resumeId = null): void
+    {
+        $post = $this->post($this->postId);
+        abort_unless($post->status === JobPost::READY, 404);
+        abort_unless(in_array($language, Resume::LANGUAGES, true) && in_array($tone, CoverLetter::TONES, true) && in_array($length, CoverLetter::LENGTHS, true), 404);
+        $resume = $resumeId !== null ? $post->user->resumes()->findOrFail($resumeId) : null;
+        if ($ai->remaining($post->user) === 0) {
+            $this->addError('letter', (new AiLimitReached)->getMessage());
+
+            return;
+        }
+
+        $letter = $post->user->coverLetters()->create([
+            'job_post_id' => $post->id,
+            'resume_id' => $resume?->id,
+            'language' => $language,
+            'tone' => $tone,
+            'length' => $length,
+            // The company and its place, for the candidate to complete with the street.
+            'recipient' => implode("\n", array_filter([$post->company, $post->location])),
+            'status' => CoverLetter::WRITING,
+        ]);
+        WriteCoverLetter::dispatch($letter);
+
+        $this->redirectRoute('letters.edit', ['id' => $letter->id]);
+    }
+
     public function delete(): void
     {
         $this->post($this->postId)->delete();
@@ -75,6 +106,7 @@ final class Show extends Component
             'post' => $post,
             'match' => $post->status === JobPost::READY ? JobMatch::of($post, $user->careerProfile()) : null,
             'resumes' => $user->resumes()->get(),
+            'letters' => $user->coverLetters()->where('job_post_id', $post->id)->get(),
         ]);
     }
 

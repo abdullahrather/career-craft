@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\CoverLetterWriter;
 use App\Ai\Agents\CvReader;
 use App\Ai\Agents\FactChecker;
 use App\Ai\Agents\FactVerifier;
@@ -225,7 +226,7 @@ describe('The admin page', function (): void {
 });
 
 it('sends the context size and no thinking to Ollama only, as other providers reject unknown fields', function (): void {
-    $agents = [new CvReader, new JobReader, new FactChecker, new FactVerifier, new Tailor('', [], 'English'), new Writer('improve')];
+    $agents = [new CvReader, new JobReader, new FactChecker, new FactVerifier, new Tailor('', [], 'English'), new Writer('improve'), new CoverLetterWriter('', '', [], 'English', 'formal', 'short')];
 
     foreach ($agents as $agent) {
         expect($agent->providerOptions(Lab::Ollama))->toHaveKeys(['num_ctx', 'think'])

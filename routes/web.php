@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\LetterController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\SocialLoginController;
@@ -39,6 +40,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
         return view('jobs.show', ['post' => $user->jobPosts()->findOrFail($id)]);
     })->whereNumber('id')->name('jobs.show');
+
+    Route::get('/letters/{id}', [LetterController::class, 'edit'])->whereNumber('id')->name('letters.edit');
+    Route::get('/letters/{id}/preview', [LetterController::class, 'preview'])->whereNumber('id')->name('letters.preview');
+    Route::get('/letters/{id}/pdf/{with}', [LetterController::class, 'download'])->whereNumber('id')->whereIn('with', ['letter', 'cv'])->name('letters.download');
 
     Route::view('/admin/ai', 'admin.ai')->middleware('can:admin')->name('admin.ai');
 
