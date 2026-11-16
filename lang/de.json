@@ -163,7 +163,7 @@
     "Forgot your password?": "Passwort vergessen?",
     "Found in :file. Tick what you want in your profile and correct anything that is wrong. Nothing is saved until you add it.": "Gefunden in :file. Haken Sie an, was in Ihr Profil soll, und korrigieren Sie, was nicht stimmt. Gespeichert wird erst, wenn Sie es hinzufügen.",
     "Free, and it takes a minute.": "Kostenlos, und es dauert eine Minute.",
-    "Free, and nothing leaves this computer. Install Ollama and download a model, such as: ollama pull qwen2.5:7b": "Kostenlos, und nichts verlässt diesen Rechner. Installieren Sie Ollama und laden Sie ein Modell, zum Beispiel: ollama pull qwen2.5:7b",
+    "Free, and nothing leaves this computer. Install Ollama and download a model, such as: ollama pull qwen3.5:9b": "Kostenlos, und nichts verlässt diesen Rechner. Installieren Sie Ollama und laden Sie ein Modell, zum Beispiel: ollama pull qwen3.5:9b",
     "From LinkedIn": "Aus LinkedIn",
     "From your CV": "Aus Ihrem Lebenslauf",
     "German Lebenslauf": "Deutscher Lebenslauf",

@@ -3,7 +3,12 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\CvReader;
+use App\Ai\Agents\FactChecker;
+use App\Ai\Agents\FactVerifier;
+use App\Ai\Agents\JobReader;
 use App\Ai\Agents\ProviderCheck;
+use App\Ai\Agents\Tailor;
+use App\Ai\Agents\Writer;
 use App\Ai\AiLimitReached;
 use App\Ai\AiRunner;
 use App\Ai\AiSettings;
@@ -15,6 +20,7 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
+use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Exceptions\InsufficientCreditsException;
 use Laravel\Ai\Exceptions\ProviderOverloadedException;
 use Livewire\Livewire;
@@ -216,6 +222,17 @@ describe('The admin page', function (): void {
         expect($user->fresh()->is_admin)->toBeFalse();
         $this->artisan('careercraft:admin', ['email' => 'nobody@example.com'])->assertFailed();
     });
+});
+
+it('sends the context size and no thinking to Ollama only, as other providers reject unknown fields', function (): void {
+    $agents = [new CvReader, new JobReader, new FactChecker, new FactVerifier, new Tailor('', [], 'English'), new Writer('improve')];
+
+    foreach ($agents as $agent) {
+        expect($agent->providerOptions(Lab::Ollama))->toHaveKeys(['num_ctx', 'think'])
+            ->and($agent->providerOptions('ollama')['think'])->toBeFalse()
+            ->and($agent->providerOptions(Lab::Anthropic))->toBe([])
+            ->and($agent->providerOptions('openai'))->toBe([]);
+    }
 });
 
 describe('Prompts', function (): void {

@@ -36,6 +36,12 @@ final readonly class FactGuard
         'am', 'im', 'zu', 'zum', 'zur', 'und', 'der', 'die', 'das', 'den', 'dem', 'des', 'mit', 'für', 'von', 'bei', 'durch', 'sowie', 'ein', 'eine', 'einer',
     ];
 
+    /**
+     * Words for leading people, in English and German. Not "managed": it's as often about
+     * things, as in "Managed releases" for "was responsible for the releases".
+     */
+    private const array LEADING_WORDS = ['led', 'supervised', 'headed', 'leitete'];
+
     public function __construct(private AiRunner $ai) {}
 
     /**
@@ -83,6 +89,12 @@ final readonly class FactGuard
                 continue;
             }
             $claims[] = ['quote' => $quote, 'kind' => $kind];
+        }
+        // Last, so a leading word already inside a claim isn't listed twice.
+        foreach (self::newLeading($suggestion, $sources) as $word) {
+            if (! array_any($claims, fn (array $claim): bool => self::contains($claim['quote'], $word))) {
+                $claims[] = ['quote' => $word, 'kind' => 'title'];
+            }
         }
 
         return $claims;
@@ -193,6 +205,24 @@ final readonly class FactGuard
         }
 
         return array_values(array_unique($titles));
+    }
+
+    /**
+     * Words for leading people that the sources never use, as in "Led a team". A model can
+     * miss these: tried live, a newer one listed nothing for "Led a team of 8 engineers".
+     *
+     * @return list<string>
+     */
+    private static function newLeading(string $suggestion, string $sources): array
+    {
+        $found = [];
+        foreach (self::LEADING_WORDS as $word) {
+            if (preg_match('/(?<![\p{L}\p{N}])'.$word.'(?![\p{L}\p{N}])/iu', $suggestion, $match) === 1 && ! self::contains($sources, $word)) {
+                $found[] = $match[0];
+            }
+        }
+
+        return $found;
     }
 
     /** @return list<string> */

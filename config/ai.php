@@ -130,7 +130,7 @@ return [
             // Ollama runs on the host, outside Docker.
             'url' => env('OLLAMA_URL', 'http://host.docker.internal:11434'),
             'models' => [
-                'text' => ['default' => env('OLLAMA_MODEL', 'qwen2.5:7b')],
+                'text' => ['default' => env('OLLAMA_MODEL', 'qwen3.5:9b')],
             ],
         ],
 
