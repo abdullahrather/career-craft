@@ -6,6 +6,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\SocialLoginController;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -30,6 +31,14 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('/resumes/{id}/preview', [ResumeController::class, 'preview'])->whereNumber('id')->name('resumes.preview');
     Route::view('/resumes/compare', 'resumes.compare')->name('resumes.compare');
     Route::get('/resume-versions/{id}/{format}', [ResumeController::class, 'download'])->whereNumber('id')->whereIn('format', ['pdf', 'docx'])->name('resume-versions.download');
+
+    Route::view('/jobs', 'jobs.index')->name('jobs');
+    Route::get('/jobs/{id}', function (int $id): View {
+        $user = request()->user();
+        abort_unless($user instanceof User, 403);
+
+        return view('jobs.show', ['post' => $user->jobPosts()->findOrFail($id)]);
+    })->whereNumber('id')->name('jobs.show');
 
     Route::view('/admin/ai', 'admin.ai')->middleware('can:admin')->name('admin.ai');
 

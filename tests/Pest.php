@@ -2,12 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Models\AiUsage;
 use App\Models\Resume;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature', 'Live');
+
+/** Records AI tokens the person has used, today unless another time is given. */
+function useToday(User $user, int $tokens, ?DateTimeInterface $at = null): void
+{
+    AiUsage::query()->create(['user_id' => $user->id, 'feature' => 'test', 'provider' => 'ollama', 'model' => 'qwen2.5:7b', 'input_tokens' => $tokens, 'output_tokens' => 0, 'cost' => 0])
+        ->forceFill(['created_at' => $at ?? now()])->save();
+}
 
 /** A one-page PDF with these lines of text. */
 function pdfWith(array $lines): string

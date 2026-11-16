@@ -51,6 +51,12 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
         return $this->hasMany(Resume::class)->latest('updated_at');
     }
 
+    /** @return HasMany<JobPost, $this> */
+    public function jobPosts(): HasMany
+    {
+        return $this->hasMany(JobPost::class)->latest('id');
+    }
+
     /** @return HasOne<Profile, $this> */
     public function profile(): HasOne
     {
