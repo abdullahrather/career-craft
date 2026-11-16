@@ -9,6 +9,7 @@ use App\Models\JobPost;
 use App\Models\Profile;
 use App\Models\ProfileLanguage;
 use App\Models\Skill;
+use App\Resumes\ResumeDocument;
 
 /**
  * How well a profile matches a job post, calculated rather than guessed: each skill the
@@ -32,8 +33,28 @@ final class JobMatch
             ...$profile->skills->map(fn (Skill $skill): string => $skill->name)->all(),
             ...$profile->languages->map(fn (ProfileLanguage $language): string => $language->name)->all(),
         ];
-        $text = ProfileFacts::text($profile);
 
+        return self::score($post, $listed, ProfileFacts::text($profile));
+    }
+
+    /**
+     * How well what one CV shows matches the post: only its visible sections count, so a
+     * tailored CV can be compared with the one it was made from.
+     *
+     * @return array{score: int|null, required: list<Found>, nice: list<Found>}
+     */
+    public static function forDocument(JobPost $post, ResumeDocument $doc): array
+    {
+        return self::score($post, $doc->listed(), $doc->text());
+    }
+
+    /**
+     * @param  list<string>  $listed  The skills and languages listed as such.
+     * @param  string  $text  Everything else, searched for the skills not listed.
+     * @return array{score: int|null, required: list<Found>, nice: list<Found>}
+     */
+    private static function score(JobPost $post, array $listed, string $text): array
+    {
         $find = function (string $skill) use ($listed, $text): array {
             $names = Skills::names($skill);
             foreach ($listed as $name) {

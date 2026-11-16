@@ -10,6 +10,7 @@ use App\Jobs\AnalyseJobPost;
 use App\JobSearch\JobMatch;
 use App\Models\JobPost;
 use App\Models\User;
+use App\Resumes\Tailoring;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
@@ -44,6 +45,21 @@ final class Show extends Component
         AnalyseJobPost::dispatch($post);
     }
 
+    /** Makes a copy of one of the person's CVs for this job, and has the AI reword it. */
+    public function tailor(AiRunner $ai, int $resumeId): void
+    {
+        $post = $this->post($this->postId);
+        abort_unless($post->status === JobPost::READY, 404);
+        $base = $post->user->resumes()->findOrFail($resumeId);
+        if ($ai->remaining($post->user) === 0) {
+            $this->addError('tailor', (new AiLimitReached)->getMessage());
+
+            return;
+        }
+
+        $this->redirectRoute('resumes.edit', ['id' => Tailoring::start($base, $post)->id]);
+    }
+
     public function delete(): void
     {
         $this->post($this->postId)->delete();
@@ -58,6 +74,7 @@ final class Show extends Component
         return view('livewire.jobs.show', [
             'post' => $post,
             'match' => $post->status === JobPost::READY ? JobMatch::of($post, $user->careerProfile()) : null,
+            'resumes' => $user->resumes()->get(),
         ]);
     }
 

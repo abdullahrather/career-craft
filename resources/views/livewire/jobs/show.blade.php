@@ -91,23 +91,58 @@
                 </details>
             </div>
 
-            <aside class="card flex flex-col gap-4" aria-labelledby="match-title">
-                <h2 id="match-title" class="card-title">{{ __('Your match') }}</h2>
-                @if ($match['score'] === null)
-                    <p class="muted text-sm">{{ __('The post names no skills to match against.') }}</p>
-                @else
-                    <div class="flex items-center gap-4">
-                        <x-jobs.score :score="$match['score']" />
-                        <p class="text-sm">
-                            {{ __(':have of :total required', ['have' => \App\JobSearch\JobMatch::matched($match['required']), 'total' => count($match['required'])]) }}<br>
-                            {{ __(':have of :total nice to have', ['have' => \App\JobSearch\JobMatch::matched($match['nice']), 'total' => count($match['nice'])]) }}
-                        </p>
-                    </div>
-                    <p class="muted text-sm">{{ __('Calculated, not guessed: each skill the post names is looked up in your skills, languages and the rest of your profile. Required skills count three times as much as nice-to-have ones.') }}</p>
-                    <a href="{{ route('profile') }}" class="link text-sm">{{ __('Add a missing skill to your profile') }}</a>
-                @endif
-                <button type="button" wire:click="delete" wire:confirm="{{ __('Delete this job post?') }}" class="button button-danger button-small self-start">{{ __('Delete') }}</button>
-            </aside>
+            <div class="flex min-w-0 flex-col gap-6">
+                <aside class="card flex flex-col gap-4" aria-labelledby="match-title">
+                    <h2 id="match-title" class="card-title">{{ __('Your match') }}</h2>
+                    @if ($match['score'] === null)
+                        <p class="muted text-sm">{{ __('The post names no skills to match against.') }}</p>
+                    @else
+                        <div class="flex items-center gap-4">
+                            <x-jobs.score :score="$match['score']" />
+                            <p class="text-sm">
+                                {{ __(':have of :total required', ['have' => \App\JobSearch\JobMatch::matched($match['required']), 'total' => count($match['required'])]) }}<br>
+                                {{ __(':have of :total nice to have', ['have' => \App\JobSearch\JobMatch::matched($match['nice']), 'total' => count($match['nice'])]) }}
+                            </p>
+                        </div>
+                        <p class="muted text-sm">{{ __('Calculated, not guessed: each skill the post names is looked up in your skills, languages and the rest of your profile. Required skills count three times as much as nice-to-have ones.') }}</p>
+                        <a href="{{ route('profile') }}" class="link text-sm">{{ __('Add a missing skill to your profile') }}</a>
+                    @endif
+                    <button type="button" wire:click="delete" wire:confirm="{{ __('Delete this job post?') }}" class="button button-danger button-small self-start">{{ __('Delete') }}</button>
+                </aside>
+    
+                <section class="card flex flex-col gap-3" aria-labelledby="tailor-title" x-data="{ resume: @js($resumes->whereNull('job_post_id')->first()?->id ?? $resumes->first()?->id) }">
+                    <h2 id="tailor-title" class="card-title">{{ __('Tailor a CV') }}</h2>
+                    @if ($resumes->isEmpty())
+                        <p class="muted text-sm">{{ __('Make a CV first, then tailor a copy of it to this job.') }}</p>
+                        <a href="{{ route('resumes') }}" class="button self-start">{{ __('Make a CV') }}</a>
+                    @else
+                        <p class="muted text-sm">{{ __('Makes a copy of a CV for this job. The AI rewords your summary and bullet points to bring forward what fits, and you accept each change. It never adds a skill you don\'t have.') }}</p>
+                        <label class="field">
+                            <span>{{ __('Start from') }}</span>
+                            <select x-model.number="resume">
+                                @foreach ($resumes as $resume)
+                                    <option value="{{ $resume->id }}">{{ $resume->name }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                        @error('tailor')
+                            <p class="field-error text-sm" role="alert">{{ $message }}</p>
+                        @enderror
+                        <button type="button" x-on:click="$wire.tailor(resume)" wire:loading.attr="disabled" wire:target="tailor" class="button button-primary self-start">{{ __('Tailor this CV') }}</button>
+                    @endif
+                    @php($tailored = $resumes->where('job_post_id', $post->id))
+                    @if ($tailored->isNotEmpty())
+                        <div>
+                            <h3 class="text-sm font-semibold">{{ __('Tailored for this job') }}</h3>
+                            <ul class="mt-1 text-sm">
+                                @foreach ($tailored as $resume)
+                                    <li><a href="{{ route('resumes.edit', ['id' => $resume->id]) }}" class="link">{{ $resume->name }}</a></li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </section>
+            </div>
         </div>
     @endif
 </div>

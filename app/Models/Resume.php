@@ -17,12 +17,14 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property int $user_id
+ * @property int|null $job_post_id The job post a tailored CV was made for.
  * @property string $name
  * @property string $language
  * @property string $template
  * @property array<string, mixed> $settings
  * @property Carbon $updated_at
  * @property-read User $user
+ * @property-read JobPost|null $jobPost
  */
 #[Fillable(['name', 'language', 'template', 'settings'])]
 final class Resume extends Model
@@ -74,6 +76,18 @@ final class Resume extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return BelongsTo<JobPost, $this> */
+    public function jobPost(): BelongsTo
+    {
+        return $this->belongsTo(JobPost::class);
+    }
+
+    /** @return HasMany<TailoredChange, $this> In the order they appear on the CV. */
+    public function changes(): HasMany
+    {
+        return $this->hasMany(TailoredChange::class)->orderBy('position');
     }
 
     /** @return HasMany<ResumeVersion, $this> Newest first. */

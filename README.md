@@ -59,6 +59,15 @@ Paste a job post, or its web address, under **Jobs**. In the background, the AI 
 - **Linked posts:** many job boards describe a post as structured data (schema.org `JobPosting`), which is used first; otherwise the page's text. Pages built in the browser can't be read, so paste those. Only public web pages are opened: no private or internal addresses, and every redirect is checked.
 - **Your match, calculated:** each skill is looked up in your skills and languages, then in the rest of your profile, with common other names treated as the same (Postgres and PostgreSQL, Deutsch and German, REST-APIs and REST API). Required skills count three times as much as nice-to-have ones. The page shows which skills you have, where they were found, and which are missing, and the score updates as your profile changes.
 
+### Tailored CV
+
+From a job post, pick one of your CVs and choose **Tailor this CV**. CareerCraft makes a copy for that job, and the AI rewords its summary and the bullet points of your three latest jobs, in the CV's language, to bring forward what fits. Each suggestion appears on the CV page as a diff to accept or reject.
+
+- **Nothing new added:** the AI only gets the job's skills you already have, and every suggestion goes through the [fact guard](#fact-guard). A flagged suggestion is accepted only once you confirm it.
+- **Your profile stays as it is:** accepted changes show on the tailored CV only, and only while your profile still has the text they reword.
+- **What the job asks for first:** in a tailored CV, your skills and bullet points that name one of the job's skills come first.
+- **Before and after:** the match score for what this CV shows, before and after its changes. As nothing new may be added, it rises only when a change brings up a skill the CV didn't show yet.
+
 ## Accounts
 
 - Sign up with email confirmation, sign in, and reset a forgotten password. The reset form answers the same whether or not an account exists, so it can't be used to find out who has one.
