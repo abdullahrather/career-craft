@@ -215,13 +215,17 @@ final readonly class FactGuard
      */
     private static function newLeading(string $suggestion, string $sources): array
     {
+        // The word as written in the text, not in capitals: "LED" is a light, not leading.
+        $uses = function (string $text, string $word): array {
+            preg_match_all('/(?<![\p{L}\p{N}])'.$word.'(?![\p{L}\p{N}])/iu', $text, $matches);
+
+            return array_values(array_filter($matches[0], fn (string $match): bool => mb_strtoupper($match) !== $match));
+        };
         $found = [];
         foreach (self::LEADING_WORDS as $word) {
-            preg_match_all('/(?<![\p{L}\p{N}])'.$word.'(?![\p{L}\p{N}])/iu', $suggestion, $matches);
-            // Not in capitals: "LED" is a light, not leading.
-            $words = array_filter($matches[0], fn (string $match): bool => mb_strtoupper($match) !== $match);
-            if ($words !== [] && ! self::contains($sources, $word)) {
-                $found[] = reset($words);
+            $used = $uses($suggestion, $word);
+            if ($used !== [] && $uses($sources, $word) === []) {
+                $found[] = $used[0];
             }
         }
 

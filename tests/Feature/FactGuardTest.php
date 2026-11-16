@@ -36,6 +36,8 @@ describe('The fact guard', function (): void {
             ->and(guard('Managed releases'))->toBe([])
             // In capitals it's the light, not leading. First in the sentence, so the name check leaves it.
             ->and(guard('LED lighting for the checkout area'))->toBe([])
+            // Nor does "LED" in the sources count as having led.
+            ->and(app(FactGuard::class)->check('Led a team of engineers', SOURCES."\n  - installed LED lighting", null))->toBe([['quote' => 'Led', 'kind' => 'title']])
             ->and(guard('Coached new colleagues during onboarding'))->toBe([]);
     });
 
