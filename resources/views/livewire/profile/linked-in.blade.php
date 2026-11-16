@@ -40,10 +40,12 @@
                     <p x-ref="text" class="mt-2 text-sm leading-relaxed whitespace-pre-line wrap-break-word">{{ $suggestion['text'] }}</p>
                     @if ($suggestion['flags'] !== [] || ! $suggestion['checked'])
                         <div id="linkedin-facts-{{ $field }}" class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+                            {{-- Both can apply: some paragraphs checked with flags, another not checked at all. --}}
                             @if (! $suggestion['checked'])
                                 <p>{{ __('This suggestion could not be checked against your profile.') }}</p>
-                            @else
-                                <p class="font-semibold">{{ __('Not in your profile:') }}</p>
+                            @endif
+                            @if ($suggestion['flags'] !== [])
+                                <p @class(['font-semibold', 'mt-2' => ! $suggestion['checked']])>{{ __('Not in your profile:') }}</p>
                                 <ul class="mt-1 list-disc pl-5">
                                     @foreach ($suggestion['flags'] as $flag)
                                         <li>“{{ $flag['quote'] }}”</li>

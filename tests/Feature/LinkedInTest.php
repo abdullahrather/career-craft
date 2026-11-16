@@ -67,6 +67,25 @@ it('marks a suggestion it couldn\'t check, and keeps LinkedIn\'s limits', functi
     expect(mb_strlen($section->get('suggestions.headline.text')))->toBeLessThanOrEqual(220);
 });
 
+it('shows the flags it found even when part of a suggestion couldn\'t be checked', function (): void {
+    LinkedInWriter::fake([['headline' => 'Product designer', 'about' => "I have 12 years of experience.\n\nI design tools."]]);
+    $calls = 0;
+    // The headline and the first paragraph are checked; the second paragraph's check fails, retries included.
+    FactChecker::fake(function () use (&$calls): array {
+        if (++$calls >= 3) {
+            throw new ProviderOverloadedException('Overloaded');
+        }
+
+        return ['claims' => []];
+    });
+
+    Livewire::actingAs(candidate())->test(LinkedIn::class)->call('suggest')
+        ->assertSet('suggestions.about.checked', false)
+        ->assertSet('suggestions.about.flags', [['quote' => '12', 'kind' => 'number']])
+        ->assertSee('could not be checked')
+        ->assertSee('“12”');
+});
+
 it('says what went wrong: an empty profile, the AI, or a used-up allowance', function (): void {
     Livewire::actingAs(User::factory()->create())->test(LinkedIn::class)->call('suggest')->assertHasErrors('linkedin');
 
