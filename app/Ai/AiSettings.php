@@ -98,7 +98,7 @@ final readonly class AiSettings
         $model = $this->models[$provider] ?? '';
 
         return $model !== '' ? $model : match ($provider) {
-            'ollama' => config()->string('ai.providers.ollama.models.text.default', 'qwen2.5:7b'),
+            'ollama' => config()->string('ai.providers.ollama.models.text.default', 'qwen3.5:9b'),
             'anthropic' => 'claude-sonnet-5-5',
             default => '',
         };

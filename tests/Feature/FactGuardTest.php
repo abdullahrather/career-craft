@@ -28,6 +28,19 @@ describe('The fact guard', function (): void {
             ->and(guard('Sped up checkout by 40%'))->toBe([]);
     });
 
+    it('flags leading people when the sources never say so, whatever the AI says', function (): void {
+        expect(guard('Led a team of engineers'))->toBe([['quote' => 'Led', 'kind' => 'title']])
+            ->and(guard('Leitete das Team und betreute den Checkout'))->toBe([['quote' => 'Leitete', 'kind' => 'title']])
+            ->and(guard('Supervised the checkout work'))->toBe([['quote' => 'Supervised', 'kind' => 'title']])
+            ->and(guard('Led the order API team', [['quote' => 'Led the order API team', 'kind' => 'title']]))->toBe([['quote' => 'Led the order API team', 'kind' => 'title']])
+            ->and(guard('Managed releases'))->toBe([])
+            // In capitals it's the light, not leading. First in the sentence, so the name check leaves it.
+            ->and(guard('LED lighting for the checkout area'))->toBe([])
+            // Nor does "LED" in the sources count as having led.
+            ->and(app(FactGuard::class)->check('Led a team of engineers', SOURCES."\n  - installed LED lighting", null))->toBe([['quote' => 'Led', 'kind' => 'title']])
+            ->and(guard('Coached new colleagues during onboarding'))->toBe([]);
+    });
+
     it('flags new names in English text, but not German nouns', function (): void {
         expect(guard('Developed the order API for Siemens using PostgreSQL'))->toBe([['quote' => 'Siemens', 'kind' => 'other']])
             ->and(guard('Built the order API while completing a PhD at MIT'))->toBe([['quote' => 'PhD', 'kind' => 'other'], ['quote' => 'MIT', 'kind' => 'other']])

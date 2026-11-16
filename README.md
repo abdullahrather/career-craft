@@ -117,10 +117,20 @@ The first `docker compose up` installs the frontend packages, which takes a minu
 By default the AI runs on [Ollama](https://ollama.com) on your machine, outside Docker, for free. Install it, then download the model once:
 
 ```bash
-ollama pull qwen2.5:7b
+ollama pull qwen3.5:9b
 ```
 
 A CV takes about 10 to 30 seconds on a laptop with a graphics card. `OLLAMA_URL` and `OLLAMA_MODEL` in `.env` change where Ollama runs and which model it uses. LinkedIn import and everything else work without it.
+
+Models tested with CareerCraft's prompts and its fact guard suite (`vendor/bin/pest tests/Live`). Pick by your graphics card's memory (on Windows: Task Manager → Performance → GPU; with NVIDIA: `nvidia-smi`; on a Mac with Apple silicon, its memory):
+
+| Memory | Model | Download | Notes |
+|---|---|---|---|
+| 8 GB or more | `qwen3.5:9b` (default) | 6.6 GB | The most complete job reading and the best German. |
+| 6 GB | `qwen2.5:7b` | 4.7 GB | The fastest. Weaker German, and misses skills a post names as alternatives. |
+| 10 GB or more | `gemma4:12b` | 8 GB | Passes the fact guard suite, but writes mixed German and English when tailoring a CV. |
+
+Without a graphics card, Ollama runs on the processor, much more slowly. A model's first request after a while takes extra seconds while it loads.
 
 To change the AI, make your account an admin and open **AI settings** in the sidebar (`/admin/ai`):
 

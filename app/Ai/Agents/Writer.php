@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\OllamaOptions;
 use App\Ai\Prompts;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use InvalidArgumentException;
@@ -82,7 +83,7 @@ final class Writer implements Agent, HasProviderOptions, HasStructuredOutput
      */
     public function providerOptions(Lab|string $provider): array
     {
-        return ['num_ctx' => 8192];
+        return OllamaOptions::for($provider, 8192);
     }
 
     public function schema(JsonSchema $schema): array

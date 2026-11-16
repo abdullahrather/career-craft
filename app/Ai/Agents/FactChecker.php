@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\OllamaOptions;
 use App\Ai\Prompts;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Attributes\Temperature;
@@ -33,7 +34,7 @@ final class FactChecker implements Agent, HasProviderOptions, HasStructuredOutpu
     /** Room for a whole profile; Ollama's default context is too small. */
     public function providerOptions(Lab|string $provider): array
     {
-        return ['num_ctx' => 8192];
+        return OllamaOptions::for($provider, 8192);
     }
 
     public function schema(JsonSchema $schema): array

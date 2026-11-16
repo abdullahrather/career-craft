@@ -1,7 +1,7 @@
 @php
     $names = ['ollama' => __('Ollama on this computer'), 'anthropic' => 'Claude (Anthropic)', 'openai-compatible' => __('OpenAI-compatible API')];
     $notes = [
-        'ollama' => __('Free, and nothing leaves this computer. Install Ollama and download a model, such as: ollama pull qwen2.5:7b'),
+        'ollama' => __('Free, and nothing leaves this computer. Install Ollama and download a model, such as: ollama pull qwen3.5:9b'),
         'anthropic' => __('Paid, with your own key. Put ANTHROPIC_API_KEY in .env and restart the app.'),
         'openai-compatible' => __('Any service that speaks the OpenAI API, such as OpenAI itself, Mistral or LM Studio. Put OPENAI_COMPATIBLE_API_KEY in .env if it needs one.'),
     ];

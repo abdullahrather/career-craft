@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\OllamaOptions;
 use App\Ai\Prompts;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Attributes\Temperature;
@@ -57,7 +58,7 @@ final class Tailor implements Agent, HasProviderOptions, HasStructuredOutput
     /** The same context size as the Writer and the fact checker, so Ollama doesn't reload the model. */
     public function providerOptions(Lab|string $provider): array
     {
-        return ['num_ctx' => 8192];
+        return OllamaOptions::for($provider, 8192);
     }
 
     public function schema(JsonSchema $schema): array

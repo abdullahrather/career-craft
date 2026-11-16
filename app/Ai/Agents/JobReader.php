@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\OllamaOptions;
 use App\Ai\Prompts;
 use App\Models\JobPost;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -31,7 +32,7 @@ final class JobReader implements Agent, HasProviderOptions, HasStructuredOutput
     /** Room for a long post and the answer; Ollama's default context is too small. */
     public function providerOptions(Lab|string $provider): array
     {
-        return ['num_ctx' => 16384];
+        return OllamaOptions::for($provider, 16384);
     }
 
     public function schema(JsonSchema $schema): array
