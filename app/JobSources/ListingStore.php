@@ -6,6 +6,7 @@ namespace App\JobSources;
 
 use App\Models\JobListing;
 use App\Models\JobListingSource;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -25,37 +26,50 @@ final class ListingStore
             if ($job->title === '' || $job->externalId === '') {
                 continue;
             }
-            DB::transaction(function () use ($job, &$new): void {
-                $source = JobListingSource::query()->where('source', $job->source)->where('external_id', $job->externalId)->first();
-                $listing = $source !== null
-                    ? $source->listing
-                    : JobListing::query()->where('fingerprint', Normalise::fingerprint($job->title, $job->company, $job->location))->first();
-
-                if ($listing === null) {
-                    $listing = JobListing::query()->create([...self::fields($job), 'fingerprint' => Normalise::fingerprint($job->title, $job->company, $job->location)]);
-                    $new++;
-                } else {
-                    // What another source already knows stays, unless this one knows more. A job's
-                    // only source may update its description, even to a shorter one.
-                    $fields = array_filter(self::fields($job), fn (mixed $value): bool => $value !== null && $value !== '');
-                    $onlySource = $source !== null && $listing->sources()->count() === 1;
-                    if (! $onlySource && mb_strlen($job->description) <= mb_strlen($listing->description)) {
-                        unset($fields['description']);
-                    }
-                    $listing->fill($fields);
-                    $listing->last_seen_at = now();
-                    $listing->save();
-                }
-
-                if ($source === null) {
-                    $listing->sources()->create(['source' => $job->source, 'external_id' => $job->externalId, 'url' => $job->url]);
-                } else {
-                    $source->update(['url' => $job->url]);
-                }
-            });
+            // Another import can create the same listing between the lookup and the insert:
+            // then the job is saved once more, and finds that listing.
+            try {
+                $new += self::saveOne($job);
+            } catch (UniqueConstraintViolationException) {
+                $new += self::saveOne($job);
+            }
         }
 
         return $new;
+    }
+
+    /** @return int 1 when the listing is new. */
+    private static function saveOne(FoundJob $job): int
+    {
+        return DB::transaction(function () use ($job): int {
+            $fingerprint = Normalise::fingerprint($job->title, $job->company, $job->location);
+            $source = JobListingSource::query()->where('source', $job->source)->where('external_id', $job->externalId)->first();
+            $listing = $source !== null ? $source->listing : JobListing::query()->where('fingerprint', $fingerprint)->first();
+            $created = $listing === null;
+
+            if ($listing === null) {
+                $listing = JobListing::query()->create([...self::fields($job), 'fingerprint' => $fingerprint]);
+            } else {
+                // What another source already knows stays, unless this one knows more. A job's
+                // only source may update its description, even to a shorter one.
+                $fields = array_filter(self::fields($job), fn (mixed $value): bool => $value !== null && $value !== '');
+                $onlySource = $source !== null && $listing->sources()->count() === 1;
+                if (! $onlySource && mb_strlen($job->description) <= mb_strlen($listing->description)) {
+                    unset($fields['description']);
+                }
+                $listing->fill($fields);
+                $listing->last_seen_at = now();
+                $listing->save();
+            }
+
+            if ($source === null) {
+                $listing->sources()->create(['source' => $job->source, 'external_id' => $job->externalId, 'url' => $job->url]);
+            } else {
+                $source->update(['url' => $job->url]);
+            }
+
+            return (int) $created;
+        });
     }
 
     /** @return array<string, mixed> */

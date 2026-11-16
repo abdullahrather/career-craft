@@ -55,9 +55,8 @@ final class Index extends Component
             if ($source === 'adzuna' && ! Adzuna::enabled()) {
                 continue;
             }
-            // Arbeitnow has no search: its feed is the same for every search.
-            $query = $source === 'arbeitnow' ? '' : mb_strtolower("{$this->what}|{$this->where}");
-            if (Cache::add("job-source:{$source}:".md5($query), true, now()->addMinutes(self::FRESH_MINUTES))) {
+            // A failed import gives the key back, so the search can be tried again.
+            if (Cache::add(ImportJobListings::freshKey($source, $this->what, $this->where), true, now()->addMinutes(self::FRESH_MINUTES))) {
                 Cache::put(ImportJobListings::runningKey($user->id, $source), true, now()->addMinutes(10));
                 ImportJobListings::dispatch($source, $this->what, $this->where, $user->id);
             }

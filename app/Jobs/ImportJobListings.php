@@ -30,6 +30,15 @@ final class ImportJobListings implements ShouldQueue
 
     public function __construct(public string $source, public string $what, public string $where, public int $userId) {}
 
+    /**
+     * The cache entry that says a source was asked this search lately. Arbeitnow has no
+     * search: its feed is the same for every search.
+     */
+    public static function freshKey(string $source, string $what, string $where): string
+    {
+        return "job-source:{$source}:".md5($source === 'arbeitnow' ? '' : mb_strtolower("{$what}|{$where}"));
+    }
+
     /** The cache entry that says this person's import from this source is running. */
     public static function runningKey(int $userId, string $source): string
     {
@@ -47,8 +56,10 @@ final class ImportJobListings implements ShouldQueue
             };
             ListingStore::save($jobs);
         } catch (Throwable $exception) {
-            // A source that's down leaves the others' jobs, and the jobs it gave before.
+            // A source that's down leaves the others' jobs, and the jobs it gave before. The
+            // search may be tried again straight away.
             report($exception);
+            Cache::forget(self::freshKey($this->source, $this->what, $this->where));
         } finally {
             Cache::forget(self::runningKey($this->userId, $this->source));
         }
@@ -57,5 +68,6 @@ final class ImportJobListings implements ShouldQueue
     public function failed(?Throwable $exception): void
     {
         Cache::forget(self::runningKey($this->userId, $this->source));
+        Cache::forget(self::freshKey($this->source, $this->what, $this->where));
     }
 }

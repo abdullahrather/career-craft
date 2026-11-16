@@ -17,6 +17,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
@@ -133,6 +134,22 @@ describe('Saving listings', function (): void {
             ->and($listing->last_seen_at->isToday())->toBeTrue();
     });
 
+    it('joins a listing another import created at the same moment, and saves the rest of the batch', function (): void {
+        // Another import inserts the same job just after this one looked for it.
+        $raced = false;
+        JobListing::creating(function (JobListing $listing) use (&$raced): void {
+            if (! $raced) {
+                $raced = true;
+                DB::table('job_listings')->insert(['title' => 'Backend Developer PHP', 'company' => 'Kranich Mobility GmbH', 'location' => 'Hamburg', 'description' => 'From the other import.', 'fingerprint' => $listing->fingerprint, 'last_seen_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
+            }
+        });
+
+        ListingStore::save([foundJob(), foundJob(['externalId' => 'two', 'title' => 'Frontend Developer'])]);
+
+        expect(JobListing::query()->count())->toBe(2)
+            ->and(JobListing::query()->where('title', 'Backend Developer PHP')->sole()->sources()->pluck('external_id')->all())->toBe(['backend-developer-kranich-1']);
+    });
+
     it('lets a source shorten its own description', function (): void {
         ListingStore::save([foundJob(['description' => 'Apply at https://example.org/index.php?id=4 today.'])]);
         ListingStore::save([foundJob(['description' => 'Apply today.'])]);
@@ -173,6 +190,21 @@ describe('The Find jobs page', function (): void {
         Livewire::actingAs($user)->test(Index::class)->set('what', 'Laravel')->call('search');
         // The same search again: nothing new. Another search: the Bundesagentur only, as Arbeitnow's feed is the same.
         Queue::assertPushed(ImportJobListings::class, 3);
+    });
+
+    it('asks a source again straight away when its last import failed', function (): void {
+        Http::fake([
+            'rest.arbeitsagentur.de/*' => Http::sequence()->push('', 503)->push(['ergebnisliste' => []]),
+            'www.arbeitnow.com/*' => Http::response(['data' => []]),
+        ]);
+        $user = User::factory()->create();
+
+        // The queue runs synchronously in tests: the first import fails within the search.
+        Livewire::actingAs($user)->test(Index::class)->set('what', 'PHP')->call('search');
+        Livewire::actingAs($user)->test(Index::class)->set('what', 'PHP')->call('search');
+
+        // The Bundesagentur twice, as the first failed; Arbeitnow once, as it worked.
+        Http::assertSentCount(3);
     });
 
     it('shows recent jobs matching every word, in the place or remote', function (): void {
