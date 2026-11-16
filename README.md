@@ -76,6 +76,10 @@ From a job post, choose **Write the letter**: in English or German (Anschreiben)
 - **DIN 5008 layout:** the address field where a window envelope expects it, place and date, subject, greeting and closing in the letter's language, and "Anlage: Lebenslauf" when a CV goes with it. The letter takes its font and colour from that CV.
 - **One PDF to send:** download the letter alone, or the letter followed by its CV as one file.
 
+### LinkedIn
+
+At the end of the career profile, **Suggest a headline and About** writes both from your profile, in English or German, within LinkedIn's limits. The fact guard checks the headline and every paragraph of the About; a flagged one can be copied only once you confirm it. You paste them into LinkedIn yourself: CareerCraft never signs in to LinkedIn.
+
 ## Accounts
 
 - Sign up with email confirmation, sign in, and reset a forgotten password. The reset form answers the same whether or not an account exists, so it can't be used to find out who has one.
