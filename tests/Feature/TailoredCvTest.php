@@ -121,6 +121,18 @@ describe('Rewording a text for the job', function (): void {
         FactChecker::assertPromptedTimes(1);
     });
 
+    it('knows the job\'s name for a skill the profile lists under another', function (): void {
+        Tailor::fake([['text' => 'Raised task completion by 25% with Vue.js']]);
+        $user = candidate();
+        $user->careerProfile()->skills()->create(['name' => 'Vue', 'level' => 3, 'position' => 3]);
+        $resume = tailoredResume($user);
+        $resume->jobPost->update(['nice_skills' => ['Vue.js']]);
+
+        (new TailorText($resume->changes[1]->fresh()))->handle(app(AiRunner::class), app(FactGuard::class));
+
+        expect($resume->changes[1]->fresh()->flags)->toBe([]);
+    });
+
     it('asks for the CV\'s language', function (): void {
         Tailor::fake([['text' => 'Steigerte die Abschlussrate um 25%']]);
         $user = candidate();

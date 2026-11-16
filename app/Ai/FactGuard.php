@@ -42,6 +42,8 @@ final readonly class FactGuard
      */
     private const array LEADING_WORDS = ['led', 'supervised', 'headed', 'leitete'];
 
+    private const array MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+
     public function __construct(private AiRunner $ai) {}
 
     /**
@@ -172,7 +174,9 @@ final readonly class FactGuard
         if (Writer::germanSigns($suggestion) > 0) {
             return [];
         }
-        $known = array_flip(self::words($sources));
+        // Months count as known: the profile writes dates as numbers ("2021-03"), and the
+        // number check already compares the year.
+        $known = array_flip([...self::words($sources), ...self::MONTHS]);
         // Words after the start of the text or of a sentence don't count.
         preg_match_all('/(?<![.!?:]\s)(?<!^)(?<=\s)(\p{Lu}[\p{L}\p{N}\'’+#.-]*)/u', $suggestion, $matches);
         $names = array_filter(

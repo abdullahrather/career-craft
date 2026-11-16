@@ -45,8 +45,7 @@ final class TailorText implements ShouldQueue
         $post = $resume->jobPost;
         $profile = $user->careerProfile()->load(['experiences', 'educations', 'projects', 'skills', 'certifications', 'languages']);
         // Only the job's skills the profile has: the AI can bring them forward, but has no missing one to add.
-        $match = $post === null ? ['required' => [], 'nice' => []] : JobMatch::of($post, $profile);
-        $skills = array_column(array_filter([...$match['required'], ...$match['nice']], fn (array $item): bool => $item['where'] !== null), 'skill');
+        $skills = JobMatch::found($post, $profile);
         $agent = new Tailor($post->title ?? '', $skills, $resume->language === 'de' ? 'German' : 'English');
 
         try {
@@ -61,7 +60,8 @@ final class TailorText implements ShouldQueue
 
             // When the guard can't run, the suggestion is marked as unchecked rather than passed.
             try {
-                $flags = $guard->check($suggestion, ProfileFacts::text($profile)."\nText being edited: {$change->original}", $user, ProfileFacts::jobs($profile));
+                $sources = ProfileFacts::text($profile)."\nThe job's names for skills the candidate has: ".implode(', ', $skills)."\nText being edited: {$change->original}";
+                $flags = $guard->check($suggestion, $sources, $user, ProfileFacts::jobs($profile));
                 $checked = true;
             } catch (AiLimitReached $exception) {
                 throw $exception;

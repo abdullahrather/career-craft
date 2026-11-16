@@ -41,6 +41,10 @@ describe('The fact guard', function (): void {
             ->and(guard('Coached new colleagues during onboarding'))->toBe([]);
     });
 
+    it('doesn\'t take a month for a new name: the profile writes dates as numbers', function (): void {
+        expect(guard('Backend developer at Nordlicht Logistik since March 2021'))->toBe([]);
+    });
+
     it('flags new names in English text, but not German nouns', function (): void {
         expect(guard('Developed the order API for Siemens using PostgreSQL'))->toBe([['quote' => 'Siemens', 'kind' => 'other']])
             ->and(guard('Built the order API while completing a PhD at MIT'))->toBe([['quote' => 'PhD', 'kind' => 'other'], ['quote' => 'MIT', 'kind' => 'other']])

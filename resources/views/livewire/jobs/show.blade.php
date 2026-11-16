@@ -142,6 +142,58 @@
                         </div>
                     @endif
                 </section>
+
+                @php($withCv = $tailored->first()?->id ?? $resumes->first()?->id)
+                <section class="card flex flex-col gap-3" aria-labelledby="letter-title"
+                    x-data="{ language: @js($post->language === 'de' ? 'de' : 'en'), tone: 'formal', length: 'standard', resume: @js($withCv) }">
+                    <h2 id="letter-title" class="card-title">{{ __('Write a cover letter') }}</h2>
+                    <p class="muted text-sm">{{ __('The AI writes it from this job and your profile, and every paragraph is checked against your profile. You can edit it before you download it.') }}</p>
+                    <label class="field">
+                        <span>{{ __('Language') }}</span>
+                        <select x-model="language">
+                            <option value="en">{{ __('English') }}</option>
+                            <option value="de">{{ __('German (Anschreiben)') }}</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>{{ __('Tone') }}</span>
+                        <select x-model="tone">
+                            <option value="formal">{{ __('Formal') }}</option>
+                            <option value="warm">{{ __('Warm') }}</option>
+                            <option value="confident">{{ __('Confident') }}</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>{{ __('Length') }}</span>
+                        <select x-model="length">
+                            <option value="short">{{ __('Short, about 150 words') }}</option>
+                            <option value="standard">{{ __('Standard, about 280 words') }}</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>{{ __('Send with') }}</span>
+                        <select x-model.number="resume">
+                            <option :value="null">{{ __('No CV') }}</option>
+                            @foreach ($resumes as $resume)
+                                <option value="{{ $resume->id }}">{{ $resume->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    @error('letter')
+                        <p class="field-error text-sm" role="alert">{{ $message }}</p>
+                    @enderror
+                    <button type="button" x-on:click="$wire.writeLetter(language, tone, length, resume || null)" wire:loading.attr="disabled" wire:target="writeLetter" class="button button-primary self-start">{{ __('Write the letter') }}</button>
+                    @if ($letters->isNotEmpty())
+                        <div>
+                            <h3 class="text-sm font-semibold">{{ __('Letters for this job') }}</h3>
+                            <ul class="mt-1 text-sm">
+                                @foreach ($letters as $letter)
+                                    <li><a href="{{ route('letters.edit', ['id' => $letter->id]) }}" class="link">{{ $letter->language === 'de' ? __('Cover letter (German)') : __('Cover letter (English)') }} · {{ $letter->updated_at->translatedFormat('j M Y, H:i') }}</a></li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </section>
             </div>
         </div>
     @endif

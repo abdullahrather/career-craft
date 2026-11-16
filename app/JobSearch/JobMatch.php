@@ -75,6 +75,22 @@ final class JobMatch
         return ['score' => $score, 'required' => $required, 'nice' => $nice];
     }
 
+    /**
+     * The post's skills the profile has, under the post's names: what the AI may bring
+     * forward, and names the fact guard counts as known ("Vue.js" for a profile's "Vue").
+     *
+     * @return list<string>
+     */
+    public static function found(?JobPost $post, Profile $profile): array
+    {
+        if ($post === null) {
+            return [];
+        }
+        $match = self::of($post, $profile);
+
+        return array_column(array_filter([...$match['required'], ...$match['nice']], fn (array $item): bool => $item['where'] !== null), 'skill');
+    }
+
     /** @param  list<Found>  $found */
     public static function matched(array $found): int
     {
