@@ -32,7 +32,15 @@ final class Tailor implements Agent, HasProviderOptions, HasStructuredOutput
     /** The job and the text, each marked off so it reads as data. */
     public function input(string $text): string
     {
-        $mark = fn (string $value): string => str_replace(['<job>', '</job>', '<skills>', '</skills>', '<text>', '</text>'], '', $value);
+        // Until nothing changes: removing one marker can join the rest of a nested one, as in "<</job>job>".
+        $mark = function (string $value): string {
+            do {
+                $before = $value;
+                $value = (string) preg_replace('/<\/?(?:job|skills|text)>/i', '', $value);
+            } while ($value !== $before);
+
+            return $value;
+        };
         $skills = $this->skills === [] ? 'none' : implode(', ', $this->skills);
 
         return '<job>'.$mark($this->job).'</job>'
