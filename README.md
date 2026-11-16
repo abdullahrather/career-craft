@@ -80,6 +80,21 @@ From a job post, choose **Write the letter**: in English or German (Anschreiben)
 
 At the end of the career profile, **Suggest a headline and About** writes both from your profile, in English or German, within LinkedIn's limits. The fact guard checks the headline and every paragraph of the About; a flagged one can be copied only once you confirm it. You paste them into LinkedIn yourself: CareerCraft never signs in to LinkedIn.
 
+## Find jobs
+
+**Find jobs** searches free public job sources and keeps what it finds as one shared list:
+
+| Source | What it gives | Key |
+|---|---|---|
+| [Bundesagentur für Arbeit](https://www.arbeitsagentur.de/jobsuche/) | Germany's largest job board, searched by title and place; each job's description is read from its details | none |
+| [Arbeitnow](https://www.arbeitnow.com) | the newest jobs, mostly in Germany, as a feed without search | none |
+| [Adzuna](https://developer.adzuna.com) | a search across German job boards, with short descriptions | a free key in `ADZUNA_APP_ID` and `ADZUNA_APP_KEY`; left out without one |
+
+- **In the background:** a search shows the jobs already found straight away, and fetches new ones; the list updates as they arrive. Each source is asked the same search at most once an hour.
+- **One form:** titles without the gender note "(m/w/d)", descriptions as plain text without web addresses, remote or hybrid where the source says so, and salaries only when the employer gives them (not Adzuna's estimates).
+- **Duplicates merged:** the same job on two sources (the same title, company without its legal form, and place) is one job with both links.
+- **Analyse:** any job opens as a job post, ready for the match score, a tailored CV and a cover letter. Jobs no source has shown for 30 days drop out of the list.
+
 ## Accounts
 
 - Sign up with email confirmation, sign in, and reset a forgotten password. The reset form answers the same whether or not an account exists, so it can't be used to find out who has one.

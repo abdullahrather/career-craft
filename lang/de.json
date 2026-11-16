@@ -543,5 +543,22 @@
     "Suggest a headline and About": "Überschrift und Info vorschlagen",
     "Writing and checking the suggestions…": "Die Vorschläge werden geschrieben und geprüft …",
     "Copy": "Kopieren",
-    "Copied": "Kopiert"
+    "Copied": "Kopiert",
+    "What": "Was",
+    "Where": "Wo",
+    "Find jobs": "Jobs finden",
+    "Jobs from the Bundesagentur für Arbeit, Arbeitnow and, with a free key, Adzuna. The same job from two sources is shown once. Analyse one to see your match, tailor a CV and write a letter.": "Jobs von der Bundesagentur für Arbeit, Arbeitnow und, mit einem kostenlosen Schlüssel, Adzuna. Derselbe Job aus zwei Quellen erscheint einmal. Analysieren Sie einen, um Ihre Übereinstimmung zu sehen, einen Lebenslauf anzupassen und ein Anschreiben zu verfassen.",
+    "a year": "im Jahr",
+    "a month": "im Monat",
+    "an hour": "pro Stunde",
+    "A job title, skill or company": "Eine Stelle, Fähigkeit oder Firma",
+    "A city, or leave empty for anywhere": "Ein Ort, oder leer lassen für überall",
+    "Search": "Suchen",
+    "Include remote jobs from anywhere": "Remote-Jobs von überall einbeziehen",
+    "Fetching new jobs from the job sources… The list updates as they come in.": "Neue Jobs werden von den Jobquellen geholt … Die Liste aktualisiert sich, sobald sie eintreffen.",
+    "No jobs found yet.": "Noch keine Jobs gefunden.",
+    "No jobs found. Search to fetch jobs from the job sources.": "Keine Jobs gefunden. Suchen Sie, um Jobs von den Jobquellen zu holen.",
+    "From": "Von",
+    "Analyse": "Analysieren",
+    "Pages": "Seiten"
 }
