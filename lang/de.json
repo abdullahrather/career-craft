@@ -533,5 +533,15 @@
     "With the CV :name, as it is now.": "Mit dem Lebenslauf :name in seiner jetzigen Form.",
     "Confirm or remove what is marked above first.": "Bestätigen oder entfernen Sie zuerst, was oben markiert ist.",
     "Delete this cover letter?": "Dieses Anschreiben löschen?",
-    "Preview of the cover letter": "Vorschau des Anschreibens"
+    "Preview of the cover letter": "Vorschau des Anschreibens",
+    "Fill in your profile first: the suggestions come from it.": "Füllen Sie zuerst Ihr Profil aus: Die Vorschläge entstehen daraus.",
+    "About": "Info",
+    "LinkedIn": "LinkedIn",
+    "A headline and About section for LinkedIn, written from your profile and checked against it. Copy them into LinkedIn yourself.": "Eine Überschrift und ein Info-Abschnitt für LinkedIn, aus Ihrem Profil geschrieben und damit abgeglichen. Kopieren Sie beides selbst in LinkedIn.",
+    "The AI is not set up yet. An admin can choose a provider under AI settings.": "Die KI ist noch nicht eingerichtet. Ein Admin kann unter KI-Einstellungen einen Anbieter wählen.",
+    "German": "Deutsch",
+    "Suggest a headline and About": "Überschrift und Info vorschlagen",
+    "Writing and checking the suggestions…": "Die Vorschläge werden geschrieben und geprüft …",
+    "Copy": "Kopieren",
+    "Copied": "Kopiert"
 }
