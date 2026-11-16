@@ -14,6 +14,10 @@
         </label>
     </form>
 
+    <div class="mt-4">
+        <livewire:discover.companies />
+    </div>
+
     <div aria-live="polite">
         @if ($fetching)
             <p class="mt-4 flex items-center gap-2 text-sm" role="status">

@@ -94,6 +94,8 @@ At the end of the career profile, **Suggest a headline and About** writes both f
 - **One form:** titles without the gender note "(m/w/d)", descriptions as plain text without web addresses, remote or hybrid where the source says so, and salaries only when the employer gives them (not Adzuna's estimates).
 - **Duplicates merged:** the same job on two sources (the same title, company without its legal form, and place) is one job with both links.
 - **Analyse:** any job opens as a job post, ready for the match score, a tailored CV and a cover letter. Jobs no source has shown for 30 days drop out of the list.
+- **Companies you follow:** paste a link to a company's job board on [Greenhouse](https://developers.greenhouse.io/job-board.html), [Lever](https://github.com/lever/postings-api) or [Ashby](https://developers.ashbyhq.com/docs/public-job-posting-api) (the board, or one of its jobs). Its open jobs join the list straight away, with salaries where Lever or Ashby boards show them. No key is needed.
+- **Daily refresh:** the `scheduler` service in `compose.yaml` runs `php artisan careercraft:refresh-jobs` every morning at 06:00. It fetches each followed board again and deletes jobs no source has shown for 30 days. Run the command yourself to refresh at any time.
 
 ## Accounts
 

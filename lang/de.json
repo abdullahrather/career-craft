@@ -547,7 +547,7 @@
     "What": "Was",
     "Where": "Wo",
     "Find jobs": "Jobs finden",
-    "Jobs from the Bundesagentur für Arbeit, Arbeitnow and, with a free key, Adzuna. The same job from two sources is shown once. Analyse one to see your match, tailor a CV and write a letter.": "Jobs von der Bundesagentur für Arbeit, Arbeitnow und, mit einem kostenlosen Schlüssel, Adzuna. Derselbe Job aus zwei Quellen erscheint einmal. Analysieren Sie einen, um Ihre Übereinstimmung zu sehen, einen Lebenslauf anzupassen und ein Anschreiben zu verfassen.",
+    "Jobs from the Bundesagentur für Arbeit, Arbeitnow, the companies you follow and, with a free key, Adzuna. The same job from two sources is shown once. Analyse one to see your match, tailor a CV and write a letter.": "Jobs von der Bundesagentur für Arbeit, Arbeitnow, den Unternehmen, denen Sie folgen, und, mit einem kostenlosen Schlüssel, Adzuna. Derselbe Job aus zwei Quellen erscheint einmal. Analysieren Sie einen, um Ihre Übereinstimmung zu sehen, einen Lebenslauf anzupassen und ein Anschreiben zu verfassen.",
     "a year": "im Jahr",
     "a month": "im Monat",
     "an hour": "pro Stunde",
@@ -560,5 +560,17 @@
     "No jobs found. Search to fetch jobs from the job sources.": "Keine Jobs gefunden. Suchen Sie, um Jobs von den Jobquellen zu holen.",
     "From": "Von",
     "Analyse": "Analysieren",
-    "Pages": "Seiten"
+    "Pages": "Seiten",
+    "Companies you follow": "Unternehmen, denen Sie folgen",
+    "Follow a company that has its job board on Greenhouse, Lever or Ashby. Its jobs join the list, and are fetched again every day.": "Folgen Sie einem Unternehmen, dessen Jobbörse auf Greenhouse, Lever oder Ashby liegt. Seine Jobs kommen in die Liste und werden jeden Tag neu geholt.",
+    "Job board link": "Link zur Jobbörse",
+    "Such as https://jobs.lever.co/company, or a link to one of its jobs": "Zum Beispiel https://jobs.lever.co/unternehmen, oder ein Link zu einem seiner Jobs",
+    "Follow": "Folgen",
+    "Fetching jobs…": "Jobs werden geholt …",
+    "Unfollow": "Nicht mehr folgen",
+    "Unfollow :name": ":name nicht mehr folgen",
+    "Paste a link to a company's job board on Greenhouse, Lever or Ashby.": "Fügen Sie einen Link zur Jobbörse eines Unternehmens auf Greenhouse, Lever oder Ashby ein.",
+    "You already follow this company.": "Sie folgen diesem Unternehmen bereits.",
+    "There is no job board at this link. Check the company name in it.": "Unter diesem Link gibt es keine Jobbörse. Prüfen Sie den Unternehmensnamen darin.",
+    "The job board didn't answer. Try again later.": "Die Jobbörse hat nicht geantwortet. Versuchen Sie es später noch einmal."
 }
