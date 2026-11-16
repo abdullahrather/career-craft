@@ -37,7 +37,8 @@ final class JobMatch
         $find = function (string $skill) use ($listed, $text): array {
             $names = Skills::names($skill);
             foreach ($listed as $name) {
-                if (in_array(Skills::key($name), $names, true)) {
+                // Both sides' forms, so "REST API" in a post matches "REST APIs" in a profile.
+                if (array_intersect(Skills::names($name), $names) !== []) {
                     return ['skill' => $skill, 'where' => 'skills'];
                 }
             }

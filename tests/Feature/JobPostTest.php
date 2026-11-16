@@ -215,6 +215,15 @@ describe('Matching a profile to a job post', function (): void {
         expect(JobMatch::of($this->post, $this->profile->fresh())['score'])->toBe(14);
     });
 
+    it('matches a singular skill in the post to a plural one in the profile', function (): void {
+        $this->post->update(['required_skills' => ['REST API'], 'nice_skills' => ['Microservice']]);
+        $this->profile->skills()->create(['name' => 'REST APIs']);
+        $this->profile->experiences()->create(['title' => 'Developer', 'employer' => 'Nordlicht', 'starts_on' => '2021-03-01', 'achievements' => ['Split the shop into microservices']]);
+
+        expect(JobMatch::of($this->post, $this->profile->fresh())['required'])->toBe([['skill' => 'REST API', 'where' => 'skills']])
+            ->and(JobMatch::of($this->post, $this->profile->fresh())['nice'])->toBe([['skill' => 'Microservice', 'where' => 'profile']]);
+    });
+
     it('has no score when the post names no skills', function (): void {
         $this->post->update(['required_skills' => [], 'nice_skills' => []]);
 

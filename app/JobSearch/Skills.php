@@ -59,8 +59,9 @@ final class Skills
     }
 
     /**
-     * Whether the text has the skill under any of its names, as whole words, or followed by
-     * "kenntnisse" as German writes it: "Deutschkenntnisse", "PHP-Kenntnisse".
+     * Whether the text has the skill under any of its names, as whole words, in the plural
+     * ("REST APIs" for "REST API"), or followed by "kenntnisse" as German writes it:
+     * "Deutschkenntnisse", "PHP-Kenntnisse".
      */
     public static function in(string $skill, string $text): bool
     {
@@ -70,7 +71,7 @@ final class Skills
             $short = preg_match('/^\p{L}{1,2}$/u', $name) === 1;
             $pattern = $short
                 ? '/(?<![\p{L}\p{N}])(?:'.preg_quote(mb_strtoupper($name), '/').'|'.preg_quote(mb_convert_case($name, MB_CASE_TITLE), '/').')(?![\p{L}\p{N}])/u'
-                : '/(?<![\p{L}\p{N}])'.preg_quote($name, '/').'(?:kenntnisse)?(?![\p{L}\p{N}])/iu';
+                : '/(?<![\p{L}\p{N}])'.preg_quote($name, '/').'s?(?:kenntnisse)?(?![\p{L}\p{N}])/iu';
             if ($name !== '' && preg_match($pattern, $text) === 1) {
                 return true;
             }
