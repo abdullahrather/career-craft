@@ -34,6 +34,8 @@ describe('The fact guard', function (): void {
             ->and(guard('Supervised the checkout work'))->toBe([['quote' => 'Supervised', 'kind' => 'title']])
             ->and(guard('Led the order API team', [['quote' => 'Led the order API team', 'kind' => 'title']]))->toBe([['quote' => 'Led the order API team', 'kind' => 'title']])
             ->and(guard('Managed releases'))->toBe([])
+            // In capitals it's the light, not leading. First in the sentence, so the name check leaves it.
+            ->and(guard('LED lighting for the checkout area'))->toBe([])
             ->and(guard('Coached new colleagues during onboarding'))->toBe([]);
     });
 

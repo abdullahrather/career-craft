@@ -217,8 +217,11 @@ final readonly class FactGuard
     {
         $found = [];
         foreach (self::LEADING_WORDS as $word) {
-            if (preg_match('/(?<![\p{L}\p{N}])'.$word.'(?![\p{L}\p{N}])/iu', $suggestion, $match) === 1 && ! self::contains($sources, $word)) {
-                $found[] = $match[0];
+            preg_match_all('/(?<![\p{L}\p{N}])'.$word.'(?![\p{L}\p{N}])/iu', $suggestion, $matches);
+            // Not in capitals: "LED" is a light, not leading.
+            $words = array_filter($matches[0], fn (string $match): bool => mb_strtoupper($match) !== $match);
+            if ($words !== [] && ! self::contains($sources, $word)) {
+                $found[] = reset($words);
             }
         }
 
