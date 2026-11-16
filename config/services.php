@@ -50,6 +50,12 @@ return [
         'redirect' => env('APP_URL').'/auth/github/callback',
     ],
 
+    // Optional job source: a free key from developer.adzuna.com. Left out without one.
+    'adzuna' => [
+        'app_id' => env('ADZUNA_APP_ID'),
+        'app_key' => env('ADZUNA_APP_KEY'),
+    ],
+
     // Makes the PDF of a CV with headless Chromium.
     'gotenberg' => [
         'url' => env('GOTENBERG_URL', 'http://gotenberg:3000'),

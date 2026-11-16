@@ -41,6 +41,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         return view('jobs.show', ['post' => $user->jobPosts()->findOrFail($id)]);
     })->whereNumber('id')->name('jobs.show');
 
+    Route::view('/discover', 'discover')->name('discover');
+
     Route::get('/letters/{id}', [LetterController::class, 'edit'])->whereNumber('id')->name('letters.edit');
     Route::get('/letters/{id}/preview', [LetterController::class, 'preview'])->whereNumber('id')->name('letters.preview');
     Route::get('/letters/{id}/pdf/{with}', [LetterController::class, 'download'])->whereNumber('id')->whereIn('with', ['letter', 'cv'])->name('letters.download');
