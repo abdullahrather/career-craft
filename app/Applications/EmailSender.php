@@ -104,8 +104,8 @@ final readonly class EmailSender
         } catch (TransportExceptionInterface $exception) {
             $reason = Str::limit($exception->getMessage(), 300);
 
-            // Gmail's errors say where they come from; a mail server's are its own reply.
-            return $account->provider === 'gmail'
+            // Gmail's and Outlook's errors say where they come from; a mail server's are its own reply.
+            return $account->provider !== 'smtp'
                 ? __('The email could not be sent. :reason', ['reason' => $reason])
                 : __('The email could not be sent. Your mail server said: :reason', ['reason' => $reason]);
         }

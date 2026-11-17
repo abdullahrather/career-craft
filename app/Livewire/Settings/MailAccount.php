@@ -6,6 +6,7 @@ namespace App\Livewire\Settings;
 
 use App\Applications\EmailSender;
 use App\Http\Controllers\GmailConnectController;
+use App\Http\Controllers\OutlookConnectController;
 use App\Models\MailAccount as Account;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -98,7 +99,7 @@ final class MailAccount extends Component
 
     public function render(): View
     {
-        return view('livewire.settings.mail-account', ['account' => $this->user()->mailAccount, 'securities' => Account::securities(), 'gmail' => GmailConnectController::enabled()]);
+        return view('livewire.settings.mail-account', ['account' => $this->user()->mailAccount, 'securities' => Account::securities(), 'gmail' => GmailConnectController::enabled(), 'outlook' => OutlookConnectController::enabled(), 'providers' => Account::PROVIDERS]);
     }
 
     private function user(): User

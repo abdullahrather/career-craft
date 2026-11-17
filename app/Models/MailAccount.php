@@ -17,12 +17,12 @@ use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
 
 /**
  * The candidate's own mail account, so applications go out from their address: a mail server
- * (smtp), or a Gmail sign-in (gmail). Passwords and tokens are encrypted, and never shown
+ * (smtp), or a Gmail or Outlook sign-in. Passwords and tokens are encrypted, and never shown
  * again once saved.
  *
  * @property int $id
  * @property int $user_id
- * @property string $provider smtp or gmail.
+ * @property string $provider smtp, gmail or outlook.
  * @property string|null $host
  * @property int|null $port
  * @property string|null $security
@@ -45,6 +45,12 @@ final class MailAccount extends Model
      * @var (Closure(string): list<array<string, mixed>>)|null
      */
     public static ?Closure $lookup = null;
+
+    /** The database default, so an account has it before it is saved and reloaded. */
+    protected $attributes = ['provider' => 'smtp'];
+
+    /** The sign-ins that send through their provider's API, with their names. */
+    public const array PROVIDERS = ['gmail' => 'Gmail', 'outlook' => 'Outlook'];
 
     /** The ports mail servers take submissions on. */
     public const array PORTS = [25, 465, 587, 2525];
@@ -76,8 +82,10 @@ final class MailAccount extends Model
      */
     public function mailer(): Mailer|string
     {
-        if ($this->provider === 'gmail') {
-            return Mail::build(['transport' => 'gmail', 'account' => $this]);
+        // A sign-in sends through its provider's API; the transport gets the account itself,
+        // so an account can be tested before it's saved.
+        if ($this->provider !== 'smtp') {
+            return Mail::build(['transport' => $this->provider, 'account' => $this]);
         }
         $settings = $this->transport();
         $pinned = null;
