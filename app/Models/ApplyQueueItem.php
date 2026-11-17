@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $resume_id
  * @property int|null $cover_letter_id
  * @property int|null $application_id
+ * @property int|null $resume_version_id
  * @property string $title
  * @property string $company
  * @property string $tone
@@ -36,7 +37,7 @@ use Illuminate\Support\Carbon;
  * @property-read CoverLetter|null $coverLetter
  * @property-read Application|null $application
  */
-#[Fillable(['job_listing_id', 'job_post_id', 'base_resume_id', 'resume_id', 'cover_letter_id', 'application_id', 'title', 'company', 'tone', 'error', 'prepared_at', 'approved_at', 'skipped_at'])]
+#[Fillable(['job_listing_id', 'job_post_id', 'base_resume_id', 'resume_id', 'cover_letter_id', 'application_id', 'resume_version_id', 'title', 'company', 'tone', 'error', 'prepared_at', 'approved_at', 'skipped_at'])]
 final class ApplyQueueItem extends Model
 {
     /** How many jobs one person can queue a day: each one costs AI time, and deserves a careful look. */

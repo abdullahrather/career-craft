@@ -32,6 +32,8 @@ return new class extends Migration
             $table->string('error', 100)->nullable();
             // When the tailored CV and letter were started; they may be deleted afterwards.
             $table->timestamp('prepared_at')->nullable();
+            // The CV version approving saved, used again if approving is tried again.
+            $table->foreignId('resume_version_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->timestamp('skipped_at')->nullable();
             $table->timestamps();

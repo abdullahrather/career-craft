@@ -183,6 +183,36 @@ describe('Approving', function (): void {
         Storage::disk('local')->assertExists([$application->cv_path, $application->letter_path]);
     });
 
+    it('saves the CV version once when approving is tried again after the letter\'s PDF failed', function (): void {
+        Storage::fake('local');
+        $pdf = Http::response(pdfWith(['Lena Brandt']), 200, ['Content-Type' => 'application/pdf']);
+        Http::fakeSequence('gotenberg:3000/*')->pushResponse($pdf)->push('down', 503)->pushResponse($pdf);
+        $user = queueCandidate();
+        $item = preparedItem($user);
+
+        Livewire::actingAs($user)->test(Review::class, ['id' => $item->id])->call('approve')->assertHasErrors('approve');
+        Livewire::actingAs($user)->test(Review::class, ['id' => $item->id])->call('approve')->assertHasNoErrors();
+
+        expect($item->resume->versions()->count())->toBe(1)
+            ->and($item->fresh()->state())->toBe('approved');
+    });
+
+    it('saves a new version when the CV changed after a failed try', function (): void {
+        Storage::fake('local');
+        $pdf = Http::response(pdfWith(['Lena Brandt']), 200, ['Content-Type' => 'application/pdf']);
+        Http::fakeSequence('gotenberg:3000/*')->pushResponse($pdf)->push('down', 503)->pushResponse($pdf)->pushResponse($pdf);
+        $user = queueCandidate();
+        $item = preparedItem($user, TailoredChange::READY);
+
+        Livewire::actingAs($user)->test(Review::class, ['id' => $item->id])->call('approve')->assertHasErrors('approve');
+        $this->travel(1)->minute();
+        $item->resume->changes()->first()->update(['status' => TailoredChange::ACCEPTED]);
+        Livewire::actingAs($user)->test(Review::class, ['id' => $item->id])->call('approve')->assertHasNoErrors();
+
+        expect($item->resume->versions()->count())->toBe(2)
+            ->and($item->fresh()->application->resume_version_id)->toBe($item->resume->versions()->first()->id);
+    });
+
     it('uses the application already tracked for the job', function (): void {
         Storage::fake('local');
         Http::fake(['gotenberg:3000/*' => Http::response(pdfWith(['Lena Brandt']), 200, ['Content-Type' => 'application/pdf'])]);

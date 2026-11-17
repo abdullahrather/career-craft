@@ -17,6 +17,7 @@ use App\Models\ResumeVersion;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
 
 /**
@@ -77,12 +78,19 @@ final readonly class ApplyQueue
         if (! $letter->sendable()) {
             return ['field' => 'approve', 'message' => __('Finish the letter first: confirm or remove what is marked in it.')];
         }
-        try {
-            $version = ResumeVersion::saveFrom($resume);
-        } catch (ConnectionException|RequestException $exception) {
-            report($exception);
+        // A version saved by a try that failed later is used again, unless the CV changed since.
+        $version = $item->resume_version_id !== null ? $resume->versions()->find($item->resume_version_id) : null;
+        $lastChange = $resume->changes()->max('updated_at');
+        $changed = max($resume->updated_at->getTimestamp(), is_string($lastChange) ? Carbon::parse($lastChange)->getTimestamp() : 0);
+        if ($version === null || $version->created_at->getTimestamp() < $changed) {
+            try {
+                $version = ResumeVersion::saveFrom($resume);
+            } catch (ConnectionException|RequestException $exception) {
+                report($exception);
 
-            return ['field' => 'approve', 'message' => __('The PDF could not be made. Check that the PDF service is running: docker compose up -d gotenberg')];
+                return ['field' => 'approve', 'message' => __('The PDF could not be made. Check that the PDF service is running: docker compose up -d gotenberg')];
+            }
+            $item->update(['resume_version_id' => $version->id]);
         }
 
         $user = $item->user;
@@ -97,7 +105,8 @@ final readonly class ApplyQueue
         ]);
         $error = $this->documents->record($application, $version, $letter);
         if ($error !== null) {
-            return $error;
+            // The review page shows approving's errors in one place.
+            return ['field' => 'approve', 'message' => $error['message']];
         }
         $application->log('queue');
         if ($application->status === 'saved') {
