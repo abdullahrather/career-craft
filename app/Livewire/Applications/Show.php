@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
@@ -126,6 +127,7 @@ final class Show extends Component
             }
         }
 
+        $hadDocuments = $application->cv_path !== null || $application->letter_path !== null;
         $directory = Application::directory($application->id);
         $disk = Storage::disk('local');
         $cv !== null ? $disk->put("{$directory}/cv.pdf", $cv) : $disk->delete("{$directory}/cv.pdf");
@@ -138,6 +140,9 @@ final class Show extends Component
             'letter_name' => $letterName,
             'letter_path' => $letterPdf !== null ? "{$directory}/letter.pdf" : null,
         ]);
+        if ($cv !== null || $letterPdf !== null || $hadDocuments) {
+            $application->log('documents', ['cv' => $application->cv_name, 'letter' => $letterName]);
+        }
         session()->flash('recorded', __('Recorded. These copies stay with the application.'));
     }
 
@@ -149,6 +154,10 @@ final class Show extends Component
         $this->redirectRoute('applications', navigate: true);
     }
 
+    /** A note or contact added below changes the timeline. */
+    #[On('application-changed')]
+    public function refreshTimeline(): void {}
+
     public function render(): View
     {
         $application = $this->application($this->applicationId);
@@ -156,6 +165,7 @@ final class Show extends Component
 
         return view('livewire.applications.show', [
             'application' => $application,
+            'events' => $application->events()->get(),
             'statuses' => Application::statusNames(),
             // The CV versions and letters made for this job come first.
             'versions' => $this->versions()->with('resume')->orderBy('created_at', 'desc')->get()

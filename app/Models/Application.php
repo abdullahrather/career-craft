@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -30,6 +32,9 @@ use Illuminate\Support\Carbon;
  * @property string|null $letter_name
  * @property string|null $letter_path
  * @property-read JobPost|null $jobPost
+ * @property-read Collection<int, ApplicationContact> $contacts
+ * @property-read Collection<int, ApplicationNote> $notes
+ * @property-read Collection<int, ApplicationEvent> $events
  */
 #[Fillable(['job_post_id', 'title', 'company', 'location', 'url', 'source', 'status', 'position', 'applied_on', 'resume_version_id', 'cv_name', 'cv_path', 'cover_letter_id', 'letter_name', 'letter_path'])]
 final class Application extends Model
@@ -56,13 +61,44 @@ final class Application extends Model
         $last = $user->applications()->where('status', 'saved')->max('position');
         $position = is_numeric($last) ? (int) $last + 1 : 0;
 
-        return $user->applications()->create([...$values, 'status' => 'saved', 'position' => $position]);
+        $application = $user->applications()->create([...$values, 'status' => 'saved', 'position' => $position]);
+        $application->log('added', ['source' => $values['source'] ?? '']);
+
+        return $application;
     }
 
     /** Where an application's document copies are kept, so deleting it can remove them. */
     public static function directory(int $id): string
     {
         return "applications/{$id}";
+    }
+
+    /** @return HasMany<ApplicationContact, $this> */
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(ApplicationContact::class)->orderBy('id');
+    }
+
+    /** @return HasMany<ApplicationNote, $this> Newest first. */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(ApplicationNote::class)->latest('id');
+    }
+
+    /** @return HasMany<ApplicationEvent, $this> Newest first. */
+    public function events(): HasMany
+    {
+        return $this->hasMany(ApplicationEvent::class)->latest('id');
+    }
+
+    /**
+     * Adds an event to the timeline.
+     *
+     * @param  array<string, string|null>  $data
+     */
+    public function log(string $type, array $data = []): void
+    {
+        $this->events()->create(['type' => $type, 'data' => $data]);
     }
 
     /** @return BelongsTo<JobPost, $this> */
@@ -80,6 +116,7 @@ final class Application extends Model
         $column = self::query()->where('user_id', $this->user_id)->where('status', $status)->whereKeyNot($this->id)->orderBy('position')->orderBy('id')->pluck('id')->all();
         array_splice($column, max(0, min($position ?? count($column), count($column))), 0, [$this->id]);
 
+        $from = $this->status;
         $this->status = $status;
         if ($status === 'applied' && $this->applied_on === null) {
             $this->applied_on = today();
@@ -87,6 +124,9 @@ final class Application extends Model
         $this->save();
         foreach ($column as $place => $id) {
             self::query()->whereKey($id)->update(['position' => $place]);
+        }
+        if ($from !== $status) {
+            $this->log('status', ['from' => $from, 'to' => $status]);
         }
     }
 

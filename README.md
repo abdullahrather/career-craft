@@ -110,6 +110,9 @@ A board of every job you are going for: Saved, Applied, Interviewing, Offer and 
 - **Add jobs:** "Track" on a job in Find jobs, "Track this job" on an analysed job post, or add one found elsewhere with its link and where you found it.
 - **Move cards:** drag a card to another column or place, or change its status in the card, which works by keyboard too. The first move to Applied dates the application today, unless it already has a date.
 - **What you sent:** on an application's page, record the CV version and cover letter you sent. A copy of each PDF stays with the application, so it shows exactly what went out even after the CV is deleted or the letter changed. Only a letter with nothing left to confirm can be recorded.
+- **Contacts:** the people behind an application, such as the recruiter or hiring manager, with email, phone and LinkedIn links.
+- **Notes:** dated notes on an application, newest first.
+- **Timeline:** what happened to an application, in order: when it was added and where it was found, every status change, the documents recorded, and the notes and contacts added. It is worded when shown, in your language.
 
 ## Accounts
 
