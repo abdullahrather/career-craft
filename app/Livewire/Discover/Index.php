@@ -8,16 +8,16 @@ use App\Ai\AiLimitReached;
 use App\Ai\AiRunner;
 use App\Jobs\AnalyseJobPost;
 use App\Jobs\ImportJobListings;
+use App\JobSearch\ListingFilters;
 use App\JobSearch\ListingRanker;
-use App\JobSources\Adzuna;
-use App\Models\DismissedListing;
 use App\Models\JobListing;
+use App\Models\SavedSearch;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -33,9 +33,6 @@ use Livewire\WithPagination;
 final class Index extends Component
 {
     use WithPagination;
-
-    /** How long a source isn't asked the same search again. */
-    private const int FRESH_MINUTES = 60;
 
     private const int PER_PAGE = 20;
 
@@ -60,13 +57,20 @@ final class Index extends Component
     #[Url]
     public bool $salary = false;
 
+    /** One company's jobs only: its company page. Left out of the address when empty. */
+    #[Url(except: '')]
+    public string $company = '';
+
+    /** How often a search saved now emails its new jobs. */
+    public string $frequency = 'daily';
+
     /** The job just marked "not interested", so it can be brought back. */
     public ?int $hidden = null;
 
     /** A changed filter or order starts again at the first page. */
     public function updated(string $property): void
     {
-        if (in_array($property, ['remote', 'sort', 'mode', 'salary'], true)) {
+        if (in_array($property, ['remote', 'sort', 'mode', 'salary', 'company'], true)) {
             $this->resetPage();
         }
     }
@@ -95,18 +99,52 @@ final class Index extends Component
         $this->where = trim($this->where);
         $this->validate(['what' => ['nullable', 'string', 'max:100'], 'where' => ['nullable', 'string', 'max:100']], attributes: ['what' => __('What'), 'where' => __('Where')]);
         $this->resetPage();
-        $user = $this->user();
+        ImportJobListings::fetch($this->what, $this->where, $this->user()->id);
+    }
 
-        foreach (ImportJobListings::SOURCES as $source) {
-            if ($source === 'adzuna' && ! Adzuna::enabled()) {
-                continue;
-            }
-            // A failed import gives the key back, so the search can be tried again.
-            if (Cache::add(ImportJobListings::freshKey($source, $this->what, $this->where), true, now()->addMinutes(self::FRESH_MINUTES))) {
-                Cache::put(ImportJobListings::runningKey($user->id, $source), true, now()->addMinutes(10));
-                ImportJobListings::dispatch($source, $this->what, $this->where, $user->id);
-            }
+    /** Saves the search on the page, to email its new jobs daily or weekly. */
+    public function saveSearch(): void
+    {
+        $this->validate([
+            'frequency' => ['required', Rule::in(SavedSearch::FREQUENCIES)],
+            'what' => ['nullable', 'string', 'max:100'],
+            'where' => ['nullable', 'string', 'max:100'],
+            'mode' => ['nullable', Rule::in(ListingFilters::MODES)],
+            'company' => ['nullable', 'string', 'max:250'],
+        ], attributes: ['frequency' => __('Email me'), 'what' => __('What'), 'where' => __('Where'), 'mode' => __('Work mode'), 'company' => __('Company')]);
+        $user = $this->user();
+        $search = $this->filters();
+        $values = ['what' => trim($search->what), 'where' => trim($search->where), 'remote' => $search->remote, 'mode' => $search->mode, 'salary' => $search->salary, 'company' => $search->company];
+        $saved = $user->savedSearches()->where($values)->first();
+        if ($saved === null && $user->savedSearches()->count() >= SavedSearch::MAX) {
+            $this->addError('frequency', __('You can save up to :max searches. Delete one first.', ['max' => SavedSearch::MAX]));
+
+            return;
         }
+        // Only jobs found from now on are new to its first alert.
+        $saved === null
+            ? $user->savedSearches()->create([...$values, 'frequency' => $this->frequency, 'checked_at' => now()])
+            : $saved->update(['frequency' => $this->frequency]);
+        session()->flash('saved', __('Search saved. New jobs for it will be emailed to you.'));
+    }
+
+    /** Runs a saved search: its filters on the page, and new jobs fetched for it. */
+    public function openSearch(int $id): void
+    {
+        $saved = $this->user()->savedSearches()->findOrFail($id);
+        $this->fill(['what' => $saved->what, 'where' => $saved->where, 'remote' => $saved->remote, 'mode' => $saved->mode, 'salary' => $saved->salary, 'company' => $saved->company]);
+        $this->search();
+    }
+
+    public function setFrequency(int $id, string $frequency): void
+    {
+        abort_unless(in_array($frequency, SavedSearch::FREQUENCIES, true), 422);
+        $this->user()->savedSearches()->findOrFail($id)->update(['frequency' => $frequency]);
+    }
+
+    public function deleteSearch(int $id): void
+    {
+        $this->user()->savedSearches()->whereKey($id)->delete();
     }
 
     /** Shows the jobs of a company just followed. */
@@ -139,25 +177,8 @@ final class Index extends Component
     public function render(): View
     {
         $user = $this->user();
-        $words = array_filter(preg_split('/\s+/u', $this->what) ?: []);
-        $query = JobListing::query()
-            ->where('last_seen_at', '>=', now()->subDays(JobListing::KEEP_DAYS))
-            ->whereNotIn('id', $user->dismissedListings()->whereNotNull('job_listing_id')->select('job_listing_id'))
-            ->when($words !== [], function (Builder $query) use ($words): void {
-                foreach ($words as $word) {
-                    $query->where(fn (Builder $match) => $match->whereLike('title', "%{$word}%")->orWhereLike('company', "%{$word}%")->orWhereLike('description', "%{$word}%"));
-                }
-            })
-            ->when($this->where !== '', fn (Builder $query) => $query->where(fn (Builder $place) => $place->whereLike('location', "%{$this->where}%")
-                ->when($this->remote, fn (Builder $remote) => $remote->orWhere('work_mode', 'remote'))))
-            ->when(in_array($this->mode, ['remote', 'hybrid', 'onsite'], true), fn (Builder $query) => $query->where('work_mode', $this->mode))
-            ->when($this->salary, fn (Builder $query) => $query->where(fn (Builder $paid) => $paid->whereNotNull('salary_min')->orWhereNotNull('salary_max')));
-
-        $ranker = new ListingRanker(
-            $user->id,
-            $user->profile()->with(['skills', 'experiences'])->first(),
-            array_values($user->dismissedListings()->latest('id')->limit(DismissedListing::RANKED)->get(['title'])->map(fn (DismissedListing $dismissed): string => $dismissed->title)->all()),
-        );
+        $query = $this->filters()->query($user);
+        $ranker = ListingRanker::for($user);
         $ranked = $this->sort === 'match' && $ranker->canRank();
         if ($ranked) {
             // Every matching job is ranked; then the page's jobs are loaded, in that order.
@@ -175,8 +196,33 @@ final class Index extends Component
             'canRank' => $ranker->canRank(),
             'yourSkills' => $ranked ? collect($listings->items())->mapWithKeys(fn (JobListing $listing): array => [$listing->id => $ranker->skillsIn($listing)])->all() : [],
             'hiddenTitle' => $this->hidden !== null ? $user->dismissedListings()->where('job_listing_id', $this->hidden)->value('title') : null,
+            'companyFacts' => $this->company !== '' ? $this->companyFacts($user) : null,
+            'savedSearches' => $user->savedSearches()->get(),
             'fetching' => array_filter(ImportJobListings::SOURCES, fn (string $source): bool => Cache::has(ImportJobListings::runningKey($user->id, $source))) !== [],
         ]);
+    }
+
+    private function filters(): ListingFilters
+    {
+        return new ListingFilters($this->what, $this->where, $this->remote, $this->mode, $this->salary, $this->company);
+    }
+
+    /**
+     * What the company page says about a company: its open jobs, where, how, and whether
+     * the person follows its job board.
+     *
+     * @return array{jobs: int, places: list<string>, modes: array<string, int>, followed: bool}
+     */
+    private function companyFacts(User $user): array
+    {
+        $listings = JobListing::query()->where('company', $this->company)->where('last_seen_at', '>=', now()->subDays(JobListing::KEEP_DAYS))->get(['location', 'work_mode']);
+
+        return [
+            'jobs' => $listings->count(),
+            'places' => array_values($listings->map(fn (JobListing $listing): string => $listing->location)->filter()->countBy()->sortDesc()->keys()->take(5)->map(fn (int|string $place): string => (string) $place)->all()),
+            'modes' => array_count_values(array_values(array_filter($listings->map(fn (JobListing $listing): string => $listing->work_mode)->all()))),
+            'followed' => $user->followedBoards()->where('name', $this->company)->exists(),
+        ];
     }
 
     private function user(): User

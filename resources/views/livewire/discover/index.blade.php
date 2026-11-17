@@ -18,6 +18,68 @@
         <livewire:discover.companies />
     </div>
 
+    <details class="card mt-4" wire:ignore.self>
+        <summary class="cursor-pointer font-semibold">{{ __('Saved searches') }} ({{ $savedSearches->count() }})</summary>
+        <p class="muted mt-2 text-sm">{{ __('Save the search on this page, and its new jobs are emailed to you, best match first.') }}</p>
+        <form wire:submit="saveSearch" class="mt-4 flex flex-wrap items-end gap-4">
+            <label class="field" for="frequency">
+                <span>{{ __('Email me') }}</span>
+                <select id="frequency" wire:model="frequency">
+                    <option value="daily">{{ __('Daily') }}</option>
+                    <option value="weekly">{{ __('Weekly') }}</option>
+                </select>
+            </label>
+            <button type="submit" class="button" wire:loading.attr="disabled" wire:target="saveSearch">{{ __('Save this search') }}</button>
+        </form>
+        <div aria-live="polite">
+            @foreach (['frequency', 'mode', 'company'] as $field)
+                @error($field)
+                    <p class="field-error mt-2 text-sm" role="alert">{{ $message }}</p>
+                @enderror
+            @endforeach
+            @if (session('saved'))
+                <p class="mt-2 text-sm" role="status">{{ session('saved') }}</p>
+            @endif
+        </div>
+
+        @if ($savedSearches->isNotEmpty())
+            <ul class="mt-4 flex flex-col gap-2">
+                @foreach ($savedSearches as $saved)
+                    @php($label = $saved->filters()->label())
+                    <li wire:key="saved-{{ $saved->id }}" class="flex flex-wrap items-center justify-between gap-3">
+                        <button type="button" wire:click="openSearch({{ $saved->id }})" class="link min-w-0 text-left wrap-break-word">{{ $label }}</button>
+                        <span class="flex shrink-0 items-center gap-2">
+                            <select wire:change="setFrequency({{ $saved->id }}, $event.target.value)" aria-label="{{ __('Email for :search', ['search' => $label]) }}">
+                                <option value="daily" @selected($saved->frequency === 'daily')>{{ __('Daily') }}</option>
+                                <option value="weekly" @selected($saved->frequency === 'weekly')>{{ __('Weekly') }}</option>
+                            </select>
+                            <button type="button" wire:click="deleteSearch({{ $saved->id }})" class="button button-small" aria-label="{{ __('Delete :search', ['search' => $label]) }}">{{ __('Delete') }}</button>
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </details>
+
+    @if ($companyFacts !== null)
+        <section class="card mt-4" aria-labelledby="company-name">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <h2 id="company-name" class="text-lg font-semibold wrap-break-word">{{ $company }}</h2>
+                    <p class="muted text-sm">{{ trans_choice('{0} No open jobs|{1} One open job|[2,*] :count open jobs', $companyFacts['jobs']) }}</p>
+                </div>
+                <button type="button" wire:click="$set('company', '')" class="button button-small">{{ __('All companies') }}</button>
+            </div>
+            @if ($companyFacts['places'] !== [])
+                <p class="mt-2 text-sm wrap-break-word">{{ __('Where: :places', ['places' => implode(', ', $companyFacts['places'])]) }}</p>
+            @endif
+            @if ($companyFacts['modes'] !== [])
+                <p class="mt-1 text-sm">{{ __('Work mode') }}: {{ implode(' · ', array_filter(array_map(fn (string $mode, string $text): string => isset($companyFacts['modes'][$mode]) ? "{$text} {$companyFacts['modes'][$mode]}" : '', array_keys($modes), $modes))) }}</p>
+            @endif
+            <p class="muted mt-2 text-sm">{{ $companyFacts['followed'] ? __('You follow its job board, so its jobs are fetched again every day.') : __('Save this search to get an email when the company lists new jobs.') }}</p>
+        </section>
+    @endif
+
     <div class="mt-4 grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
         <label class="field" for="sort">
             <span>{{ __('Order') }}</span>
@@ -70,7 +132,12 @@
                 <li wire:key="listing-{{ $listing->id }}" class="card flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div class="min-w-0">
                         <h2 class="font-semibold wrap-break-word">{{ $listing->title }}</h2>
-                        <p class="muted text-sm wrap-break-word">{{ implode(' · ', array_filter([$listing->company, $listing->location])) }}</p>
+                        <p class="muted text-sm wrap-break-word">
+                            @if ($listing->company !== '')
+                                <a href="{{ route('discover', ['company' => $listing->company]) }}" class="link" wire:navigate>{{ $listing->company }}</a>@if ($listing->location !== '') · @endif
+                            @endif
+                            {{ $listing->location }}
+                        </p>
                         <p class="mt-2 flex flex-wrap items-center gap-2 text-sm">
                             @if ($listing->work_mode !== '')
                                 <span class="badge">{{ $modes[$listing->work_mode] ?? $listing->work_mode }}</span>
