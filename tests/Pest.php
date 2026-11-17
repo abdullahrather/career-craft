@@ -5,10 +5,13 @@ declare(strict_types=1);
 use App\JobSources\FoundJob;
 use App\JobSources\ListingStore;
 use App\Models\AiUsage;
+use App\Models\CoverLetter;
 use App\Models\JobListing;
 use App\Models\Resume;
+use App\Models\ResumeVersion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature', 'Live');
@@ -125,4 +128,18 @@ function saveJobs(array $jobs): void
         ListingStore::save([foundJob(['externalId' => "job-{$index}", 'company' => "Firma {$index}", ...$values])]);
         JobListing::query()->latest('id')->first()->update(['posted_at' => now()->subDays(count($jobs) - $index)]);
     }
+}
+
+/** A saved CV version with its PDF on the (fake) disk. */
+function savedVersion(User $user, string $pdf = '%PDF-1.7 cv'): ResumeVersion
+{
+    $resume = resumeFor($user);
+    Storage::disk('local')->put("resumes/{$resume->id}/1.pdf", $pdf);
+
+    return $resume->versions()->create(['number' => 1, 'name' => 'Design roles', 'language' => 'en', 'template' => 'classic', 'pdf_path' => "resumes/{$resume->id}/1.pdf", 'docx_path' => "resumes/{$resume->id}/1.docx", 'text' => 'Lena Brandt', 'pages' => 1, 'checked' => 3, 'missing' => []]);
+}
+
+function readyLetter(User $user, array $values = []): CoverLetter
+{
+    return $user->coverLetters()->create(['language' => 'en', 'tone' => 'formal', 'length' => 'standard', 'recipient' => "Nordwind Logistik\nBremen", 'subject' => 'Application as Product Designer', 'body' => 'I design tools for depots.', 'checked' => true, 'status' => CoverLetter::READY, ...$values]);
 }

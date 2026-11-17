@@ -7,10 +7,8 @@ use App\Livewire\Applications\Show;
 use App\Livewire\Discover\Index;
 use App\Livewire\Jobs\Show as JobPage;
 use App\Models\Application;
-use App\Models\CoverLetter;
 use App\Models\JobListing;
 use App\Models\JobPost;
-use App\Models\ResumeVersion;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -20,20 +18,6 @@ use Livewire\Livewire;
 function column(User $user, string $status): array
 {
     return $user->applications()->where('status', $status)->orderBy('position')->orderBy('id')->pluck('title')->all();
-}
-
-/** A saved CV version with its PDF on the (fake) disk. */
-function savedVersion(User $user, string $pdf = '%PDF-1.7 cv'): ResumeVersion
-{
-    $resume = resumeFor($user);
-    Storage::disk('local')->put("resumes/{$resume->id}/1.pdf", $pdf);
-
-    return $resume->versions()->create(['number' => 1, 'name' => 'Design roles', 'language' => 'en', 'template' => 'classic', 'pdf_path' => "resumes/{$resume->id}/1.pdf", 'docx_path' => "resumes/{$resume->id}/1.docx", 'text' => 'Lena Brandt', 'pages' => 1, 'checked' => 3, 'missing' => []]);
-}
-
-function readyLetter(User $user, array $values = []): CoverLetter
-{
-    return $user->coverLetters()->create(['language' => 'en', 'tone' => 'formal', 'length' => 'standard', 'recipient' => "Nordwind Logistik\nBremen", 'subject' => 'Application as Product Designer', 'body' => 'I design tools for depots.', 'checked' => true, 'status' => CoverLetter::READY, ...$values]);
 }
 
 describe('The board', function (): void {

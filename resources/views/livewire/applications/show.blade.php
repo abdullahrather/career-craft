@@ -1,37 +1,41 @@
 <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
-    <form wire:submit="save" class="card flex flex-col gap-4">
-        <h2 class="card-title">{{ __('The job') }}</h2>
-        <x-wire.input model="title" :label="__('Job title')" />
-        <x-wire.input model="company" :label="__('Company')" />
-        <x-wire.input model="location" :label="__('Place')" />
-        <x-wire.input model="url" type="url" :label="__('Link to the job')" />
-        <x-wire.input model="source" :label="__('Found on')" />
-        <div class="grid gap-4 sm:grid-cols-2">
-            <label class="field" for="status">
-                <span>{{ __('Status') }}</span>
-                <select id="status" wire:model="status">
-                    @foreach ($statuses as $value => $text)
-                        <option value="{{ $value }}">{{ $text }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <x-wire.input model="appliedOn" type="date" :label="__('Applied on')" />
-        </div>
-        <div class="flex flex-wrap items-center gap-3">
-            <button type="submit" class="button button-primary" wire:loading.attr="disabled" wire:target="save">{{ __('Save') }}</button>
-            @if ($application->jobPost !== null)
-                <a href="{{ route('jobs.show', ['id' => $application->job_post_id]) }}" class="link text-sm" wire:navigate>{{ __('The analysed job post') }}</a>
+    <div class="flex min-w-0 flex-col gap-6">
+        <form wire:submit="save" class="card flex flex-col gap-4">
+            <h2 class="card-title">{{ __('The job') }}</h2>
+            <x-wire.input model="title" :label="__('Job title')" />
+            <x-wire.input model="company" :label="__('Company')" />
+            <x-wire.input model="location" :label="__('Place')" />
+            <x-wire.input model="url" type="url" :label="__('Link to the job')" />
+            <x-wire.input model="source" :label="__('Found on')" />
+            <div class="grid gap-4 sm:grid-cols-2">
+                <label class="field" for="status">
+                    <span>{{ __('Status') }}</span>
+                    <select id="status" wire:model="status">
+                        @foreach ($statuses as $value => $text)
+                            <option value="{{ $value }}">{{ $text }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <x-wire.input model="appliedOn" type="date" :label="__('Applied on')" />
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <button type="submit" class="button button-primary" wire:loading.attr="disabled" wire:target="save">{{ __('Save') }}</button>
+                @if ($application->jobPost !== null)
+                    <a href="{{ route('jobs.show', ['id' => $application->job_post_id]) }}" class="link text-sm" wire:navigate>{{ __('The analysed job post') }}</a>
+                @endif
+                @if ($application->url !== null)
+                    <a href="{{ $application->url }}" class="link text-sm" target="_blank" rel="noopener noreferrer nofollow">{{ __('The job online') }} ↗</a>
+                @endif
+            </div>
+            @if (session('saved'))
+                <p class="text-sm" role="status">{{ session('saved') }}</p>
             @endif
-            @if ($application->url !== null)
-                <a href="{{ $application->url }}" class="link text-sm" target="_blank" rel="noopener noreferrer nofollow">{{ __('The job online') }} ↗</a>
-            @endif
-        </div>
-        @if (session('saved'))
-            <p class="text-sm" role="status">{{ session('saved') }}</p>
-        @endif
-    </form>
+        </form>
 
-    <div class="flex flex-col gap-6">
+        <livewire:applications.contacts :application-id="$application->id" />
+    </div>
+
+    <div class="flex min-w-0 flex-col gap-6">
         <section class="card flex flex-col gap-4" aria-labelledby="documents">
             <div>
                 <h2 id="documents" class="card-title">{{ __('What you sent') }}</h2>
@@ -88,6 +92,20 @@
                     <p class="text-sm" role="status">{{ session('recorded') }}</p>
                 @endif
             </form>
+        </section>
+
+        <livewire:applications.notes :application-id="$application->id" />
+
+        <section class="card" aria-labelledby="timeline">
+            <h2 id="timeline" class="card-title">{{ __('Timeline') }}</h2>
+            <ol class="mt-3 flex flex-col gap-3 border-l-2 border-stone-200 pl-4 text-sm dark:border-stone-800">
+                @foreach ($events as $event)
+                    <li wire:key="event-{{ $event->id }}">
+                        <p class="wrap-break-word">{{ $event->text() }}</p>
+                        <p class="muted text-xs"><time datetime="{{ $event->created_at->toIso8601String() }}">{{ $event->created_at->translatedFormat('j M Y, H:i') }}</time></p>
+                    </li>
+                @endforeach
+            </ol>
         </section>
 
         <button type="button" wire:click="delete" wire:confirm="{{ __('Delete this application and its copies?') }}" class="button button-danger self-start">{{ __('Delete') }}</button>
