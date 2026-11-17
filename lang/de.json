@@ -865,5 +865,6 @@
     "Revoke this token? The extension using it stops working.": "Diesen Token widerrufen? Die Erweiterung, die ihn nutzt, funktioniert dann nicht mehr.",
     "Revoke": "Widerrufen",
     "Make a token": "Token erstellen",
-    "This job isn't in your applications. Track it on CareerCraft first.": "Diese Stelle ist nicht in Ihren Bewerbungen. Verfolgen Sie sie zuerst in CareerCraft."
+    "This job isn't in your applications. Track it on CareerCraft first.": "Diese Stelle ist nicht in Ihren Bewerbungen. Verfolgen Sie sie zuerst in CareerCraft.",
+    "Several of your applications are for this page. Keep one, then fill the form.": "Mehrere Ihrer Bewerbungen gehören zu dieser Seite. Behalten Sie eine, dann füllen Sie das Formular."
 }

@@ -71,7 +71,8 @@ final class Application extends Model
 
     /**
      * A job page's address in one form, so the page an application was tracked from and the
-     * page its form is on match: no "www.", query, fragment, trailing slash or "/apply".
+     * page its form is on match: no "www.", fragment, trailing slash or "/apply", and of the
+     * query only Greenhouse's job id, which tells jobs on one company career page apart.
      */
     public static function normaliseUrl(string $url): ?string
     {
@@ -82,7 +83,10 @@ final class Application extends Model
         $host = (string) preg_replace('/^www\./', '', strtolower($parts['host']));
         $path = (string) preg_replace('#/apply/?$#', '', rtrim($parts['path'] ?? '', '/'));
 
-        return $host.rtrim($path, '/');
+        parse_str($parts['query'] ?? '', $query);
+        $job = $query['gh_jid'] ?? null;
+
+        return $host.rtrim($path, '/').(is_string($job) && $job !== '' ? '?gh_jid='.$job : '');
     }
 
     /** Where an application's document copies are kept, so deleting it can remove them. */

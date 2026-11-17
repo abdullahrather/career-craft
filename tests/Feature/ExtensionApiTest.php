@@ -51,6 +51,42 @@ describe('The extension API', function (): void {
             ->assertHeader('Content-Type', 'application/pdf')->assertStreamedContent('%PDF-1.7 cv');
     });
 
+    it('sends only answers the fact guard checked and found nothing in', function (): void {
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer', 'url' => 'https://jobs.lever.co/nordwind/abc-123']);
+        $user->applyQueueItems()->create(['application_id' => $application->id, 'title' => 'Designer', 'tone' => 'formal', 'answers_status' => 'ready', 'answers' => [
+            ['question' => 'why_company', 'text' => 'Like at Google, I design tools.', 'flags' => [['quote' => 'Google', 'kind' => 'employer']], 'checked' => true],
+            ['question' => 'why_fit', 'text' => 'I raised task completion by 25%.', 'flags' => [], 'checked' => false],
+        ]]);
+        $item = $user->applyQueueItems()->create(['application_id' => $application->id, 'title' => 'Designer', 'tone' => 'formal', 'answers_status' => 'ready', 'answers' => [
+            ['question' => 'why_company', 'text' => 'I want to design tools for depots.', 'flags' => [], 'checked' => true],
+            ['question' => 'why_fit', 'text' => 'Unchecked claim.', 'flags' => [], 'checked' => false],
+        ]]);
+
+        $this->withToken(extensionToken($user))->getJson(route('extension.application', ['url' => 'https://jobs.lever.co/nordwind/abc-123']))
+            ->assertJsonPath('answers', [['question' => 'why_company', 'text' => 'I want to design tools for depots.']]);
+
+        $item->update(['answers' => [['question' => 'why_company', 'text' => 'Like at Google.', 'flags' => [['quote' => 'Google', 'kind' => 'employer']], 'checked' => true]]]);
+        app('auth')->forgetGuards();
+        $this->withToken(extensionToken($user))->getJson(route('extension.application', ['url' => 'https://jobs.lever.co/nordwind/abc-123']))
+            ->assertJsonPath('answers', []);
+    });
+
+    it('tells jobs on one career page apart by their Greenhouse job id, and won\'t guess between equal addresses', function (): void {
+        $user = User::factory()->create();
+        $first = Application::track($user, ['title' => 'Designer', 'url' => 'https://nordwind.example/careers?gh_jid=111']);
+        Application::track($user, ['title' => 'Engineer', 'url' => 'https://nordwind.example/careers?gh_jid=222']);
+        $token = extensionToken($user);
+
+        $this->withToken($token)->getJson(route('extension.application', ['url' => 'https://nordwind.example/careers?utm_source=x&gh_jid=111#app']))
+            ->assertOk()->assertJsonPath('id', $first->id);
+
+        Application::track($user, ['title' => 'Designer again', 'url' => 'https://jobs.lever.co/nordwind/abc-123']);
+        Application::track($user, ['title' => 'Designer twice', 'url' => 'https://jobs.lever.co/nordwind/abc-123/']);
+        $this->withToken($token)->getJson(route('extension.application', ['url' => 'https://jobs.lever.co/nordwind/abc-123']))
+            ->assertStatus(409)->assertJson(['message' => 'Several of your applications are for this page. Keep one, then fill the form.']);
+    });
+
     it('says when the job isn\'t tracked', function (): void {
         $user = User::factory()->create();
         Application::track($user, ['title' => 'Designer', 'url' => 'https://jobs.lever.co/nordwind/abc-123']);

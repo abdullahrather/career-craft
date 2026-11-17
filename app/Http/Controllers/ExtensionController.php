@@ -51,12 +51,22 @@ final class ExtensionController
     {
         $user = $this->user($request);
         $wanted = Application::normaliseUrl($request->string('url')->toString());
-        $application = $wanted === null ? null : $user->applications()->whereNotNull('url')->latest('id')->get()
-            ->first(fn (Application $application): bool => Application::normaliseUrl((string) $application->url) === $wanted);
+        $matches = $wanted === null ? collect() : $user->applications()->whereNotNull('url')->get()
+            ->filter(fn (Application $application): bool => Application::normaliseUrl((string) $application->url) === $wanted);
+        // Rather no documents than another job's.
+        if ($matches->count() > 1) {
+            return response()->json(['message' => __('Several of your applications are for this page. Keep one, then fill the form.')], 409);
+        }
+        $application = $matches->first();
         if ($application === null) {
             return response()->json(['message' => __('This job isn\'t in your applications. Track it on CareerCraft first.')], 404);
         }
-        $answers = ApplyQueueItem::query()->where('application_id', $application->id)->latest('id')->first()->answers ?? [];
+        // Only answers the fact guard checked and found nothing new in: the extension pastes them
+        // without showing the warnings the review page shows.
+        $answers = array_filter(
+            ApplyQueueItem::query()->where('application_id', $application->id)->latest('id')->first()->answers ?? [],
+            fn (array $answer): bool => $answer['checked'] && $answer['flags'] === [],
+        );
 
         return response()->json([
             'id' => $application->id,
@@ -66,7 +76,7 @@ final class ExtensionController
                 'cv' => $application->cv_path !== null ? ['name' => (Str::slug((string) $application->cv_name) ?: 'cv').'.pdf', 'url' => route('extension.document', ['id' => $application->id, 'document' => 'cv'])] : null,
                 'letter' => $application->letter_path !== null ? ['name' => (Str::slug((string) $application->letter_name) ?: 'letter').'.pdf', 'url' => route('extension.document', ['id' => $application->id, 'document' => 'letter'])] : null,
             ]),
-            'answers' => array_map(fn (array $answer): array => ['question' => $answer['question'], 'text' => $answer['text']], $answers),
+            'answers' => array_values(array_map(fn (array $answer): array => ['question' => $answer['question'], 'text' => $answer['text']], $answers)),
         ]);
     }
 
