@@ -88,6 +88,12 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
         return $this->hasMany(Application::class);
     }
 
+    /** @return HasOne<MailAccount, $this> */
+    public function mailAccount(): HasOne
+    {
+        return $this->hasOne(MailAccount::class);
+    }
+
     /** @return HasMany<ApplyQueueItem, $this> Newest first. */
     public function applyQueueItems(): HasMany
     {

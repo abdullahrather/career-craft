@@ -1,0 +1,110 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Livewire\Settings;
+
+use App\Applications\EmailSender;
+use App\Models\MailAccount as Account;
+use App\Models\User;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Livewire\Component;
+
+/**
+ * The candidate's own mail server, to send applications from their address. Saving sends a
+ * test email to that address; only an account whose test went through can send.
+ */
+final class MailAccount extends Component
+{
+    public string $mailHost = '';
+
+    public string $mailPort = '587';
+
+    public string $mailSecurity = 'starttls';
+
+    public string $mailUsername = '';
+
+    /** Left empty to keep the saved password. */
+    public string $mailPassword = '';
+
+    public string $mailFrom = '';
+
+    public string $mailName = '';
+
+    public function mount(): void
+    {
+        $user = $this->user();
+        $account = $user->mailAccount;
+        $this->fill($account !== null
+            ? ['mailHost' => $account->host, 'mailPort' => (string) $account->port, 'mailSecurity' => $account->security, 'mailUsername' => $account->username, 'mailFrom' => $account->from_address, 'mailName' => $account->from_name]
+            : ['mailFrom' => $user->email, 'mailName' => $user->name, 'mailUsername' => $user->email]);
+    }
+
+    public function save(EmailSender $sender): void
+    {
+        $user = $this->user();
+        $account = $user->mailAccount;
+        $this->validate([
+            'mailHost' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9.-]+$/'],
+            'mailPort' => ['required', 'integer', 'min:1', 'max:65535'],
+            'mailSecurity' => ['required', Rule::in(Account::securities())],
+            'mailUsername' => ['nullable', 'string', 'max:255'],
+            'mailPassword' => [$account === null ? 'required' : 'nullable', 'string', 'max:500'],
+            'mailFrom' => ['required', 'email', 'max:255'],
+            'mailName' => ['required', 'string', 'max:255'],
+        ], attributes: ['mailHost' => __('Mail server'), 'mailPort' => __('Port'), 'mailSecurity' => __('Encryption'), 'mailUsername' => __('User name'), 'mailPassword' => __('Password'), 'mailFrom' => __('Send from'), 'mailName' => __('Your name')]);
+        $problem = Account::hostProblem($this->mailHost, (int) $this->mailPort);
+        if ($problem !== null) {
+            $this->addError('mailHost', $problem);
+
+            return;
+        }
+
+        $account ??= $user->mailAccount()->make();
+        $account->fill([
+            'host' => strtolower($this->mailHost),
+            'port' => (int) $this->mailPort,
+            'security' => $this->mailSecurity,
+            'username' => trim($this->mailUsername),
+            'from_address' => trim($this->mailFrom),
+            'from_name' => trim($this->mailName),
+            'verified_at' => null,
+        ]);
+        if ($this->mailPassword !== '') {
+            $account->password = $this->mailPassword;
+        }
+        $account->save();
+        $this->reset('mailPassword');
+
+        $error = $sender->test($account);
+        if ($error !== null) {
+            $this->addError('test', $error);
+
+            return;
+        }
+        $account->update(['verified_at' => now()]);
+        session()->flash('mail-saved', __('A test email went to :address. Applications can now be sent from it.', ['address' => $account->from_address]));
+    }
+
+    public function remove(): void
+    {
+        $this->user()->mailAccount()->delete();
+        $this->reset();
+        $this->mount();
+    }
+
+    public function render(): View
+    {
+        return view('livewire.settings.mail-account', ['account' => $this->user()->mailAccount, 'securities' => Account::securities()]);
+    }
+
+    private function user(): User
+    {
+        $user = Auth::user();
+        abort_unless($user instanceof User, 403);
+
+        return $user;
+    }
+}

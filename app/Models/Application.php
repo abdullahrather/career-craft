@@ -33,6 +33,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $letter_path
  * @property Carbon|null $nudged_at
  * @property-read JobPost|null $jobPost
+ * @property-read User $user
  * @property-read Collection<int, ApplicationContact> $contacts
  * @property-read Collection<int, ApplicationNote> $notes
  * @property-read Collection<int, ApplicationEvent> $events
@@ -72,6 +73,18 @@ final class Application extends Model
     public static function directory(int $id): string
     {
         return "applications/{$id}";
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /** @return HasMany<ApplicationEmail, $this> Newest first. */
+    public function emails(): HasMany
+    {
+        return $this->hasMany(ApplicationEmail::class)->latest('id');
     }
 
     /** @return HasMany<ApplicationContact, $this> */

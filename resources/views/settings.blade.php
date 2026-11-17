@@ -134,6 +134,8 @@
 
         <livewire:settings.reminders />
 
+        <livewire:settings.mail-account />
+
         <livewire:settings.devices />
 
         @php($usedToday = \App\Models\AiUsage::tokensToday(auth()->user()))

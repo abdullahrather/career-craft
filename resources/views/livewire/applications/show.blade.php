@@ -96,6 +96,8 @@
             </form>
         </section>
 
+        <livewire:applications.email :application-id="$application->id" />
+
         <livewire:applications.tasks :application-id="$application->id" />
 
         <livewire:applications.notes :application-id="$application->id" />
