@@ -40,6 +40,9 @@ final class ApplicationEvent extends Model
             },
             'note' => __('Added a note'),
             'contact' => __('Added :name as a contact', ['name' => $data['name'] ?? '']),
+            'task' => __('Added the task “:title”, due :date', ['title' => $data['title'] ?? '', 'date' => Carbon::parse((string) ($data['due_on'] ?? 'today'))->translatedFormat('j M Y')]),
+            'task_done' => __('Done: :title', ['title' => $data['title'] ?? '']),
+            'interview' => __('Interview on :date', ['date' => Carbon::parse((string) ($data['starts_at'] ?? 'now'))->translatedFormat('j M Y, H:i')]),
             default => $this->type,
         };
     }

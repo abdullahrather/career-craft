@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Applications\DailyReminders;
 use App\Jobs\ImportCompanyBoard;
 use App\Jobs\ImportJobListings;
 use App\JobSearch\JobAlerts;
@@ -56,5 +57,13 @@ Artisan::command('careercraft:send-job-alerts', function (): int {
     return 0;
 })->purpose('Email saved searches their new jobs');
 
+// The morning email on applications: tasks due, interviews coming up, follow-ups.
+Artisan::command('careercraft:send-reminders', function (): int {
+    $this->info('Sent '.DailyReminders::send(now()).' reminder emails.');
+
+    return 0;
+})->purpose('Email people their tasks, interviews and follow-ups for the day');
+
 Schedule::command('careercraft:refresh-jobs')->dailyAt('06:00');
 Schedule::command('careercraft:send-job-alerts')->dailyAt('07:00');
+Schedule::command('careercraft:send-reminders')->dailyAt('07:30');

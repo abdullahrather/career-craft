@@ -31,6 +31,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $cover_letter_id
  * @property string|null $letter_name
  * @property string|null $letter_path
+ * @property Carbon|null $nudged_at
  * @property-read JobPost|null $jobPost
  * @property-read Collection<int, ApplicationContact> $contacts
  * @property-read Collection<int, ApplicationNote> $notes
@@ -77,6 +78,18 @@ final class Application extends Model
     public function contacts(): HasMany
     {
         return $this->hasMany(ApplicationContact::class)->orderBy('id');
+    }
+
+    /** @return HasMany<ApplicationTask, $this> Open ones first, then by day. */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(ApplicationTask::class)->orderByRaw('done_at is not null')->orderBy('due_on')->orderBy('id');
+    }
+
+    /** @return HasMany<ApplicationInterview, $this> In time order. */
+    public function interviews(): HasMany
+    {
+        return $this->hasMany(ApplicationInterview::class)->orderBy('starts_at');
     }
 
     /** @return HasMany<ApplicationNote, $this> Newest first. */
@@ -133,6 +146,6 @@ final class Application extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['applied_on' => 'date', 'position' => 'integer'];
+        return ['applied_on' => 'date', 'position' => 'integer', 'nudged_at' => 'datetime'];
     }
 }

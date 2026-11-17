@@ -6,7 +6,7 @@
             <x-wire.input model="company" :label="__('Company')" />
             <x-wire.input model="url" type="url" :label="__('Link to the job')" />
             <x-wire.input model="source" :label="__('Found on')" :hint="__('Such as LinkedIn, StepStone or the company\'s website')" />
-            <button type="submit" class="button button-primary self-start" wire:loading.attr="disabled" wire:target="add">{{ __('Add to Saved') }}</button>
+            <button type="submit" class="button button-primary self-start justify-self-start" wire:loading.attr="disabled" wire:target="add">{{ __('Add to Saved') }}</button>
         </form>
     </details>
 
