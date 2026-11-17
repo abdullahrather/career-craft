@@ -35,7 +35,7 @@
             <div class="sm:col-span-2">
                 <x-wire.input model="linkedin" type="url" :label="__('LinkedIn profile')" />
             </div>
-            <button type="submit" class="button self-start" wire:loading.attr="disabled" wire:target="add">{{ __('Add contact') }}</button>
+            <button type="submit" class="button self-start justify-self-start" wire:loading.attr="disabled" wire:target="add">{{ __('Add contact') }}</button>
         </form>
     </details>
 </section>

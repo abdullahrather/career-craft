@@ -25,6 +25,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $locale
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $two_factor_confirmed_at
+ * @property int $follow_up_days How many quiet days in Applied before a follow-up is suggested.
+ * @property bool $reminder_emails
  * @property bool $is_admin Not fillable: set with `php artisan careercraft:admin`.
  */
 #[Fillable(['name', 'email', 'password', 'locale'])]
@@ -37,6 +39,8 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
     /** The database default, so a new account has it before it is saved and reloaded. */
     protected $attributes = [
         'is_admin' => false,
+        'follow_up_days' => 7,
+        'reminder_emails' => true,
     ];
 
     /** @return HasMany<SocialAccount, $this> */
@@ -113,6 +117,8 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
         return [
             'email_verified_at' => 'datetime',
             'is_admin' => 'boolean',
+            'follow_up_days' => 'integer',
+            'reminder_emails' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
             'password' => 'hashed',
         ];

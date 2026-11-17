@@ -9,6 +9,7 @@ use App\Http\Controllers\SocialLoginController;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -62,6 +63,16 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
         return Storage::disk('local')->download($path, (Str::slug((string) $name) ?: $document).'.pdf');
     })->whereNumber('id')->whereIn('document', ['cv', 'letter'])->name('applications.download');
+    Route::get('/applications/{id}/interviews/{interview}.ics', function (int $id, int $interview): Response {
+        $user = request()->user();
+        abort_unless($user instanceof User, 403);
+        $found = $user->applications()->findOrFail($id)->interviews()->findOrFail($interview);
+
+        return response($found->ics(), 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="interview-'.$found->starts_at->format('Y-m-d').'.ics"',
+        ]);
+    })->whereNumber(['id', 'interview'])->name('applications.interview');
 
     Route::get('/letters/{id}', [LetterController::class, 'edit'])->whereNumber('id')->name('letters.edit');
     Route::get('/letters/{id}/preview', [LetterController::class, 'preview'])->whereNumber('id')->name('letters.preview');

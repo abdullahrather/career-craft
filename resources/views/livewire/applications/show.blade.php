@@ -32,6 +32,8 @@
             @endif
         </form>
 
+        <livewire:applications.interviews :application-id="$application->id" />
+
         <livewire:applications.contacts :application-id="$application->id" />
     </div>
 
@@ -93,6 +95,8 @@
                 @endif
             </form>
         </section>
+
+        <livewire:applications.tasks :application-id="$application->id" />
 
         <livewire:applications.notes :application-id="$application->id" />
 

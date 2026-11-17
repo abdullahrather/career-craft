@@ -113,6 +113,10 @@ A board of every job you are going for: Saved, Applied, Interviewing, Offer and 
 - **Contacts:** the people behind an application, such as the recruiter or hiring manager, with email, phone and LinkedIn links.
 - **Notes:** dated notes on an application, newest first.
 - **Timeline:** what happened to an application, in order: when it was added and where it was found, every status change, the documents recorded, and the notes and contacts added. It is worded when shown, in your language.
+- **Tasks:** things to do by a day, such as a thank-you email. Tick one off when done; due and overdue tasks show on the dashboard.
+- **Interviews:** a date, time, length and place (an address, a phone number or a video link). "Add to calendar" downloads an `.ics` file for Google Calendar, Outlook or Apple Calendar. The time is kept as entered, so the calendar shows the interview at that hour.
+- **Follow-ups:** an application in Applied with no news for 7 days (you choose, under Reminders in the settings) and no open task is suggested for a follow-up on the dashboard.
+- **Morning email:** at 07:30 the scheduler runs `php artisan careercraft:send-reminders`. It emails tasks due, interviews today and tomorrow, and applications to follow up. A follow-up is mentioned once per quiet spell, not every morning. Nothing to say, no email; it can be turned off in the settings, and only confirmed email addresses get it.
 
 ## Accounts
 
