@@ -114,6 +114,15 @@ Speed without bots that apply unattended: each job is prepared for you, and noth
 - **Approve:** saves the tailored CV as a version and adds the job to your applications in Applied, with copies of the CV and letter and "Prepared with the apply queue" on its timeline. Then you apply on the job's page.
 - **Log:** every job approved or skipped stays listed, with when it was queued and decided.
 
+## Sending by email
+
+Applications go out from your own address, never from CareerCraft's.
+
+- **Your mail account:** under Sending email in the settings, enter your provider's mail server, port and encryption, and your user name and password (some providers, such as Gmail, need an app password). The password is stored encrypted and never shown again. Saving sends a test email to your address; only an account whose test went through can send. Outside development the server must be a public address on a mail port (465, 587, 25 or 2525). In development, Mailpit works as the server (`mailpit`, port 1025, no encryption).
+- **Send by email:** on an application with its CV and letter recorded, check the recipient (an address found in the job post is filled in), the subject and a short note in the letter's language, then press Send. The recorded CV and letter go attached as PDFs.
+- **Log and limits:** every email sent is listed on the application with its text and attachments, and noted on its timeline; an application in Saved moves to Applied. Up to 20 application emails a day.
+- **Job board submission:** Greenhouse, Lever and Ashby only take applications through their APIs with a key from the employer, so CareerCraft sends by email instead.
+
 ## Applications
 
 A board of every job you are going for: Saved, Applied, Interviewing, Offer and Rejected.

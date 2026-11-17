@@ -101,6 +101,7 @@ final class Show extends Component
             return;
         }
         session()->flash('recorded', __('Recorded. These copies stay with the application.'));
+        $this->dispatch('application-changed');
     }
 
     public function delete(): void
