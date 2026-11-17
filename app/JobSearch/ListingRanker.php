@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\JobSearch;
 
+use App\Models\DismissedListing;
 use App\Models\Experience;
 use App\Models\JobListing;
 use App\Models\Profile;
 use App\Models\Skill;
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -64,6 +66,16 @@ final class ListingRanker
             }
         }
         $this->dismissed = $counts;
+    }
+
+    /** The ranker for a person's profile and the jobs they marked "not interested" lately. */
+    public static function for(User $user): self
+    {
+        return new self(
+            $user->id,
+            $user->profile()->with(['skills', 'experiences'])->first(),
+            array_values($user->dismissedListings()->latest('id')->limit(DismissedListing::RANKED)->get(['title'])->map(fn (DismissedListing $dismissed): string => $dismissed->title)->all()),
+        );
     }
 
     /** Whether the profile has anything to rank by. */

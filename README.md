@@ -98,7 +98,10 @@ At the end of the career profile, **Suggest a headline and About** writes both f
 - **Not interested:** hides a job for you, with Undo. Words from the titles you hide rank similar jobs lower, unless your own profile uses them: hiding a "Sales Manager" lowers other sales jobs, but not your "Developer" ones.
 - **Filters:** work mode (remote, hybrid or on site) and "only with a salary".
 - **Companies you follow:** paste a link to a company's job board on [Greenhouse](https://developers.greenhouse.io/job-board.html), [Lever](https://github.com/lever/postings-api) or [Ashby](https://developers.ashbyhq.com/docs/public-job-posting-api) (the board, or one of its jobs). Its open jobs join the list straight away, with salaries where Lever or Ashby boards show them. No key is needed.
-- **Daily refresh:** the `scheduler` service in `compose.yaml` runs `php artisan careercraft:refresh-jobs` every morning at 06:00. It fetches each followed board again and deletes jobs no source has shown for 30 days. Run the command yourself to refresh at any time.
+- **Company pages:** a company's name on a job, or in Companies you follow, shows its jobs alone, with how many are open, where and how it hires, and whether you follow its board.
+- **Saved searches:** save the search on the page, including a company page, with an email every day or every week. Up to 20 per person; open one to run it again, or change or delete it.
+- **Daily refresh:** the `scheduler` service in `compose.yaml` runs `php artisan careercraft:refresh-jobs` every morning at 06:00. It fetches each followed board and each saved search again, and deletes jobs no source has shown for 30 days. Run the command yourself to refresh at any time.
+- **Job alerts:** at 07:00 the scheduler runs `php artisan careercraft:send-job-alerts`. Each saved search that is due emails the jobs found since it was last checked, up to 10 of them best match first, in your language. Nothing new, no email; only confirmed email addresses get alerts. In development they land in Mailpit.
 
 ## Accounts
 

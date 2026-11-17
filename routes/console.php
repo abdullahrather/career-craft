@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 use App\Jobs\ImportCompanyBoard;
+use App\Jobs\ImportJobListings;
+use App\JobSearch\JobAlerts;
 use App\Models\FollowedBoard;
 use App\Models\JobListing;
+use App\Models\SavedSearch;
 use App\Models\User;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -29,17 +32,29 @@ Artisan::command('careercraft:admin {email} {--remove : Take admin rights away}'
     return 0;
 })->purpose('Make an account an admin, or take admin rights away');
 
-// Every day: each followed company board is fetched again, and jobs no source has shown for
-// a month are deleted. The scheduler service in compose.yaml runs it.
+// Every day: each followed company board and each saved search is fetched again, and jobs
+// no source has shown for a month are deleted. The scheduler service in compose.yaml runs it.
 Artisan::command('careercraft:refresh-jobs', function (): int {
     $boards = FollowedBoard::query()->select(['board', 'slug'])->distinct()->get();
     foreach ($boards as $followed) {
         ImportCompanyBoard::dispatch($followed->board, $followed->slug);
     }
+    $searches = SavedSearch::query()->select(['what', 'where'])->selectRaw('min(user_id) as user_id')->groupBy(['what', 'where'])->get();
+    foreach ($searches as $search) {
+        ImportJobListings::fetch($search->what, $search->where, $search->user_id);
+    }
     $deleted = JobListing::query()->where('last_seen_at', '<', now()->subDays(JobListing::KEEP_DAYS))->toBase()->delete();
-    $this->info("Refreshing {$boards->count()} company boards. Deleted {$deleted} old jobs.");
+    $this->info("Refreshing {$boards->count()} company boards and {$searches->count()} saved searches. Deleted {$deleted} old jobs.");
 
     return 0;
-})->purpose('Fetch followed company boards again, and delete old jobs');
+})->purpose('Fetch followed company boards and saved searches again, and delete old jobs');
+
+// The saved searches' new jobs, by email, an hour after the refresh has fetched them.
+Artisan::command('careercraft:send-job-alerts', function (): int {
+    $this->info('Sent '.JobAlerts::send(now()).' job alerts.');
+
+    return 0;
+})->purpose('Email saved searches their new jobs');
 
 Schedule::command('careercraft:refresh-jobs')->dailyAt('06:00');
+Schedule::command('careercraft:send-job-alerts')->dailyAt('07:00');

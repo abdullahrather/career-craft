@@ -23,6 +23,9 @@ final class ImportJobListings implements ShouldQueue
 
     public const array SOURCES = ['arbeitsagentur', 'arbeitnow', 'adzuna'];
 
+    /** How long a source isn't asked the same search again. */
+    private const int FRESH_MINUTES = 60;
+
     public int $tries = 1;
 
     /** Room for the search and one details request per job, at 15 seconds each at worst. */
@@ -37,6 +40,21 @@ final class ImportJobListings implements ShouldQueue
     public static function freshKey(string $source, string $what, string $where): string
     {
         return "job-source:{$source}:".md5($source === 'arbeitnow' ? '' : mb_strtolower("{$what}|{$where}"));
+    }
+
+    /** Fetches new jobs for a search from every source, unless a source was asked it lately. */
+    public static function fetch(string $what, string $where, int $userId): void
+    {
+        foreach (self::SOURCES as $source) {
+            if ($source === 'adzuna' && ! Adzuna::enabled()) {
+                continue;
+            }
+            // A failed import gives the key back, so the search can be tried again.
+            if (Cache::add(self::freshKey($source, $what, $where), true, now()->addMinutes(self::FRESH_MINUTES))) {
+                Cache::put(self::runningKey($userId, $source), true, now()->addMinutes(10));
+                self::dispatch($source, $what, $where, $userId);
+            }
+        }
     }
 
     /** The cache entry that says this person's import from this source is running. */

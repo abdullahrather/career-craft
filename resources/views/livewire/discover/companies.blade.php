@@ -16,7 +16,7 @@
             @foreach ($boards as $board)
                 <li wire:key="board-{{ $board->id }}" class="flex items-center justify-between gap-3">
                     <span class="min-w-0 wrap-break-word">
-                        {{ $board->name }}
+                        <a href="{{ route('discover', ['company' => $board->name]) }}" class="link" wire:navigate>{{ $board->name }}</a>
                         <span class="muted text-sm">· {{ \App\JobSources\CompanyBoards::NAMES[$board->board] ?? $board->board }}</span>
                     </span>
                     <button type="button" wire:click="unfollow({{ $board->id }})" class="button button-small shrink-0" aria-label="{{ __('Unfollow :name', ['name' => $board->name]) }}">{{ __('Unfollow') }}</button>

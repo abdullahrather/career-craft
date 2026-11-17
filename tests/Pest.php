@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\JobSources\FoundJob;
+use App\JobSources\ListingStore;
 use App\Models\AiUsage;
+use App\Models\JobListing;
 use App\Models\Resume;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -100,4 +102,27 @@ function resumeFor(User $user, string $template = 'classic', string $language = 
         'template' => $template,
         'settings' => [...Resume::defaults($template), ...$settings],
     ]);
+}
+
+/** A fictional candidate: a PHP backend developer. */
+function backendCandidate(): User
+{
+    $user = User::factory()->create();
+    $profile = $user->careerProfile();
+    $profile->update(['headline' => 'Backend Developer']);
+    $profile->experiences()->create(['title' => 'Software Engineer', 'employer' => 'Nordlicht Logistik', 'city' => 'Hamburg', 'starts_on' => '2021-03-01']);
+    foreach (['PHP', 'Laravel', 'PostgreSQL'] as $position => $skill) {
+        $profile->skills()->create(['name' => $skill, 'position' => $position]);
+    }
+
+    return $user;
+}
+
+/** Saves fictional jobs, the first one newest. */
+function saveJobs(array $jobs): void
+{
+    foreach (array_reverse($jobs) as $index => $values) {
+        ListingStore::save([foundJob(['externalId' => "job-{$index}", 'company' => "Firma {$index}", ...$values])]);
+        JobListing::query()->latest('id')->first()->update(['posted_at' => now()->subDays(count($jobs) - $index)]);
+    }
 }

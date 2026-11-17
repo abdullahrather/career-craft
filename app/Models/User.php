@@ -75,6 +75,12 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
         return $this->hasMany(DismissedListing::class);
     }
 
+    /** @return HasMany<SavedSearch, $this> */
+    public function savedSearches(): HasMany
+    {
+        return $this->hasMany(SavedSearch::class)->latest('id');
+    }
+
     /** @return HasOne<Profile, $this> */
     public function profile(): HasOne
     {

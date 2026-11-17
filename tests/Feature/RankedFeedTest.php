@@ -10,21 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
-/** A fictional candidate: a PHP backend developer. */
-function backendCandidate(): User
-{
-    $user = User::factory()->create();
-    $profile = $user->careerProfile();
-    $profile->update(['headline' => 'Backend Developer']);
-    $profile->experiences()->create(['title' => 'Software Engineer', 'employer' => 'Nordlicht Logistik', 'city' => 'Hamburg', 'starts_on' => '2021-03-01']);
-    foreach (['PHP', 'Laravel', 'PostgreSQL'] as $position => $skill) {
-        $profile->skills()->create(['name' => $skill, 'position' => $position]);
-    }
-
-    return $user;
-}
-
-/** Saves fictional jobs, the first one newest, and gives back their titles in the order the page shows them. */
+/** The titles of the jobs on the page, in the order it shows them. */
 function feedTitles(User $user, array $set = []): array
 {
     $page = Livewire::actingAs($user)->test(Index::class);
@@ -33,14 +19,6 @@ function feedTitles(User $user, array $set = []): array
     }
 
     return array_values(array_map(fn (JobListing $listing): string => $listing->title, $page->viewData('listings')->items()));
-}
-
-function saveJobs(array $jobs): void
-{
-    foreach (array_reverse($jobs) as $index => $values) {
-        ListingStore::save([foundJob(['externalId' => "job-{$index}", 'company' => "Firma {$index}", ...$values])]);
-        JobListing::query()->latest('id')->first()->update(['posted_at' => now()->subDays(count($jobs) - $index)]);
-    }
 }
 
 describe('The ranked feed', function (): void {
