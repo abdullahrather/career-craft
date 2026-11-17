@@ -44,6 +44,14 @@ return [
         'redirect' => env('APP_URL').'/auth/google/callback',
     ],
 
+    // Optional: candidates send applications through Outlook. A Microsoft Entra app registration;
+    // "common" lets both personal and work accounts connect.
+    'microsoft' => [
+        'client_id' => env('MICROSOFT_CLIENT_ID'),
+        'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
+        'tenant' => env('MICROSOFT_TENANT', 'common'),
+    ],
+
     'github' => [
         'client_id' => env('GITHUB_CLIENT_ID'),
         'client_secret' => env('GITHUB_CLIENT_SECRET'),

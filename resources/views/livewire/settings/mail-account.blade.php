@@ -6,18 +6,29 @@
     <h2 id="mail-account" class="card-title">{{ __('Sending email') }}</h2>
     <p class="muted mt-2 text-sm">{{ __('Send applications from your own address, through your mail provider\'s server. Your provider\'s help pages list the server, port and encryption; some, such as Gmail, need an app password.') }}</p>
     @if ($account?->verified_at !== null)
-        <p class="mt-3 text-sm"><span class="badge badge-brand">{{ __('Ready') }}</span> {{ $account->provider === 'gmail' ? __('Sending through Gmail from :address, tested :date.', ['address' => $account->from_address, 'date' => $account->verified_at->translatedFormat('j M Y, H:i')]) : __('Sending from :address, tested :date.', ['address' => $account->from_address, 'date' => $account->verified_at->translatedFormat('j M Y, H:i')]) }}</p>
-    @elseif ($account?->provider === 'gmail')
-        <p class="mt-3 text-sm"><span class="badge">{{ __('Not connected') }}</span> {{ __('Gmail no longer lets CareerCraft send for you. Connect it again.') }}</p>
+        <p class="mt-3 text-sm"><span class="badge badge-brand">{{ __('Ready') }}</span>
+            @if ($account->provider === 'smtp')
+                {{ __('Sending from :address, tested :date.', ['address' => $account->from_address, 'date' => $account->verified_at->translatedFormat('j M Y, H:i')]) }}
+            @else
+                {{ __('Sending through :provider from :address, tested :date.', ['provider' => $providers[$account->provider], 'address' => $account->from_address, 'date' => $account->verified_at->translatedFormat('j M Y, H:i')]) }}
+            @endif
+        </p>
+    @elseif ($account !== null && $account->provider !== 'smtp')
+        <p class="mt-3 text-sm"><span class="badge">{{ __('Not connected') }}</span> {{ __(':provider no longer lets CareerCraft send for you. Connect it again.', ['provider' => $providers[$account->provider]]) }}</p>
     @elseif ($account !== null)
         <p class="mt-3 text-sm"><span class="badge">{{ __('Not tested') }}</span> {{ __('The last test email didn\'t go through. Check the settings and save again.') }}</p>
     @endif
 
-    @if ($gmail)
+    @if ($gmail || $outlook)
         <div class="mt-4 flex flex-wrap items-center gap-3">
-            <a href="{{ route('mail.gmail') }}" class="button">{{ $account?->provider === 'gmail' ? __('Connect Gmail again') : __('Send through Gmail') }}</a>
-            <span class="muted text-sm">{{ __('Google asks you to allow sending email only; CareerCraft can\'t read your inbox.') }}</span>
+            @if ($gmail)
+                <a href="{{ route('mail.gmail') }}" class="button">{{ $account?->provider === 'gmail' ? __('Connect Gmail again') : __('Send through Gmail') }}</a>
+            @endif
+            @if ($outlook)
+                <a href="{{ route('mail.outlook') }}" class="button">{{ $account?->provider === 'outlook' ? __('Connect Outlook again') : __('Send through Outlook') }}</a>
+            @endif
         </div>
+        <p class="muted mt-2 text-sm">{{ __('You allow sending email only; CareerCraft can\'t read your inbox.') }}</p>
         <p class="muted mt-4 text-sm">{{ __('Or use your provider\'s mail server:') }}</p>
     @endif
 

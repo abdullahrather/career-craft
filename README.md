@@ -119,6 +119,7 @@ Speed without bots that apply unattended: each job is prepared for you, and noth
 Applications go out from your own address, never from CareerCraft's.
 
 - **Gmail:** "Send through Gmail" in the settings asks Google for permission to send email only (not to read it). The tokens are stored encrypted, the access token is refreshed when it runs out, and a test email is sent on connecting. If Google takes the permission back, the settings ask to connect again. See [Send through Gmail](#send-through-gmail-optional) for the Google setup.
+- **Outlook:** "Send through Outlook" works the same way for personal and work Microsoft accounts, through Microsoft Graph with permission to send email only. A state value checked on the way back keeps a sign-in someone else started from being slipped in. See [Send through Outlook](#send-through-outlook-optional) for the Microsoft setup.
 - **Your mail account:** under Sending email in the settings, enter your provider's mail server, port and encryption, and your user name and password (some providers, such as Gmail, need an app password). The password is stored encrypted and never shown again. Saving sends a test email to your address; only an account whose test went through can send. Outside development the server must be a public address on a mail port (465, 587, 25 or 2525). In development, Mailpit works as the server (`mailpit`, port 1025, no encryption).
 - **Send by email:** on an application with its CV and letter recorded, check the recipient (an address found in the job post is filled in), the subject and a short note in the letter's language, then press Send. The recorded CV and letter go attached as PDFs.
 - **Log and limits:** every email sent is listed on the application with its text and attachments, and noted on its timeline; an application in Saved moves to Applied. Up to 20 application emails a day.
@@ -222,6 +223,17 @@ The same Google keys let candidates send applications through their Gmail. In th
 1. Enable the Gmail API.
 2. Add `http://localhost:8000/settings/mail/gmail/callback` as a second authorised redirect URI.
 3. Add the `https://www.googleapis.com/auth/gmail.send` scope to the OAuth consent screen. It is a sensitive scope: while the app is in testing, only the test users you list can connect, and Google reviews the app before anyone else can.
+
+### Send through Outlook (optional)
+
+Register a free app in the [Microsoft Entra admin center](https://entra.microsoft.com) (App registrations → New registration):
+
+1. Supported account types: accounts in any organizational directory and personal Microsoft accounts.
+2. Redirect URI: platform Web, `http://localhost:8000/settings/mail/outlook/callback`.
+3. API permissions: Microsoft Graph, delegated, `Mail.Send`, `User.Read` and `offline_access`.
+4. Certificates & secrets: a new client secret.
+
+Then set `MICROSOFT_CLIENT_ID` (the application ID) and `MICROSOFT_CLIENT_SECRET` (the secret's value) in `.env`. `MICROSOFT_TENANT` defaults to `common`, for personal and work accounts alike.
 
 ## Checks
 
