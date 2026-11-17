@@ -10,7 +10,6 @@ use App\Models\ApplicationEmail;
 use App\Models\CoverLetter;
 use App\Models\MailAccount;
 use App\Models\User;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
@@ -96,8 +95,12 @@ final readonly class EmailSender
     /** @param  array<string, string>  $files */
     private function deliver(MailAccount $account, string $to, string $subject, string $body, array $files): ?string
     {
+        $mailer = $account->mailer();
+        if (is_string($mailer)) {
+            return $mailer;
+        }
         try {
-            Mail::build($account->transport())->to($to)->send(new ApplicationMail($account->from_address, $account->from_name, $subject, $body, $files));
+            $mailer->to($to)->send(new ApplicationMail($account->from_address, $account->from_name, $subject, $body, $files));
         } catch (TransportExceptionInterface $exception) {
             return __('The email could not be sent. Your mail server said: :reason', ['reason' => Str::limit($exception->getMessage(), 300)]);
         }

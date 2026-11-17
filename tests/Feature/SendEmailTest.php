@@ -117,6 +117,29 @@ describe('The mail account', function (): void {
         expect($user->mailAccount()->sole()->verified_at)->toBeNull();
     });
 
+    it('refuses a server whose name also points to a private IPv6 address', function (): void {
+        $this->app['env'] = 'production';
+        MailAccount::$lookup = fn (string $host): array => [['type' => 'A', 'ip' => '93.184.216.34'], ['type' => 'AAAA', 'ipv6' => 'fd00::25']];
+
+        expect(MailAccount::hostProblem('smtp.mailbox.example', 587))->toContain('private network');
+        MailAccount::$lookup = null;
+    });
+
+    it('connects to the address it checked, while TLS still checks the server\'s name', function (): void {
+        $this->app['env'] = 'production';
+        MailAccount::$lookup = fn (string $host): array => [['type' => 'A', 'ip' => '93.184.216.34']];
+        $account = mailAccountFor(User::factory()->create());
+
+        $stream = $account->mailer()->getSymfonyTransport()->getStream();
+
+        expect($stream->getHost())->toBe('93.184.216.34')
+            ->and($stream->getPort())->toBe(587)
+            ->and($stream->getStreamOptions()['ssl']['peer_name'])->toBe('smtp.mailbox.example');
+        MailAccount::$lookup = fn (string $host): array => [['type' => 'AAAA', 'ipv6' => '::1']];
+        expect($account->mailer())->toBeString()->toContain('private network');
+        MailAccount::$lookup = null;
+    });
+
     it('can be removed', function (): void {
         $user = User::factory()->create();
         mailAccountFor($user);
