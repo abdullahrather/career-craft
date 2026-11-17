@@ -22,22 +22,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 
-/** A fictional job as a source would find it. */
-function foundJob(array $values = []): FoundJob
-{
-    return new FoundJob(...[
-        'source' => 'arbeitnow',
-        'externalId' => 'backend-developer-kranich-1',
-        'url' => 'https://www.arbeitnow.com/jobs/backend-developer-kranich-1',
-        'title' => 'Backend Developer PHP',
-        'company' => 'Kranich Mobility GmbH',
-        'location' => 'Hamburg',
-        'workMode' => '',
-        'description' => 'We build booking software for ferries.',
-        ...$values,
-    ]);
-}
-
 describe('Normalising', function (): void {
     it('takes the gender note out of titles', function (string $title): void {
         expect(Normalise::title($title))->toBe('Backend-Entwickler PHP');

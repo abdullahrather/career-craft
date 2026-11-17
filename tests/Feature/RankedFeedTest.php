@@ -7,6 +7,7 @@ use App\JobSources\ListingStore;
 use App\Livewire\Discover\Index;
 use App\Models\JobListing;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 /** A fictional candidate: a PHP backend developer. */
@@ -92,6 +93,22 @@ describe('The ranked feed', function (): void {
         ListingStore::save([foundJob(['externalId' => 'job-1', 'company' => 'Firma 1', 'title' => 'Designer', 'description' => 'Laravel, PHP and Postgres, not just Java.'])]);
 
         expect(feedTitles($user))->toBe(['Designer', 'Engineer']);
+    });
+
+    it('keeps the points of jobs a filter hides, and reads no description again', function (): void {
+        saveJobs([['title' => 'Remote PHP', 'workMode' => 'remote'], ['title' => 'Office PHP'], ['title' => 'Hybrid PHP', 'workMode' => 'hybrid']]);
+        $user = backendCandidate();
+        $ranker = fn (): ListingRanker => new ListingRanker($user->id, $user->profile()->with(['skills', 'experiences'])->first(), []);
+        $jobs = fn (?string $mode = null) => JobListing::query()->when($mode, fn ($query) => $query->where('work_mode', $mode))->get(['id', 'title', 'posted_at', 'updated_at']);
+        $ranker()->rank($jobs());
+        // The remote job changes, so the remote-only list scores it again.
+        $this->travel(1)->minute();
+        JobListing::query()->where('title', 'Remote PHP')->update(['description' => 'Laravel too.', 'updated_at' => now()]);
+        $ranker()->rank($jobs('remote'));
+
+        DB::enableQueryLog();
+        expect($ranker()->rank($jobs()))->toHaveCount(3)
+            ->and(collect(DB::getQueryLog())->pluck('query')->filter(fn (string $sql): bool => str_contains($sql, '"description"')))->toBeEmpty();
     });
 
     it('filters by work mode and salary', function (): void {

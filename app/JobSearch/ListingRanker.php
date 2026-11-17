@@ -119,8 +119,9 @@ final class ListingRanker
                     $kept[$listing->id] = [$this->score($listing), (int) $listing->updated_at?->getTimestamp()];
                 }
             }
-            // Only the jobs still listed are kept.
-            $kept = array_intersect_key($kept, $candidates->keyBy('id')->all());
+            // Jobs hidden by today's filters keep their points; only deleted jobs' points go.
+            $existing = JobListing::query()->whereKey(array_keys($kept))->get(['id'])->map(fn (JobListing $listing): int => $listing->id)->all();
+            $kept = array_intersect_key($kept, array_flip($existing));
             Cache::put($key, $kept, now()->addHours(self::KEEP_HOURS));
         }
 
