@@ -1,0 +1,92 @@
+<div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+    <form wire:submit="save" class="card flex flex-col gap-4">
+        <h2 class="card-title">{{ __('The job') }}</h2>
+        <x-wire.input model="title" :label="__('Job title')" />
+        <x-wire.input model="company" :label="__('Company')" />
+        <x-wire.input model="location" :label="__('Place')" />
+        <x-wire.input model="url" type="url" :label="__('Link to the job')" />
+        <x-wire.input model="source" :label="__('Found on')" />
+        <div class="grid gap-4 sm:grid-cols-2">
+            <label class="field" for="status">
+                <span>{{ __('Status') }}</span>
+                <select id="status" wire:model="status">
+                    @foreach ($statuses as $value => $text)
+                        <option value="{{ $value }}">{{ $text }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <x-wire.input model="appliedOn" type="date" :label="__('Applied on')" />
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <button type="submit" class="button button-primary" wire:loading.attr="disabled" wire:target="save">{{ __('Save') }}</button>
+            @if ($application->jobPost !== null)
+                <a href="{{ route('jobs.show', ['id' => $application->job_post_id]) }}" class="link text-sm" wire:navigate>{{ __('The analysed job post') }}</a>
+            @endif
+            @if ($application->url !== null)
+                <a href="{{ $application->url }}" class="link text-sm" target="_blank" rel="noopener noreferrer nofollow">{{ __('The job online') }} ↗</a>
+            @endif
+        </div>
+        @if (session('saved'))
+            <p class="text-sm" role="status">{{ session('saved') }}</p>
+        @endif
+    </form>
+
+    <div class="flex flex-col gap-6">
+        <section class="card flex flex-col gap-4" aria-labelledby="documents">
+            <div>
+                <h2 id="documents" class="card-title">{{ __('What you sent') }}</h2>
+                <p class="muted mt-1 text-sm">{{ __('Record the CV version and letter you sent. A copy of each PDF stays with this application, even if the CV is deleted or the letter changed later.') }}</p>
+            </div>
+
+            @if ($application->cv_path !== null || $application->letter_path !== null)
+                <ul class="flex flex-col gap-2 text-sm">
+                    @if ($application->cv_path !== null)
+                        <li class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="min-w-0 wrap-break-word"><span class="font-semibold">{{ __('CV') }}:</span> {{ $application->cv_name }}</span>
+                            <a href="{{ route('applications.download', ['id' => $application->id, 'document' => 'cv']) }}" class="button button-small">{{ __('Download PDF') }}</a>
+                        </li>
+                    @endif
+                    @if ($application->letter_path !== null)
+                        <li class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="min-w-0 wrap-break-word"><span class="font-semibold">{{ __('Letter') }}:</span> {{ $application->letter_name }}</span>
+                            <a href="{{ route('applications.download', ['id' => $application->id, 'document' => 'letter']) }}" class="button button-small">{{ __('Download PDF') }}</a>
+                        </li>
+                    @endif
+                </ul>
+            @endif
+
+            <form wire:submit="recordDocuments" class="flex flex-col gap-4">
+                <label class="field" for="cvVersion">
+                    <span>{{ __('CV version') }}</span>
+                    <select id="cvVersion" wire:model="cvVersion">
+                        <option value="">{{ __('None') }}</option>
+                        @foreach ($versions as $version)
+                            <option value="{{ $version->id }}">{{ __(':name, version :number', ['name' => $version->name, 'number' => $version->number]) }} · {{ $version->created_at->translatedFormat('j M Y') }}</option>
+                        @endforeach
+                    </select>
+                    @if ($versions->isEmpty())
+                        <span class="field-hint">{{ __('A CV gets versions when you save one in the CV editor.') }}</span>
+                    @endif
+                </label>
+                <label class="field" for="letter">
+                    <span>{{ __('Cover letter') }}</span>
+                    <select id="letter" wire:model="letter">
+                        <option value="">{{ __('None') }}</option>
+                        @foreach ($letters as $item)
+                            <option value="{{ $item->id }}">{{ $item->subject !== '' ? $item->subject : ($item->language === 'de' ? __('Cover letter (German)') : __('Cover letter (English)')) }} · {{ $item->updated_at->translatedFormat('j M Y') }}</option>
+                        @endforeach
+                    </select>
+                    @error('letter')
+                        <span class="field-error" role="alert">{{ $message }}</span>
+                    @enderror
+                </label>
+                <button type="submit" class="button self-start" wire:loading.attr="disabled" wire:target="recordDocuments">{{ __('Record what I sent') }}</button>
+                @if (session('recorded'))
+                    <p class="text-sm" role="status">{{ session('recorded') }}</p>
+                @endif
+            </form>
+        </section>
+
+        <button type="button" wire:click="delete" wire:confirm="{{ __('Delete this application and its copies?') }}" class="button button-danger self-start">{{ __('Delete') }}</button>
+    </div>
+</div>

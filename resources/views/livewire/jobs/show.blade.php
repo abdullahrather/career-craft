@@ -57,6 +57,13 @@
                     @if ($post->url !== null)
                         <a href="{{ $post->url }}" class="link mt-3 inline-block text-sm" target="_blank" rel="noopener noreferrer nofollow">{{ __('Open the original post') }} ↗</a>
                     @endif
+                    <div class="mt-4">
+                        @if ($application !== null)
+                            <a href="{{ route('applications.show', ['id' => $application->id]) }}" class="link text-sm" wire:navigate>{{ __('In your applications: :status', ['status' => \App\Models\Application::statusNames()[$application->status]]) }}</a>
+                        @else
+                            <button type="button" wire:click="track" class="button button-small">{{ __('Track this job') }}</button>
+                        @endif
+                    </div>
                 </section>
 
                 @foreach (['required' => __('Required'), 'nice' => __('Nice to have')] as $list => $heading)

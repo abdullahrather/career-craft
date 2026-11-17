@@ -9,6 +9,7 @@ use App\Ai\AiRunner;
 use App\Jobs\AnalyseJobPost;
 use App\Jobs\WriteCoverLetter;
 use App\JobSearch\JobMatch;
+use App\Models\Application;
 use App\Models\CoverLetter;
 use App\Models\JobPost;
 use App\Models\Resume;
@@ -91,6 +92,21 @@ final class Show extends Component
         $this->redirectRoute('letters.edit', ['id' => $letter->id]);
     }
 
+    /** Adds the job to the person's applications, in Saved. */
+    public function track(): void
+    {
+        $post = $this->post($this->postId);
+        $application = $post->user->applications()->where('job_post_id', $post->id)->first() ?? Application::track($post->user, [
+            'job_post_id' => $post->id,
+            'title' => $post->title !== '' ? $post->title : __('Job post'),
+            'company' => $post->company,
+            'location' => $post->location,
+            'url' => $post->url,
+            'source' => $post->url !== null ? (string) preg_replace('/^www\./', '', (string) parse_url($post->url, PHP_URL_HOST)) : '',
+        ]);
+        $this->redirectRoute('applications.show', ['id' => $application->id], navigate: true);
+    }
+
     public function delete(): void
     {
         $this->post($this->postId)->delete();
@@ -107,6 +123,7 @@ final class Show extends Component
             'match' => $post->status === JobPost::READY ? JobMatch::of($post, $user->careerProfile()) : null,
             'resumes' => $user->resumes()->get(),
             'letters' => $user->coverLetters()->where('job_post_id', $post->id)->get(),
+            'application' => $user->applications()->where('job_post_id', $post->id)->first(),
         ]);
     }
 

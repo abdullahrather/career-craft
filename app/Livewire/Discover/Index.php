@@ -10,7 +10,9 @@ use App\Jobs\AnalyseJobPost;
 use App\Jobs\ImportJobListings;
 use App\JobSearch\ListingFilters;
 use App\JobSearch\ListingRanker;
+use App\Models\Application;
 use App\Models\JobListing;
+use App\Models\JobListingSource;
 use App\Models\SavedSearch;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -174,6 +176,24 @@ final class Index extends Component
         $this->redirectRoute('jobs.show', ['id' => $post->id]);
     }
 
+    /** Adds a job to the person's applications, in Saved, unless it is there already. */
+    public function track(int $listingId): void
+    {
+        $listing = JobListing::query()->with('sources')->findOrFail($listingId);
+        $source = $listing->sources->first();
+        $user = $this->user();
+        if ($source !== null && $user->applications()->where('url', $source->url)->exists()) {
+            return;
+        }
+        Application::track($user, [
+            'title' => $listing->title,
+            'company' => $listing->company,
+            'location' => $listing->location,
+            'url' => $source?->url,
+            'source' => $source !== null ? (JobListingSource::NAMES[$source->source] ?? $source->source) : '',
+        ]);
+    }
+
     public function render(): View
     {
         $user = $this->user();
@@ -189,12 +209,16 @@ final class Index extends Component
         } else {
             $listings = $query->with('sources')->orderByDesc('posted_at')->orderByDesc('id')->simplePaginate(self::PER_PAGE);
         }
+        // A job is in the person's applications when one of its links is.
+        $links = collect($listings->items())->flatMap(fn (JobListing $listing) => $listing->sources->pluck('url'))->all();
+        $trackedLinks = $links !== [] ? $user->applications()->whereIn('url', $links)->pluck('url')->all() : [];
 
         return view('livewire.discover.index', [
             'listings' => $listings,
             'ranked' => $ranked,
             'canRank' => $ranker->canRank(),
             'yourSkills' => $ranked ? collect($listings->items())->mapWithKeys(fn (JobListing $listing): array => [$listing->id => $ranker->skillsIn($listing)])->all() : [],
+            'tracked' => array_values(collect($listings->items())->filter(fn (JobListing $listing): bool => $listing->sources->pluck('url')->intersect($trackedLinks)->isNotEmpty())->map(fn (JobListing $listing): int => $listing->id)->all()),
             'hiddenTitle' => $this->hidden !== null ? $user->dismissedListings()->where('job_listing_id', $this->hidden)->value('title') : null,
             'companyFacts' => $this->company !== '' ? $this->companyFacts($user) : null,
             'savedSearches' => $user->savedSearches()->get(),
