@@ -128,14 +128,20 @@ document.addEventListener('alpine:init', () => {
 
         init() {
             this.fit();
-            new ResizeObserver(() => this.fit()).observe(this.$refs.box);
+            this.observer = new ResizeObserver(() => this.fit());
+            this.observer.observe(this.$refs.box);
             // The preview page reports its length; only messages from it count.
             window.addEventListener('message', (event) => {
-                if (event.origin !== location.origin || event.source !== this.$refs.frame.contentWindow) return;
+                if (event.origin !== location.origin || !this.$refs.frame || event.source !== this.$refs.frame.contentWindow) return;
                 if (event.data?.type !== 'resume-pages') return;
                 this.pages = event.data.pages;
                 this.loaded();
             });
+        },
+
+        // Leaving the page with wire:navigate removes the preview; its watcher goes with it.
+        destroy() {
+            this.observer.disconnect();
         },
 
         get src() {

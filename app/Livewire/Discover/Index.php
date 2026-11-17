@@ -6,6 +6,7 @@ namespace App\Livewire\Discover;
 
 use App\Ai\AiLimitReached;
 use App\Ai\AiRunner;
+use App\Applications\ApplyQueue;
 use App\Jobs\AnalyseJobPost;
 use App\Jobs\ImportJobListings;
 use App\JobSearch\ListingFilters;
@@ -13,6 +14,7 @@ use App\JobSearch\ListingRanker;
 use App\Models\Application;
 use App\Models\JobListing;
 use App\Models\JobListingSource;
+use App\Models\JobPost;
 use App\Models\SavedSearch;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -65,6 +67,9 @@ final class Index extends Component
 
     /** How often a search saved now emails its new jobs. */
     public string $frequency = 'daily';
+
+    /** The job just added to the apply queue, to say so. */
+    public ?string $queued = null;
 
     /** The job just marked "not interested", so it can be brought back. */
     public ?int $hidden = null;
@@ -167,11 +172,7 @@ final class Index extends Component
             return;
         }
 
-        // The listing's own text when it has the whole post; otherwise its page is read.
-        $text = trim(implode("\n", array_filter([$listing->title, implode(' · ', array_filter([$listing->company, $listing->location]))]))."\n\n".$listing->description);
-        $post = mb_strlen($listing->description) >= 200
-            ? $user->jobPosts()->create(['text' => $text, 'url' => $listing->sources->first()?->url])
-            : $user->jobPosts()->create(['url' => $listing->sources->first()?->url]);
+        $post = JobPost::fromListing($user, $listing);
         AnalyseJobPost::dispatch($post);
         $this->redirectRoute('jobs.show', ['id' => $post->id]);
     }
@@ -192,6 +193,18 @@ final class Index extends Component
             'url' => $source?->url,
             'source' => $source !== null ? (JobListingSource::NAMES[$source->source] ?? $source->source) : '',
         ]);
+    }
+
+    /** Adds a job to the apply queue, to be prepared for review. */
+    public function queue(ApplyQueue $queue, int $listingId): void
+    {
+        $result = $queue->add($this->user(), JobListing::query()->with('sources')->findOrFail($listingId));
+        if (is_string($result)) {
+            $this->addError('queue', $result);
+
+            return;
+        }
+        $this->queued = $result->title;
     }
 
     public function render(): View
@@ -218,6 +231,7 @@ final class Index extends Component
             'ranked' => $ranked,
             'canRank' => $ranker->canRank(),
             'yourSkills' => $ranked ? collect($listings->items())->mapWithKeys(fn (JobListing $listing): array => [$listing->id => $ranker->skillsIn($listing)])->all() : [],
+            'inQueue' => $user->applyQueueItems()->whereNull('skipped_at')->whereIn('job_listing_id', collect($listings->items())->map(fn (JobListing $listing): int => $listing->id)->all())->pluck('job_listing_id')->all(),
             'tracked' => array_values(collect($listings->items())->filter(fn (JobListing $listing): bool => $listing->sources->pluck('url')->intersect($trackedLinks)->isNotEmpty())->map(fn (JobListing $listing): int => $listing->id)->all()),
             'hiddenTitle' => $this->hidden !== null ? $user->dismissedListings()->where('job_listing_id', $this->hidden)->value('title') : null,
             'companyFacts' => $this->company !== '' ? $this->companyFacts($user) : null,

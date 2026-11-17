@@ -103,6 +103,16 @@ At the end of the career profile, **Suggest a headline and About** writes both f
 - **Daily refresh:** the `scheduler` service in `compose.yaml` runs `php artisan careercraft:refresh-jobs` every morning at 06:00. It fetches each followed board and each saved search again, and deletes jobs no source has shown for 30 days. Run the command yourself to refresh at any time.
 - **Job alerts:** at 07:00 the scheduler runs `php artisan careercraft:send-job-alerts`. Each saved search that is due emails the jobs found since it was last checked, up to 10 of them best match first, in your language. Nothing new, no email; only confirmed email addresses get alerts. In development they land in Mailpit.
 
+## Apply queue
+
+Speed without bots that apply unattended: each job is prepared for you, and nothing goes to an employer without your review.
+
+- **Queue:** "Queue" on a job in Find jobs. The post is analysed, then a copy of the CV you chose is tailored to it and a letter is written in the post's language, in the tone you chose. All of it happens in the background; with the local AI it takes a few minutes per job.
+- **Limits:** 10 jobs a day per person, none once the day's AI allowance is used, and each job once (a skipped job can be queued again).
+- **Review:** one page per job with the match, the tailored CV's suggestions to accept or reject, and the letter with anything marked to confirm. Suggestions left undecided keep your own words.
+- **Approve:** saves the tailored CV as a version and adds the job to your applications in Applied, with copies of the CV and letter and "Prepared with the apply queue" on its timeline. Then you apply on the job's page.
+- **Log:** every job approved or skipped stays listed, with when it was queued and decided.
+
 ## Applications
 
 A board of every job you are going for: Saved, Applied, Interviewing, Offer and Rejected.
