@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CareerCraft</title>
+    <style>
+        body { width: 320px; margin: 0; padding: 16px; font: 14px/1.4 system-ui, sans-serif; color: #1c1917; }
+        h1 { margin: 0 0 12px; font-size: 16px; color: #0f766e; }
+        label { display: block; margin-top: 10px; font-weight: 600; }
+        input { box-sizing: border-box; width: 100%; margin-top: 4px; padding: 6px 8px; border: 1px solid #d6d3d1; border-radius: 8px; font: inherit; }
+        button { margin-top: 12px; padding: 7px 14px; border: 0; border-radius: 999px; background: #0f766e; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+        button.secondary { background: #e7e5e4; color: #1c1917; }
+        button:disabled { opacity: .6; cursor: default; }
+        p { margin: 10px 0 0; }
+        .muted { color: #57534e; font-size: 13px; }
+        .error { color: #b91c1c; }
+        [hidden] { display: none; }
+    </style>
+</head>
+<body>
+    <h1>CareerCraft</h1>
+
+    <section id="fill" hidden>
+        <p class="muted">Fills this application form with your details, and the CV and letter recorded for this job. Check every field before you submit.</p>
+        <button id="fill-button" type="button">Fill this form</button>
+        <p id="result" role="status"></p>
+        <button id="change" type="button" class="secondary">Change settings</button>
+    </section>
+
+    <form id="settings" hidden>
+        <p class="muted">Make a token on CareerCraft under Settings → Browser extension, and paste it here.</p>
+        <label for="server">CareerCraft address</label>
+        <input id="server" type="url" value="http://localhost:8000" required>
+        <label for="token">Token</label>
+        <input id="token" type="password" autocomplete="off" required>
+        <button type="submit">Save</button>
+        <p id="settings-result" role="status"></p>
+    </form>
+
+    <script src="popup.js"></script>
+</body>
+</html>

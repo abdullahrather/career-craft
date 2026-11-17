@@ -1,0 +1,12 @@
+{
+    "manifest_version": 3,
+    "name": "CareerCraft",
+    "version": "0.1.0",
+    "description": "Fills application forms on Greenhouse and Lever with your CareerCraft details, CV and letter. You check the form and submit it yourself.",
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "CareerCraft"
+    },
+    "permissions": ["storage", "activeTab", "scripting"],
+    "host_permissions": ["http://localhost/*", "http://127.0.0.1/*"]
+}

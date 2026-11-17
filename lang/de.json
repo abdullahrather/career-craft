@@ -854,5 +854,16 @@
     ":provider no longer lets CareerCraft send for you. Connect it again.": ":provider erlaubt CareerCraft nicht mehr, für Sie zu senden. Verbinden Sie es erneut.",
     "Connect Outlook again": "Outlook erneut verbinden",
     "Send through Outlook": "Über Outlook senden",
-    "You allow sending email only; CareerCraft can't read your inbox.": "Sie erlauben nur das Senden von E-Mails; CareerCraft kann Ihr Postfach nicht lesen."
+    "You allow sending email only; CareerCraft can't read your inbox.": "Sie erlauben nur das Senden von E-Mails; CareerCraft kann Ihr Postfach nicht lesen.",
+    "Browser extension": "Browser-Erweiterung",
+    "The CareerCraft extension for Chrome and Edge fills application forms on Greenhouse and Lever with your details, CV and letter. You check the form and submit it yourself. Make a token here and paste it into the extension.": "Die CareerCraft-Erweiterung für Chrome und Edge füllt Bewerbungsformulare auf Greenhouse und Lever mit Ihren Angaben, Lebenslauf und Anschreiben. Sie prüfen das Formular und schicken es selbst ab. Erstellen Sie hier einen Token und fügen Sie ihn in die Erweiterung ein.",
+    "Your new token. Copy it now: it isn't shown again.": "Ihr neuer Token. Kopieren Sie ihn jetzt: Er wird nicht noch einmal angezeigt.",
+    "Copy the token": "Den Token kopieren",
+    "Made :date": "Erstellt am :date",
+    "last used :date": "zuletzt genutzt am :date",
+    "not used yet": "noch nicht genutzt",
+    "Revoke this token? The extension using it stops working.": "Diesen Token widerrufen? Die Erweiterung, die ihn nutzt, funktioniert dann nicht mehr.",
+    "Revoke": "Widerrufen",
+    "Make a token": "Token erstellen",
+    "This job isn't in your applications. Track it on CareerCraft first.": "Diese Stelle ist nicht in Ihren Bewerbungen. Verfolgen Sie sie zuerst in CareerCraft."
 }

@@ -114,6 +114,16 @@ Speed without bots that apply unattended: each job is prepared for you, and noth
 - **Approve:** saves the tailored CV as a version and adds the job to your applications in Applied, with copies of the CV and letter and "Prepared with the apply queue" on its timeline. Then you apply on the job's page.
 - **Log:** every job approved or skipped stays listed, with when it was queued and decided.
 
+## Browser extension
+
+The `extension/` folder holds a Chrome and Edge extension that fills application forms on Greenhouse and Lever from CareerCraft. You check the form and press submit yourself; it never submits.
+
+- **Install:** open `chrome://extensions` (or `edge://extensions`), turn on developer mode, choose "Load unpacked" and pick the `extension` folder.
+- **Connect:** under Settings → Browser extension, make a token (shown once; it can only read what the extension needs, and can be revoked) and paste it into the extension with the CareerCraft address (`http://localhost:8000`).
+- **Fill:** on a job's application form, press "Fill this form". For a job in your applications, it fills your name, email, phone, place, LinkedIn, GitHub and website, your application details, and the queue's answers to common questions where the form asks them, and attaches the CV and letter recorded for the job. Only empty fields are filled, each value once; dropdowns and questions about gender, ethnicity, disability or veteran status are left to you.
+- **Permissions:** the extension works on a tab only when you press its button, and talks only to CareerCraft on `localhost`.
+- **API:** `/api/extension/profile`, `/api/extension/application?url=…` and `/api/extension/applications/{id}/documents/{cv|letter}`, with the token as a bearer token. Read only, 60 requests a minute.
+
 ## Sending by email
 
 Applications go out from your own address, never from CareerCraft's.
