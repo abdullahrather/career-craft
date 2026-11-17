@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 final class JobListingSource extends Model
 {
     /** Each source and the name shown for it. */
-    public const array NAMES = ['arbeitsagentur' => 'Bundesagentur für Arbeit', 'arbeitnow' => 'Arbeitnow', 'adzuna' => 'Adzuna'];
+    public const array NAMES = ['arbeitsagentur' => 'Bundesagentur für Arbeit', 'arbeitnow' => 'Arbeitnow', 'adzuna' => 'Adzuna', 'greenhouse' => 'Greenhouse', 'lever' => 'Lever', 'ashby' => 'Ashby'];
 
     /** @return BelongsTo<JobListing, $this> */
     public function listing(): BelongsTo

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\JobSources;
 
+use Carbon\CarbonImmutable;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
@@ -21,5 +23,16 @@ final class Sources
         $value = data_get($data, $path);
 
         return is_string($value) || is_int($value) || is_float($value) ? (string) $value : '';
+    }
+
+    /** A date in a source's answer, or nothing when it's missing or can't be read. */
+    public static function date(mixed $data, string $path): ?CarbonImmutable
+    {
+        $value = self::string($data, $path);
+        try {
+            return $value !== '' ? CarbonImmutable::parse($value) : null;
+        } catch (InvalidFormatException) {
+            return null;
+        }
     }
 }

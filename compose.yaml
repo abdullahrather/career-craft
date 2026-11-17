@@ -34,6 +34,11 @@ services:
     <<: *php
     command: php artisan queue:work --tries=3
 
+  # Runs scheduled tasks, such as the daily refresh of followed company boards.
+  scheduler:
+    <<: *php
+    command: php artisan schedule:work
+
   vite:
     image: node:24-alpine
     working_dir: /app

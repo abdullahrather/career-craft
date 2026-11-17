@@ -15,6 +15,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -61,6 +62,13 @@ final class Index extends Component
                 ImportJobListings::dispatch($source, $this->what, $this->where, $user->id);
             }
         }
+    }
+
+    /** Shows the jobs of a company just followed. */
+    #[On('jobs-imported')]
+    public function jobsImported(): void
+    {
+        $this->resetPage();
     }
 
     /** Analyses a job like a pasted post, then opens it. */
