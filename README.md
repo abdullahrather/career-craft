@@ -110,6 +110,7 @@ Speed without bots that apply unattended: each job is prepared for you, and noth
 - **Queue:** "Queue" on a job in Find jobs. The post is analysed, then a copy of the CV you chose is tailored to it and a letter is written in the post's language, in the tone you chose. All of it happens in the background; with the local AI it takes a few minutes per job.
 - **Limits:** 10 jobs a day per person, none once the day's AI allowance is used, and each job once (a skipped job can be queued again).
 - **Review:** one page per job with the match, the tailored CV's suggestions to accept or reject, and the letter with anything marked to confirm. Suggestions left undecided keep your own words.
+- **Answers to common questions:** each job also gets answers to "Why do you want to work at this company?" and "Why are you a good fit for this role?", in the post's language, from your profile only and checked by the fact guard; anything it can't find in your profile is shown before you paste the answer. Your salary expectation, notice period, earliest start and work permit, entered once under Application details in the career profile (never on a CV), are shown beside them. Everything has a Copy button, and the answers can be written again.
 - **Approve:** saves the tailored CV as a version and adds the job to your applications in Applied, with copies of the CV and letter and "Prepared with the apply queue" on its timeline. Then you apply on the job's page.
 - **Log:** every job approved or skipped stays listed, with when it was queued and decided.
 

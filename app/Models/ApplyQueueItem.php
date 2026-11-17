@@ -27,6 +27,8 @@ use Illuminate\Support\Carbon;
  * @property string $tone
  * @property string|null $error
  * @property Carbon|null $prepared_at
+ * @property string|null $answers_status writing, ready or failed.
+ * @property list<array{question: string, text: string, flags: list<array{quote: string, kind: string}>, checked: bool}>|null $answers
  * @property Carbon|null $approved_at
  * @property Carbon|null $skipped_at
  * @property Carbon $created_at
@@ -37,7 +39,7 @@ use Illuminate\Support\Carbon;
  * @property-read CoverLetter|null $coverLetter
  * @property-read Application|null $application
  */
-#[Fillable(['job_listing_id', 'job_post_id', 'base_resume_id', 'resume_id', 'cover_letter_id', 'application_id', 'resume_version_id', 'title', 'company', 'tone', 'error', 'prepared_at', 'approved_at', 'skipped_at'])]
+#[Fillable(['job_listing_id', 'job_post_id', 'base_resume_id', 'resume_id', 'cover_letter_id', 'application_id', 'resume_version_id', 'title', 'company', 'tone', 'error', 'prepared_at', 'approved_at', 'skipped_at', 'answers_status', 'answers'])]
 final class ApplyQueueItem extends Model
 {
     /** How many jobs one person can queue a day: each one costs AI time, and deserves a careful look. */
@@ -95,6 +97,8 @@ final class ApplyQueueItem extends Model
             // Prepared, but the tailored CV or the letter was deleted since.
             $this->resume === null, $this->coverLetter === null => 'failed',
             $this->resume->changes()->where('status', TailoredChange::WAITING)->exists(), $this->coverLetter->status === CoverLetter::WRITING => 'preparing',
+            // The first answers are part of preparing; writing them again isn't.
+            $this->answers_status === 'writing' && $this->answers === null => 'preparing',
             // A letter the AI couldn't write can be tried again on the review page.
             default => 'ready',
         };
@@ -103,6 +107,6 @@ final class ApplyQueueItem extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['prepared_at' => 'datetime', 'approved_at' => 'datetime', 'skipped_at' => 'datetime'];
+        return ['answers' => 'array', 'prepared_at' => 'datetime', 'approved_at' => 'datetime', 'skipped_at' => 'datetime'];
     }
 }

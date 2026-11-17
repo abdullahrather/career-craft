@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
 /**
  * A person's career profile: the one record every CV, cover letter and job match is
@@ -23,10 +24,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $city
  * @property string $country
  * @property string|null $photo_path
+ * @property int|null $salary_expectation Euros a year, gross.
+ * @property string $notice_period
+ * @property Carbon|null $earliest_start
+ * @property string $work_permit
  * @property-read ProfileImport|null $import
  * @property-read User $user
  */
-#[Fillable(['headline', 'summary', 'email', 'phone', 'city', 'country'])]
+#[Fillable(['headline', 'summary', 'email', 'phone', 'city', 'country', 'salary_expectation', 'notice_period', 'earliest_start', 'work_permit'])]
 final class Profile extends Model
 {
     /** A summary shorter than this reads as unfinished. */
@@ -39,12 +44,20 @@ final class Profile extends Model
         'phone' => '',
         'city' => '',
         'country' => '',
+        'notice_period' => '',
+        'work_permit' => '',
     ];
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return ['salary_expectation' => 'integer', 'earliest_start' => 'date'];
     }
 
     /** @return HasOne<ProfileImport, $this> */

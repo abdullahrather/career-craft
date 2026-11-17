@@ -2,14 +2,19 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\AnswerWriter;
+use App\Ai\Agents\FactChecker;
+use App\Ai\Agents\FactVerifier;
 use App\Ai\AiSettings;
 use App\Jobs\AnalyseJobPost;
 use App\Jobs\PrepareApplication;
 use App\Jobs\TailorText;
+use App\Jobs\WriteAnswers;
 use App\Jobs\WriteCoverLetter;
 use App\Livewire\ApplyQueue\Index as QueuePage;
 use App\Livewire\ApplyQueue\Review;
 use App\Livewire\Discover\Index as FindJobs;
+use App\Livewire\Profile\ApplicationDetails;
 use App\Models\Application;
 use App\Models\ApplicationEvent;
 use App\Models\ApplyQueueItem;
@@ -22,6 +27,7 @@ use App\Resumes\Tailoring;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Ai\Prompts\AgentPrompt;
 use Livewire\Livewire;
 
 /** A fictional candidate with a CV chosen for the apply queue. */
@@ -282,4 +288,100 @@ describe('The queue pages', function (): void {
         Livewire::actingAs(candidate())->test(Review::class, ['id' => $item->id])->assertNotFound();
         $this->actingAs($item->user)->get(route('apply-queue'))->assertOk()->assertSee('Product Designer');
     });
+});
+
+describe('Answers to common questions', function (): void {
+    beforeEach(function (): void {
+        FactChecker::fake(fn (): array => ['claims' => []]);
+        FactVerifier::fake(fn (): array => ['fact' => '', 'reason' => '', 'backed' => false]);
+    });
+
+    it('are written while the job is prepared, in the post\'s language, and checked against the profile', function (): void {
+        Queue::fake();
+        $user = queueCandidate();
+        $item = $user->applyQueueItems()->create(['job_post_id' => analysedPost($user)->id, 'base_resume_id' => $user->apply_resume_id, 'title' => 'Designer', 'tone' => 'warm']);
+        (new PrepareApplication($item))->handle();
+        Queue::assertPushed(WriteAnswers::class);
+        expect($item->fresh()->answers_status)->toBe('writing');
+
+        AnswerWriter::fake([['why_company' => 'Bei Nordwind Logistik möchte ich Werkzeuge gestalten, wie zuvor für Google.', 'why_fit' => 'Bei Hafenblick Studio habe ich die Abschlussrate um 25% erhöht.']]);
+        FactChecker::fake(fn (): array => ['claims' => [['quote' => 'Google', 'kind' => 'employer'], ['quote' => 'bei Nordwind Logistik', 'kind' => 'employer']]]);
+        app()->call([new WriteAnswers($item->fresh()), 'handle']);
+
+        $item->refresh();
+        expect($item->answers_status)->toBe('ready')
+            ->and(array_column($item->answers, 'question'))->toBe(['why_company', 'why_fit'])
+            ->and($item->answers[1]['text'])->toBe('Bei Hafenblick Studio habe ich die Abschlussrate um 25% erhöht.')
+            // The company applied to may be named; anything else not in the profile is kept.
+            ->and($item->answers[0]['flags'])->toBe([['quote' => 'Google', 'kind' => 'employer']])
+            ->and($item->answers[0]['checked'])->toBeTrue();
+        AnswerWriter::assertPrompted(fn (AgentPrompt $prompt): bool => str_starts_with($prompt->prompt, "<job>Product Designer</job>\n<company>Nordwind Logistik</company>\n<skills>Figma</skills>\n<facts>\n")
+            && str_ends_with($prompt->prompt, 'Write in German.'));
+    });
+
+    it('fail visibly when the AI gives nothing back, and the job is still ready to review', function (): void {
+        $user = queueCandidate();
+        $item = preparedItem($user);
+        $item->update(['answers_status' => 'writing']);
+        expect($item->fresh()->state())->toBe('preparing');
+
+        AnswerWriter::fake([['why_company' => 'Something.', 'why_fit' => '  ']]);
+        app()->call([new WriteAnswers($item->fresh()), 'handle']);
+
+        expect($item->fresh()->answers_status)->toBe('failed')
+            ->and($item->fresh()->state())->toBe('ready');
+        Livewire::actingAs($user)->test(Review::class, ['id' => $item->id])->assertSee('The AI could not write the answers.');
+
+        (new WriteAnswers($item->fresh()))->failed(new RuntimeException('Timed out.'));
+        expect($item->fresh()->answers_status)->toBe('failed');
+    });
+
+    it('shows the answers and the profile\'s facts ready to copy, with what the check couldn\'t find', function (): void {
+        $user = queueCandidate();
+        $user->careerProfile()->update(['salary_expectation' => 65000, 'notice_period' => '3 months to the end of a month', 'earliest_start' => '2027-02-01']);
+        $item = preparedItem($user);
+        $item->update(['answers_status' => 'ready', 'answers' => [
+            ['question' => 'why_company', 'text' => 'I want to design tools at Nordwind Logistik.', 'flags' => [['quote' => 'Google', 'kind' => 'employer']], 'checked' => true],
+            ['question' => 'why_fit', 'text' => 'I raised task completion by 25%.', 'flags' => [], 'checked' => false],
+        ]]);
+
+        Livewire::actingAs($user)->test(Review::class, ['id' => $item->id])
+            ->assertSee(['Answers to common questions', 'Why do you want to work at Nordwind Logistik?', 'I want to design tools at Nordwind Logistik.', 'Not found in your profile: “Google”.', 'could not be checked against your profile'])
+            ->assertSeeHtml('data-text="I raised task completion by 25%."')
+            ->assertSee(['Salary expectation', '€65,000 a year', '3 months to the end of a month', '1 February 2027', 'Add the rest in your career profile'])
+            ->assertDontSee('Work permit');
+    });
+
+    it('can be written again without the review going back to preparing', function (): void {
+        Queue::fake();
+        $user = queueCandidate();
+        $item = preparedItem($user);
+        $item->update(['answers_status' => 'ready', 'answers' => [['question' => 'why_fit', 'text' => 'Old answer.', 'flags' => [], 'checked' => true]]]);
+
+        Livewire::actingAs($user)->test(Review::class, ['id' => $item->id])->call('rewriteAnswers')->assertSee('Writing the answers…');
+        Queue::assertPushed(WriteAnswers::class);
+        expect($item->fresh()->state())->toBe('ready');
+
+        $item->update(['answers_status' => 'failed']);
+        (new AiSettings(dailyTokens: 100))->save();
+        useToday($user, 100);
+        Livewire::actingAs($user)->test(Review::class, ['id' => $item->id])->call('rewriteAnswers')->assertHasErrors('answers');
+        expect($item->fresh()->answers_status)->toBe('failed');
+    });
+});
+
+it('keeps the application details on the profile, never on a CV', function (): void {
+    $user = candidate();
+
+    Livewire::actingAs($user)->test(ApplicationDetails::class)
+        ->set(['salaryExpectation' => '0', 'earliestStart' => 'soon'])->call('save')->assertHasErrors(['salaryExpectation', 'earliestStart'])
+        ->set(['salaryExpectation' => '65000', 'noticePeriod' => ' 3 months ', 'earliestStart' => '2027-02-01', 'workPermit' => 'EU citizen'])->call('save')->assertHasNoErrors()->assertSee('Saved.');
+
+    $profile = $user->careerProfile()->fresh();
+    expect($profile->only(['salary_expectation', 'notice_period', 'work_permit']))->toBe(['salary_expectation' => 65000, 'notice_period' => '3 months', 'work_permit' => 'EU citizen'])
+        ->and($profile->earliest_start->toDateString())->toBe('2027-02-01');
+    $this->actingAs($user)->get(route('resumes.preview', ['id' => resumeFor($user)->id]))->assertOk()->assertDontSee('65000')->assertDontSee('EU citizen');
+
+    Livewire::actingAs($user)->test(ApplicationDetails::class)->set(['salaryExpectation' => '', 'earliestStart' => ''])->call('save');
+    expect($user->careerProfile()->fresh()->salary_expectation)->toBeNull();
 });
