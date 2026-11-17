@@ -18,7 +18,39 @@
         <livewire:discover.companies />
     </div>
 
+    <div class="mt-4 grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
+        <label class="field" for="sort">
+            <span>{{ __('Order') }}</span>
+            <select id="sort" wire:model.live="sort">
+                <option value="match">{{ __('Best match for your profile') }}</option>
+                <option value="newest">{{ __('Newest first') }}</option>
+            </select>
+        </label>
+        <label class="field" for="mode">
+            <span>{{ __('Work mode') }}</span>
+            <select id="mode" wire:model.live="mode">
+                <option value="">{{ __('Any') }}</option>
+                @foreach ($modes as $value => $text)
+                    <option value="{{ $value }}">{{ $text }}</option>
+                @endforeach
+            </select>
+        </label>
+        <label class="flex items-center gap-2 text-sm sm:pb-2.5">
+            <input type="checkbox" wire:model.live="salary">
+            {{ __('Only with a salary') }}
+        </label>
+    </div>
+
     <div aria-live="polite">
+        @if ($sort === 'match' && ! $canRank)
+            <p class="muted mt-4 text-sm">{{ __('Add skills or job titles to your career profile to see the jobs that fit you best first. Until then, the newest come first.') }} <a href="{{ route('profile') }}" class="link" wire:navigate>{{ __('Career profile') }}</a></p>
+        @endif
+        @if ($hiddenTitle !== null)
+            <p class="mt-4 text-sm" role="status">
+                {{ __('Hidden: :title. Jobs like it will rank lower.', ['title' => $hiddenTitle]) }}
+                <button type="button" wire:click="undo" class="link">{{ __('Undo') }}</button>
+            </p>
+        @endif
         @if ($fetching)
             <p class="mt-4 flex items-center gap-2 text-sm" role="status">
                 <span class="size-4 shrink-0 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" aria-hidden="true"></span>
@@ -53,6 +85,9 @@
                                 <span class="muted">{{ $listing->posted_at->translatedFormat('j M Y') }}</span>
                             @endif
                         </p>
+                        @if (($yourSkills[$listing->id] ?? []) !== [])
+                            <p class="mt-2 text-sm">{{ __('Your skills: :skills', ['skills' => implode(', ', $yourSkills[$listing->id])]) }}</p>
+                        @endif
                         <p class="muted mt-2 text-xs">
                             {{ __('From') }}
                             @foreach ($listing->sources as $source)
@@ -60,15 +95,18 @@
                             @endforeach
                         </p>
                     </div>
-                    <button type="button" wire:click="analyse({{ $listing->id }})" wire:loading.attr="disabled" wire:target="analyse" class="button button-small shrink-0 self-start">{{ __('Analyse') }}</button>
+                    <div class="flex shrink-0 gap-2 self-start">
+                        <button type="button" wire:click="analyse({{ $listing->id }})" wire:loading.attr="disabled" wire:target="analyse" class="button button-small">{{ __('Analyse') }}</button>
+                        <button type="button" wire:click="dismiss({{ $listing->id }})" class="button button-small" aria-label="{{ __('Not interested in :title', ['title' => $listing->title]) }}">{{ __('Not interested') }}</button>
+                    </div>
                 </li>
             @endforeach
         </ul>
 
         @if ($listings->hasPages())
             <nav class="mt-6 flex justify-between gap-2" aria-label="{{ __('Pages') }}">
-                <button type="button" wire:click="previousPage" @disabled($listings->onFirstPage()) class="button button-small">← {{ __('Newer') }}</button>
-                <button type="button" wire:click="nextPage" @disabled(! $listings->hasMorePages()) class="button button-small">{{ __('Older') }} →</button>
+                <button type="button" wire:click="previousPage" @disabled($listings->onFirstPage()) class="button button-small">← {{ $ranked ? __('Previous') : __('Newer') }}</button>
+                <button type="button" wire:click="nextPage" @disabled(! $listings->hasMorePages()) class="button button-small">{{ $ranked ? __('Next') : __('Older') }} →</button>
             </nav>
         @endif
     @endif

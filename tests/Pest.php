@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\JobSources\FoundJob;
 use App\Models\AiUsage;
 use App\Models\Resume;
 use App\Models\User;
@@ -15,6 +16,22 @@ function useToday(User $user, int $tokens, ?DateTimeInterface $at = null): void
 {
     AiUsage::query()->create(['user_id' => $user->id, 'feature' => 'test', 'provider' => 'ollama', 'model' => 'qwen2.5:7b', 'input_tokens' => $tokens, 'output_tokens' => 0, 'cost' => 0])
         ->forceFill(['created_at' => $at ?? now()])->save();
+}
+
+/** A fictional job as a source would find it. */
+function foundJob(array $values = []): FoundJob
+{
+    return new FoundJob(...[
+        'source' => 'arbeitnow',
+        'externalId' => 'backend-developer-kranich-1',
+        'url' => 'https://www.arbeitnow.com/jobs/backend-developer-kranich-1',
+        'title' => 'Backend Developer PHP',
+        'company' => 'Kranich Mobility GmbH',
+        'location' => 'Hamburg',
+        'workMode' => '',
+        'description' => 'We build booking software for ferries.',
+        ...$values,
+    ]);
 }
 
 /** A one-page PDF with these lines of text. */
