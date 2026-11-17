@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\ApplyQueue;
 
+use App\Ai\AiLimitReached;
+use App\Ai\AiRunner;
 use App\Applications\ApplyQueue;
+use App\Jobs\WriteAnswers;
 use App\JobSearch\JobMatch;
 use App\Models\ApplyQueueItem;
 use App\Models\JobPost;
@@ -38,6 +41,20 @@ final class Review extends Component
         }
     }
 
+    /** Has the AI write the answers again, such as after a failure or a profile change. */
+    public function rewriteAnswers(AiRunner $ai): void
+    {
+        $item = $this->item($this->itemId);
+        abort_unless(in_array($item->state(), ['ready', 'approved'], true) && $item->answers_status !== 'writing', 404);
+        if ($ai->remaining($item->user) === 0) {
+            $this->addError('answers', (new AiLimitReached)->getMessage());
+
+            return;
+        }
+        $item->update(['answers_status' => 'writing']);
+        WriteAnswers::dispatch($item);
+    }
+
     public function skip(): void
     {
         $item = $this->item($this->itemId);
@@ -55,6 +72,7 @@ final class Review extends Component
             'item' => $item,
             'state' => $item->state(),
             'match' => $post !== null && $post->status === JobPost::READY ? JobMatch::of($post, $item->user->careerProfile()) : null,
+            'profile' => $item->user->careerProfile(),
             'undecided' => $item->resume?->changes()->where('status', TailoredChange::READY)->count() ?? 0,
         ]);
     }

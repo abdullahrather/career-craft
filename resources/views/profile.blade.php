@@ -23,6 +23,7 @@
             <livewire:profile.certifications />
             <livewire:profile.links />
             <livewire:profile.linked-in />
+            <livewire:profile.application-details />
         </div>
 
         <aside class="flex flex-col gap-6 xl:sticky xl:top-6">
@@ -40,6 +41,7 @@
                         'certifications' => __('Certificates'),
                         'links' => __('Links'),
                         'linkedin' => __('LinkedIn'),
+                        'application' => __('Application details'),
                     ] as $anchor => $label)
                         <li><a href="#{{ $anchor }}" class="nav-link py-1.5">{{ $label }}</a></li>
                     @endforeach

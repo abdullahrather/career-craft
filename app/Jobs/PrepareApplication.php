@@ -14,8 +14,9 @@ use Throwable;
 
 /**
  * The second step of preparing a queued application, after the post is analysed: a tailored
- * copy of the person's CV, and a letter in the post's language sent with it. Both are
- * written by the AI in the background, and both wait for the person's review.
+ * copy of the person's CV, a letter in the post's language sent with it, and answers to the
+ * questions application forms ask. The AI writes them in the background, and all of them
+ * wait for the person's review.
  */
 final class PrepareApplication implements ShouldQueue
 {
@@ -52,6 +53,8 @@ final class PrepareApplication implements ShouldQueue
             'status' => CoverLetter::WRITING,
         ]);
         WriteCoverLetter::dispatch($letter);
+        $item->update(['answers_status' => 'writing']);
+        WriteAnswers::dispatch($item);
         $item->update(['resume_id' => $resume->id, 'cover_letter_id' => $letter->id, 'prepared_at' => now(), 'title' => $post->title !== '' ? mb_substr($post->title, 0, 250) : $item->title, 'company' => $post->company !== '' ? mb_substr($post->company, 0, 250) : $item->company]);
     }
 

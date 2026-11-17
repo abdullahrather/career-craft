@@ -75,6 +75,76 @@
         </section>
     @endif
 
+    @if (in_array($state, ['ready', 'approved'], true) && $item->answers_status !== null)
+        @php
+            $questions = ['why_company' => __('Why do you want to work at :company?', ['company' => $item->company !== '' ? $item->company : __('this company')]), 'why_fit' => __('Why are you a good fit for this role?')];
+            $facts = array_filter([
+                __('Salary expectation') => $profile->salary_expectation !== null ? __(':amount a year', ['amount' => \Illuminate\Support\Number::currency($profile->salary_expectation, 'EUR', app()->getLocale(), 0)]) : null,
+                __('Notice period') => $profile->notice_period ?: null,
+                __('Earliest start') => $profile->earliest_start?->translatedFormat('j F Y'),
+                __('Work permit') => $profile->work_permit ?: null,
+            ]);
+        @endphp
+        <section class="card flex flex-col gap-4" aria-labelledby="answers-title" @if ($item->answers_status === 'writing') wire:poll.5s @endif>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h2 id="answers-title" class="card-title">{{ __('Answers to common questions') }}</h2>
+                    <p class="muted mt-1 text-sm">{{ __('Ready to paste into the application form. Read each one first: you send it, not CareerCraft.') }}</p>
+                </div>
+                @if ($item->answers_status !== 'writing')
+                    <button type="button" wire:click="rewriteAnswers" wire:loading.attr="disabled" wire:target="rewriteAnswers" class="button button-small">{{ __('Write again') }}</button>
+                @endif
+            </div>
+            @error('answers')
+                <p class="field-error text-sm" role="alert">{{ $message }}</p>
+            @enderror
+
+            @if ($item->answers_status === 'writing')
+                <p class="flex items-center gap-2 text-sm" role="status">
+                    <span class="size-4 shrink-0 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" aria-hidden="true"></span>
+                    {{ __('Writing the answers…') }}
+                </p>
+            @elseif ($item->answers_status === 'failed')
+                <p class="field-error text-sm" role="alert">{{ __('The AI could not write the answers. Try again in a moment.') }}</p>
+            @else
+                @foreach ($item->answers ?? [] as $answer)
+                    <div class="flex flex-col gap-2 border-t border-stone-200 pt-4 first:border-t-0 first:pt-0 dark:border-stone-800">
+                        <div class="flex items-start justify-between gap-3">
+                            <h3 class="font-semibold">{{ $questions[$answer['question']] ?? $answer['question'] }}</h3>
+                            <x-copy-button :text="$answer['text']" :label="__('Copy the answer to: :question', ['question' => $questions[$answer['question']] ?? $answer['question']])" />
+                        </div>
+                        <p class="text-sm whitespace-pre-line wrap-break-word">{{ $answer['text'] }}</p>
+                        @foreach ($answer['flags'] as $flag)
+                            <p class="text-sm text-amber-800 dark:text-amber-300">{{ __('Not found in your profile: “:quote”. Check it before you use this answer.', ['quote' => $flag['quote']]) }}</p>
+                        @endforeach
+                        @if (! $answer['checked'])
+                            <p class="text-sm text-amber-800 dark:text-amber-300">{{ __('This answer could not be checked against your profile. Read it carefully.') }}</p>
+                        @endif
+                    </div>
+                @endforeach
+            @endif
+
+            <div class="border-t border-stone-200 pt-4 dark:border-stone-800">
+                <h3 class="font-semibold">{{ __('From your profile') }}</h3>
+                @if ($facts === [])
+                    <p class="muted mt-1 text-sm">{{ __('Add your salary expectation, notice period, earliest start and work permit once, and they show here ready to copy.') }} <a href="{{ route('profile') }}#application" class="link">{{ __('Application details') }}</a></p>
+                @else
+                    <dl class="mt-2 flex flex-col gap-2 text-sm">
+                        @foreach ($facts as $label => $value)
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="min-w-0"><dt class="muted inline">{{ $label }}:</dt> <dd class="inline wrap-break-word">{{ $value }}</dd></div>
+                                <x-copy-button :text="$value" :label="__('Copy: :label', ['label' => $label])" />
+                            </div>
+                        @endforeach
+                    </dl>
+                    @if (count($facts) < 4)
+                        <a href="{{ route('profile') }}#application" class="link mt-2 inline-block text-sm">{{ __('Add the rest in your career profile') }}</a>
+                    @endif
+                @endif
+            </div>
+        </section>
+    @endif
+
     @if (in_array($state, ['ready', 'approved'], true) && $item->resume !== null && $item->coverLetter !== null)
         <livewire:resumes.tailoring :resume-id="$item->resume_id" :key="'tailoring-'.$item->resume_id" />
         <livewire:letters.editor :letter-id="$item->cover_letter_id" :key="'letter-'.$item->cover_letter_id" />
