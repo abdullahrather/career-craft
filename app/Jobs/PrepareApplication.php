@@ -10,6 +10,7 @@ use App\Models\JobPost;
 use App\Resumes\Tailoring;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Throwable;
 
 /**
  * The second step of preparing a queued application, after the post is analysed: a tailored
@@ -52,5 +53,11 @@ final class PrepareApplication implements ShouldQueue
         ]);
         WriteCoverLetter::dispatch($letter);
         $item->update(['resume_id' => $resume->id, 'cover_letter_id' => $letter->id, 'prepared_at' => now(), 'title' => $post->title !== '' ? mb_substr($post->title, 0, 250) : $item->title, 'company' => $post->company !== '' ? mb_substr($post->company, 0, 250) : $item->company]);
+    }
+
+    /** Something went wrong mid-way: the item shows as stopped, not as preparing for ever. */
+    public function failed(?Throwable $exception): void
+    {
+        $this->item->update(['error' => 'prepare-failed']);
     }
 }

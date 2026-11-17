@@ -136,6 +136,17 @@ describe('Preparing', function (): void {
         Queue::assertNotPushed(WriteCoverLetter::class);
     });
 
+    it('shows as stopped, not preparing for ever, when preparing fails', function (): void {
+        Queue::fake();
+        $user = queueCandidate();
+        $item = $user->applyQueueItems()->create(['job_post_id' => analysedPost($user)->id, 'base_resume_id' => $user->apply_resume_id, 'title' => 'Designer', 'tone' => 'warm']);
+
+        (new PrepareApplication($item))->failed(new RuntimeException('The database went away.'));
+
+        expect($item->fresh()->state())->toBe('failed');
+        Livewire::actingAs($user)->test(Review::class, ['id' => $item->id])->assertSee('Preparing this application failed.');
+    });
+
     it('is ready once the AI is done, and stopped if the letter is deleted', function (): void {
         $user = queueCandidate();
         $item = preparedItem($user, TailoredChange::WAITING);

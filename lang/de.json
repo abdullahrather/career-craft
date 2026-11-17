@@ -756,5 +756,6 @@
     "Queued: :title. It is being prepared for you to review.": "Eingereiht: :title. Sie wird zur Prüfung vorbereitet.",
     "Queued": "Eingereiht",
     "Queue :title": ":title einreihen",
-    "Queue": "Einreihen"
+    "Queue": "Einreihen",
+    "Preparing this application failed.": "Die Vorbereitung dieser Bewerbung ist fehlgeschlagen."
 }

@@ -2,6 +2,7 @@
     $post = $item->jobPost;
     $reason = match (true) {
         $item->error === 'no-cv' => __('The CV to start from was deleted before this job was prepared.'),
+        $item->error === 'prepare-failed' => __('Preparing this application failed.'),
         $post === null => __('The job post was deleted.'),
         $post->status === \App\Models\JobPost::FAILED => __('The job post could not be read.'),
         default => __('The tailored CV or the letter was deleted.'),
