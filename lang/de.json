@@ -647,5 +647,6 @@
     "Track this job": "Diese Stelle verfolgen",
     "Tracked": "Verfolgt",
     "Track :title": ":title verfolgen",
-    "Track": "Verfolgen"
+    "Track": "Verfolgen",
+    "The PDF of this CV version is missing. Save the CV again in the CV editor.": "Das PDF dieser Lebenslauf-Version fehlt. Speichern Sie den Lebenslauf im Lebenslauf-Editor erneut."
 }

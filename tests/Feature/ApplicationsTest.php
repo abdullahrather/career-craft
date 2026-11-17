@@ -156,6 +156,37 @@ describe('An application', function (): void {
         $this->actingAs($user)->get(route('applications'))->assertSee(['CV', 'Letter']);
     });
 
+    it('records nothing when the CV version\'s PDF is missing', function (): void {
+        Storage::fake('local');
+        $user = candidate();
+        $version = savedVersion($user);
+        Storage::disk('local')->delete($version->pdf_path);
+        $application = Application::track($user, ['title' => 'Product Designer']);
+
+        Livewire::actingAs($user)->test(Show::class, ['id' => $application->id])
+            ->set('cvVersion', (string) $version->id)->call('recordDocuments')
+            ->assertHasErrors('cvVersion');
+
+        expect($application->fresh()->cv_path)->toBeNull();
+        Storage::disk('local')->assertMissing(Application::directory($application->id).'/cv.pdf');
+    });
+
+    it('keeps the copies recorded before when the letter\'s PDF can\'t be made', function (): void {
+        Storage::fake('local');
+        $user = candidate();
+        $first = savedVersion($user, '%PDF-1.7 first');
+        $application = Application::track($user, ['title' => 'Product Designer']);
+        Livewire::actingAs($user)->test(Show::class, ['id' => $application->id])->set('cvVersion', (string) $first->id)->call('recordDocuments');
+
+        Http::fake(['gotenberg:3000/*' => Http::response('down', 503)]);
+        Livewire::actingAs($user)->test(Show::class, ['id' => $application->id])
+            ->set(['cvVersion' => (string) savedVersion($user, '%PDF-1.7 second')->id, 'letter' => (string) readyLetter($user)->id])->call('recordDocuments')
+            ->assertHasErrors('letter');
+
+        expect($application->fresh()->resume_version_id)->toBe($first->id);
+        $this->actingAs($user)->get(route('applications.download', ['id' => $application->id, 'document' => 'cv']))->assertStreamedContent('%PDF-1.7 first');
+    });
+
     it('takes back a document set to none', function (): void {
         Storage::fake('local');
         $user = candidate();

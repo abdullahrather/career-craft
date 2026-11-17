@@ -103,31 +103,41 @@ final class Show extends Component
             return;
         }
 
-        $directory = Application::directory($application->id);
-        $values = ['resume_version_id' => null, 'cv_name' => null, 'cv_path' => null, 'cover_letter_id' => null, 'letter_name' => null, 'letter_path' => null];
-        if ($version !== null) {
-            Storage::disk('local')->put("{$directory}/cv.pdf", (string) Storage::disk('local')->get($version->pdf_path));
-            $values = [...$values, 'resume_version_id' => $version->id, 'cv_name' => __(':name, version :number', ['name' => $version->name, 'number' => $version->number]), 'cv_path' => "{$directory}/cv.pdf"];
+        // Both PDFs are in hand before anything is written, so a failure leaves the copies
+        // recorded before as they were.
+        $cv = $version !== null ? Storage::disk('local')->get($version->pdf_path) : null;
+        if ($version !== null && $cv === null) {
+            $this->addError('cvVersion', __('The PDF of this CV version is missing. Save the CV again in the CV editor.'));
+
+            return;
         }
+        $letterPdf = null;
+        $letterName = null;
         if ($letter !== null) {
             $doc = new LetterDocument($letter);
+            $letterName = $letter->subject !== '' ? $letter->subject : $doc->title();
             try {
-                $file = $pdf->renderHtml($doc->render(pdf: true), $doc->fontFiles(), $doc->title(), $doc->name());
+                $letterPdf = $pdf->renderHtml($doc->render(pdf: true), $doc->fontFiles(), $doc->title(), $doc->name());
             } catch (ConnectionException|RequestException $exception) {
                 report($exception);
                 $this->addError('letter', __('The PDF could not be made. Check that the PDF service is running: docker compose up -d gotenberg'));
 
                 return;
             }
-            Storage::disk('local')->put("{$directory}/letter.pdf", $file);
-            $values = [...$values, 'cover_letter_id' => $letter->id, 'letter_name' => $letter->subject !== '' ? $letter->subject : $doc->title(), 'letter_path' => "{$directory}/letter.pdf"];
         }
-        foreach (['cv_path' => 'cv.pdf', 'letter_path' => 'letter.pdf'] as $column => $file) {
-            if ($values[$column] === null) {
-                Storage::disk('local')->delete("{$directory}/{$file}");
-            }
-        }
-        $application->update($values);
+
+        $directory = Application::directory($application->id);
+        $disk = Storage::disk('local');
+        $cv !== null ? $disk->put("{$directory}/cv.pdf", $cv) : $disk->delete("{$directory}/cv.pdf");
+        $letterPdf !== null ? $disk->put("{$directory}/letter.pdf", $letterPdf) : $disk->delete("{$directory}/letter.pdf");
+        $application->update([
+            'resume_version_id' => $version?->id,
+            'cv_name' => $version !== null ? __(':name, version :number', ['name' => $version->name, 'number' => $version->number]) : null,
+            'cv_path' => $cv !== null ? "{$directory}/cv.pdf" : null,
+            'cover_letter_id' => $letter?->id,
+            'letter_name' => $letterName,
+            'letter_path' => $letterPdf !== null ? "{$directory}/letter.pdf" : null,
+        ]);
         session()->flash('recorded', __('Recorded. These copies stay with the application.'));
     }
 

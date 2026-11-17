@@ -67,6 +67,9 @@
                     @if ($versions->isEmpty())
                         <span class="field-hint">{{ __('A CV gets versions when you save one in the CV editor.') }}</span>
                     @endif
+                    @error('cvVersion')
+                        <span class="field-error" role="alert">{{ $message }}</span>
+                    @enderror
                 </label>
                 <label class="field" for="letter">
                     <span>{{ __('Cover letter') }}</span>
