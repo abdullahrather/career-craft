@@ -103,6 +103,14 @@ At the end of the career profile, **Suggest a headline and About** writes both f
 - **Daily refresh:** the `scheduler` service in `compose.yaml` runs `php artisan careercraft:refresh-jobs` every morning at 06:00. It fetches each followed board and each saved search again, and deletes jobs no source has shown for 30 days. Run the command yourself to refresh at any time.
 - **Job alerts:** at 07:00 the scheduler runs `php artisan careercraft:send-job-alerts`. Each saved search that is due emails the jobs found since it was last checked, up to 10 of them best match first, in your language. Nothing new, no email; only confirmed email addresses get alerts. In development they land in Mailpit.
 
+## Applications
+
+A board of every job you are going for: Saved, Applied, Interviewing, Offer and Rejected.
+
+- **Add jobs:** "Track" on a job in Find jobs, "Track this job" on an analysed job post, or add one found elsewhere with its link and where you found it.
+- **Move cards:** drag a card to another column or place, or change its status in the card, which works by keyboard too. The first move to Applied dates the application today, unless it already has a date.
+- **What you sent:** on an application's page, record the CV version and cover letter you sent. A copy of each PDF stays with the application, so it shows exactly what went out even after the CV is deleted or the letter changed. Only a letter with nothing left to confirm can be recorded.
+
 ## Accounts
 
 - Sign up with email confirmation, sign in, and reset a forgotten password. The reset form answers the same whether or not an account exists, so it can't be used to find out who has one.

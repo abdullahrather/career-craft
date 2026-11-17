@@ -11,6 +11,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 Route::view('/', 'home')->name('home');
@@ -42,6 +43,25 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     })->whereNumber('id')->name('jobs.show');
 
     Route::view('/discover', 'discover')->name('discover');
+
+    Route::view('/applications', 'applications.index')->name('applications');
+    Route::get('/applications/{id}', function (int $id): View {
+        $user = request()->user();
+        abort_unless($user instanceof User, 403);
+
+        return view('applications.show', ['application' => $user->applications()->findOrFail($id)]);
+    })->whereNumber('id')->name('applications.show');
+    // The copies of the CV and letter sent; only their owner gets them.
+    Route::get('/applications/{id}/{document}', function (int $id, string $document): StreamedResponse {
+        $user = request()->user();
+        abort_unless($user instanceof User, 403);
+        $application = $user->applications()->findOrFail($id);
+        $path = $document === 'cv' ? $application->cv_path : $application->letter_path;
+        abort_if($path === null || ! Storage::disk('local')->exists($path), 404);
+        $name = $document === 'cv' ? $application->cv_name : $application->letter_name;
+
+        return Storage::disk('local')->download($path, (Str::slug((string) $name) ?: $document).'.pdf');
+    })->whereNumber('id')->whereIn('document', ['cv', 'letter'])->name('applications.download');
 
     Route::get('/letters/{id}', [LetterController::class, 'edit'])->whereNumber('id')->name('letters.edit');
     Route::get('/letters/{id}/preview', [LetterController::class, 'preview'])->whereNumber('id')->name('letters.preview');

@@ -162,7 +162,12 @@
                             @endforeach
                         </p>
                     </div>
-                    <div class="flex shrink-0 gap-2 self-start">
+                    <div class="flex shrink-0 flex-wrap gap-2 self-start">
+                        @if (in_array($listing->id, $tracked, true))
+                            <a href="{{ route('applications') }}" class="badge badge-brand" wire:navigate>{{ __('Tracked') }} ✓</a>
+                        @else
+                            <button type="button" wire:click="track({{ $listing->id }})" class="button button-small" aria-label="{{ __('Track :title', ['title' => $listing->title]) }}">{{ __('Track') }}</button>
+                        @endif
                         <button type="button" wire:click="analyse({{ $listing->id }})" wire:loading.attr="disabled" wire:target="analyse" class="button button-small">{{ __('Analyse') }}</button>
                         <button type="button" wire:click="dismiss({{ $listing->id }})" class="button button-small" aria-label="{{ __('Not interested in :title', ['title' => $listing->title]) }}">{{ __('Not interested') }}</button>
                     </div>
