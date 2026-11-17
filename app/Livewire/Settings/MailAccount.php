@@ -63,9 +63,9 @@ final class MailAccount extends Component
             return;
         }
 
-        $account ??= $user->mailAccount()->make();
-        // A mail server replaces a Gmail connection.
-        $account->fill([
+        // A mail server replaces a Gmail connection, but only once its test went through: a
+        // server that can't send leaves the account there was.
+        $settings = [
             'provider' => 'smtp',
             'access_token' => null,
             'refresh_token' => null,
@@ -74,24 +74,19 @@ final class MailAccount extends Component
             'port' => (int) $this->mailPort,
             'security' => $this->mailSecurity,
             'username' => trim($this->mailUsername),
+            'password' => $this->mailPassword !== '' ? $this->mailPassword : $account?->password,
             'from_address' => trim($this->mailFrom),
             'from_name' => trim($this->mailName),
-            'verified_at' => null,
-        ]);
-        if ($this->mailPassword !== '') {
-            $account->password = $this->mailPassword;
-        }
-        $account->save();
-        $this->reset('mailPassword');
-
-        $error = $sender->test($account);
+        ];
+        $error = $sender->test($user->mailAccount()->make($settings));
         if ($error !== null) {
             $this->addError('test', $error);
 
             return;
         }
-        $account->update(['verified_at' => now()]);
-        session()->flash('mail-saved', __('A test email went to :address. Applications can now be sent from it.', ['address' => $account->from_address]));
+        $saved = $user->mailAccount()->updateOrCreate([], [...$settings, 'verified_at' => now()]);
+        $this->reset('mailPassword');
+        session()->flash('mail-saved', __('A test email went to :address. Applications can now be sent from it.', ['address' => $saved->from_address]));
     }
 
     public function remove(): void

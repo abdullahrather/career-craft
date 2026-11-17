@@ -45,7 +45,7 @@ describe('The mail account', function (): void {
             ->and($server->settings[0])->toMatchArray(['scheme' => 'smtp', 'require_tls' => true, 'auto_tls' => true]);
     });
 
-    it('stays untested, and says why, when the test email fails', function (): void {
+    it('is not saved, and says why, when the test email fails', function (): void {
         fakeMailServer(down: true);
         $user = User::factory()->create();
 
@@ -53,7 +53,7 @@ describe('The mail account', function (): void {
             ->set(['mailHost' => 'smtp.mailbox.example', 'mailPassword' => 'wrong'])->call('save')
             ->assertHasErrors('test')->assertSee('535 5.7.8 Authentication failed');
 
-        expect($user->mailAccount()->sole()->verified_at)->toBeNull();
+        expect($user->mailAccount()->exists())->toBeFalse();
     });
 
     it('refuses a server whose name also points to a private IPv6 address', function (): void {

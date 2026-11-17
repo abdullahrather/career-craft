@@ -164,6 +164,19 @@ describe('Sending through Gmail', function (): void {
             ->assertDontSee('Your mail server said');
     });
 
+    it('keeps a working Gmail connection when the mail server saved instead fails its test', function (): void {
+        fakeMailServer(down: true);
+        $user = User::factory()->create();
+        gmailAccount($user);
+
+        Livewire::actingAs($user)->test(MailAccountSettings::class)
+            ->set(['mailHost' => 'smtp.mailbox.example', 'mailPassword' => 'wrong'])->call('save')
+            ->assertHasErrors('test')->assertSet('mailPassword', 'wrong');
+
+        expect($user->mailAccount()->sole()->only(['provider', 'refresh_token']))->toBe(['provider' => 'gmail', 'refresh_token' => 'refresh-1'])
+            ->and($user->mailAccount()->sole()->verified_at)->not->toBeNull();
+    });
+
     it('gives way to a mail server saved instead, dropping the tokens', function (): void {
         fakeMailServer();
         $user = User::factory()->create();
