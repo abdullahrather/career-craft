@@ -51,8 +51,8 @@ final class ExtensionController
     {
         $user = $this->user($request);
         $wanted = Application::normaliseUrl($request->string('url')->toString());
-        $matches = $wanted === null ? collect() : $user->applications()->whereNotNull('url')->get()
-            ->filter(fn (Application $application): bool => Application::normaliseUrl((string) $application->url) === $wanted);
+        $matches = $user->applications()->whereNotNull('url')->get()
+            ->filter(fn (Application $application): bool => $wanted !== null && Application::normaliseUrl((string) $application->url) === $wanted);
         // Rather no documents than another job's.
         if ($matches->count() > 1) {
             return response()->json(['message' => __('Several of your applications are for this page. Keep one, then fill the form.')], 409);
