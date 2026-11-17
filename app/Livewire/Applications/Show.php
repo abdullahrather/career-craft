@@ -69,7 +69,7 @@ final class Show extends Component
             'title' => ['required', 'string', 'max:250'],
             'company' => ['nullable', 'string', 'max:250'],
             'location' => ['nullable', 'string', 'max:250'],
-            'url' => ['nullable', 'url:http,https', 'max:2000'],
+            'url' => ['nullable', 'url:http,https', 'max:2048'],
             'source' => ['nullable', 'string', 'max:100'],
             'status' => ['required', Rule::in(Application::STATUSES)],
             'appliedOn' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],

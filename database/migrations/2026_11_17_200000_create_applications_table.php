@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('title', 250);
             $table->string('company', 250)->default('');
             $table->string('location', 250)->default('');
-            $table->string('url', 2000)->nullable();
+            $table->string('url', 2048)->nullable();
             // Where the job was found, such as Arbeitnow or a company's website.
             $table->string('source', 100)->default('');
             // saved, applied, interviewing, offer or rejected.

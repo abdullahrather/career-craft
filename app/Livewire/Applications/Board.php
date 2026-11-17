@@ -30,7 +30,7 @@ final class Board extends Component
         $this->validate([
             'title' => ['required', 'string', 'max:250'],
             'company' => ['nullable', 'string', 'max:250'],
-            'url' => ['nullable', 'url:http,https', 'max:2000'],
+            'url' => ['nullable', 'url:http,https', 'max:2048'],
             'source' => ['nullable', 'string', 'max:100'],
         ], attributes: ['title' => __('Job title'), 'company' => __('Company'), 'url' => __('Link to the job'), 'source' => __('Found on')]);
 

@@ -255,4 +255,16 @@ describe('Tracking a job', function (): void {
         expect($user->applications()->sole()->only(['title', 'company', 'url', 'source']))
             ->toBe(['title' => 'Backend Developer', 'company' => 'Kranich Mobility GmbH', 'url' => 'https://www.arbeitnow.com/jobs/backend-developer-kranich-1', 'source' => 'Arbeitnow']);
     });
+
+    it('takes a job link as long as the job sources allow', function (): void {
+        $url = 'https://www.arbeitnow.com/jobs/'.str_repeat('a', 2048 - 31);
+        saveJobs([['title' => 'Backend Developer', 'url' => $url]]);
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test(Index::class)->call('track', JobListing::query()->sole()->id);
+        $application = $user->applications()->sole();
+        Livewire::actingAs($user)->test(Show::class, ['id' => $application->id])->call('save')->assertHasNoErrors();
+
+        expect(strlen($application->url))->toBe(2048);
+    });
 });
