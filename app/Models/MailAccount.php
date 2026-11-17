@@ -77,7 +77,7 @@ final class MailAccount extends Model
     public function mailer(): Mailer|string
     {
         if ($this->provider === 'gmail') {
-            return Mail::build(['transport' => 'gmail', 'account' => $this->id]);
+            return Mail::build(['transport' => 'gmail', 'account' => $this]);
         }
         $settings = $this->transport();
         $pinned = null;

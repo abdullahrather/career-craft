@@ -845,5 +845,6 @@
     "Connect Gmail again": "Gmail erneut verbinden",
     "Send through Gmail": "Über Gmail senden",
     "Google asks you to allow sending email only; CareerCraft can't read your inbox.": "Google fragt nur nach der Erlaubnis, E-Mails zu senden; CareerCraft kann Ihr Postfach nicht lesen.",
-    "Or use your provider's mail server:": "Oder nutzen Sie den Mailserver Ihres Anbieters:"
+    "Or use your provider's mail server:": "Oder nutzen Sie den Mailserver Ihres Anbieters:",
+    "The email could not be sent. :reason": "Die E-Mail konnte nicht gesendet werden. :reason"
 }

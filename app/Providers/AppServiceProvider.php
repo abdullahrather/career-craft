@@ -30,6 +30,11 @@ final class AppServiceProvider extends ServiceProvider
         Gate::define('admin', fn (User $user): bool => $user->is_admin);
 
         // Applications sent through a candidate's Gmail, with their permission.
-        Mail::extend('gmail', fn (array $config): GmailTransport => new GmailTransport(MailAccount::query()->whereKey($config['account'])->firstOrFail()));
+        Mail::extend('gmail', function (array $config): GmailTransport {
+            $account = $config['account'] ?? null;
+            abort_unless($account instanceof MailAccount, 500);
+
+            return new GmailTransport($account);
+        });
     }
 }

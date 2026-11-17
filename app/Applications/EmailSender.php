@@ -102,7 +102,12 @@ final readonly class EmailSender
         try {
             $mailer->to($to)->send(new ApplicationMail($account->from_address, $account->from_name, $subject, $body, $files));
         } catch (TransportExceptionInterface $exception) {
-            return __('The email could not be sent. Your mail server said: :reason', ['reason' => Str::limit($exception->getMessage(), 300)]);
+            $reason = Str::limit($exception->getMessage(), 300);
+
+            // Gmail's errors say where they come from; a mail server's are its own reply.
+            return $account->provider === 'gmail'
+                ? __('The email could not be sent. :reason', ['reason' => $reason])
+                : __('The email could not be sent. Your mail server said: :reason', ['reason' => $reason]);
         }
 
         return null;

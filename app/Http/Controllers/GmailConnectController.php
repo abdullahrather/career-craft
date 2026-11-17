@@ -53,7 +53,8 @@ final class GmailConnectController
             return $this->failed(__('Gmail was connected without permission to send email. Connect again and allow sending.'));
         }
 
-        $account = $user->mailAccount()->updateOrCreate([], [
+        // Tested before it's saved: a Gmail that can't send leaves the account there was.
+        $gmail = [
             'provider' => 'gmail',
             'host' => null,
             'port' => null,
@@ -65,13 +66,12 @@ final class GmailConnectController
             'token_expires_at' => now()->addSeconds((int) $google->expiresIn),
             'from_address' => $google->getEmail(),
             'from_name' => $user->name,
-            'verified_at' => null,
-        ]);
-        $error = $sender->test($account);
+        ];
+        $error = $sender->test($user->mailAccount()->make($gmail));
         if ($error !== null) {
             return $this->failed($error);
         }
-        $account->update(['verified_at' => now()]);
+        $account = $user->mailAccount()->updateOrCreate([], [...$gmail, 'verified_at' => now()]);
 
         return redirect()->route('settings')->with('status', __('Gmail is connected. A test email went to :address.', ['address' => $account->from_address]));
     }

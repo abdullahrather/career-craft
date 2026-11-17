@@ -83,6 +83,19 @@ describe('Connecting Gmail', function (): void {
             && str_contains(gmailRaw($request), 'To: lena.brandt@gmail.example'));
     });
 
+    it('keeps a working mail server when the Gmail test fails', function (): void {
+        Http::fake(['gmail.googleapis.com/*' => Http::response(['error' => ['message' => 'Gmail API has not been used in project 1 before or it is disabled.']], 403)]);
+        fakeGoogle(googleUser());
+        $user = User::factory()->create();
+        mailAccountFor($user);
+
+        $this->actingAs($user)->get(route('mail.gmail.callback'))->assertRedirect(route('settings'))
+            ->assertSessionHas('error', 'The email could not be sent. Gmail refused the email: Gmail API has not been used in project 1 before or it is disabled.');
+
+        expect($user->mailAccount()->sole()->only(['provider', 'host', 'password', 'refresh_token']))->toBe(['provider' => 'smtp', 'host' => 'smtp.mailbox.example', 'password' => 'app-password', 'refresh_token' => null])
+            ->and($user->mailAccount()->sole()->verified_at)->not->toBeNull();
+    });
+
     it('refuses a connection without permission to send, or without a refresh token', function (array $scopes, ?string $refreshToken): void {
         Http::fake();
         fakeGoogle(googleUser($scopes, $refreshToken));
@@ -147,7 +160,8 @@ describe('Sending through Gmail', function (): void {
 
         Livewire::actingAs($user)->test(Email::class, ['applicationId' => recordedApplication($user)->id])
             ->set(['emailTo' => 'jobs@nordwind.example', 'emailSubject' => 'S', 'emailBody' => 'B'])->call('send')
-            ->assertSee('Gmail refused the email: Daily user sending limit exceeded.');
+            ->assertSee('The email could not be sent. Gmail refused the email: Daily user sending limit exceeded.')
+            ->assertDontSee('Your mail server said');
     });
 
     it('gives way to a mail server saved instead, dropping the tokens', function (): void {
