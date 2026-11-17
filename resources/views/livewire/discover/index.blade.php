@@ -119,6 +119,12 @@
                 {{ __('Fetching new jobs from the job sources… The list updates as they come in.') }}
             </p>
         @endif
+        @if ($queued !== null)
+            <p class="mt-4 text-sm" role="status">{{ __('Queued: :title. It is being prepared for you to review.', ['title' => $queued]) }} <a href="{{ route('apply-queue') }}" class="link" wire:navigate>{{ __('Apply queue') }}</a></p>
+        @endif
+        @error('queue')
+            <p class="field-error mt-4 text-sm" role="alert">{{ $message }} <a href="{{ route('apply-queue') }}" class="link" wire:navigate>{{ __('Apply queue') }}</a></p>
+        @enderror
         @error('analyse')
             <p class="field-error mt-4 text-sm" role="alert">{{ $message }}</p>
         @enderror
@@ -167,6 +173,11 @@
                             <a href="{{ route('applications') }}" class="badge badge-brand" wire:navigate>{{ __('Tracked') }} ✓</a>
                         @else
                             <button type="button" wire:click="track({{ $listing->id }})" class="button button-small" aria-label="{{ __('Track :title', ['title' => $listing->title]) }}">{{ __('Track') }}</button>
+                        @endif
+                        @if (in_array($listing->id, $inQueue, true))
+                            <a href="{{ route('apply-queue') }}" class="badge badge-brand" wire:navigate>{{ __('Queued') }} ✓</a>
+                        @else
+                            <button type="button" wire:click="queue({{ $listing->id }})" wire:loading.attr="disabled" wire:target="queue" class="button button-small" aria-label="{{ __('Queue :title', ['title' => $listing->title]) }}">{{ __('Queue') }}</button>
                         @endif
                         <button type="button" wire:click="analyse({{ $listing->id }})" wire:loading.attr="disabled" wire:target="analyse" class="button button-small">{{ __('Analyse') }}</button>
                         <button type="button" wire:click="dismiss({{ $listing->id }})" class="button button-small" aria-label="{{ __('Not interested in :title', ['title' => $listing->title]) }}">{{ __('Not interested') }}</button>

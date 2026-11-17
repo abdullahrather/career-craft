@@ -45,6 +45,14 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
     Route::view('/discover', 'discover')->name('discover');
 
+    Route::view('/apply-queue', 'apply-queue.index')->name('apply-queue');
+    Route::get('/apply-queue/{id}', function (int $id): View {
+        $user = request()->user();
+        abort_unless($user instanceof User, 403);
+
+        return view('apply-queue.review', ['item' => $user->applyQueueItems()->findOrFail($id)]);
+    })->whereNumber('id')->name('apply-queue.review');
+
     Route::view('/applications', 'applications.index')->name('applications');
     Route::get('/applications/{id}', function (int $id): View {
         $user = request()->user();

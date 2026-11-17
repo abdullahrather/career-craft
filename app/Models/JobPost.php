@@ -54,6 +54,21 @@ final class JobPost extends Model
         'nice_skills' => '[]',
     ];
 
+    /**
+     * A post to analyse from a job found on Find jobs: the listing's own text when it has
+     * the whole post, otherwise its page is read.
+     */
+    public static function fromListing(User $user, JobListing $listing): self
+    {
+        $url = $listing->sources->first()?->url;
+        if (mb_strlen($listing->description) < 200) {
+            return $user->jobPosts()->create(['url' => $url]);
+        }
+        $text = trim(implode("\n", array_filter([$listing->title, implode(' · ', array_filter([$listing->company, $listing->location]))]))."\n\n".$listing->description);
+
+        return $user->jobPosts()->create(['text' => $text, 'url' => $url]);
+    }
+
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {

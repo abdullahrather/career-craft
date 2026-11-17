@@ -27,6 +27,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $two_factor_confirmed_at
  * @property int $follow_up_days How many quiet days in Applied before a follow-up is suggested.
  * @property bool $reminder_emails
+ * @property int|null $apply_resume_id The CV the apply queue tailors from.
+ * @property string $apply_tone The tone of the apply queue's letters.
  * @property bool $is_admin Not fillable: set with `php artisan careercraft:admin`.
  */
 #[Fillable(['name', 'email', 'password', 'locale'])]
@@ -41,6 +43,7 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
         'is_admin' => false,
         'follow_up_days' => 7,
         'reminder_emails' => true,
+        'apply_tone' => 'formal',
     ];
 
     /** @return HasMany<SocialAccount, $this> */
@@ -83,6 +86,12 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
+    }
+
+    /** @return HasMany<ApplyQueueItem, $this> Newest first. */
+    public function applyQueueItems(): HasMany
+    {
+        return $this->hasMany(ApplyQueueItem::class)->latest('id');
     }
 
     /** @return HasMany<SavedSearch, $this> */

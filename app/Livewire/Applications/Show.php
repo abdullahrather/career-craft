@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Applications;
 
-use App\Letters\LetterDocument;
+use App\Applications\SentDocuments;
 use App\Models\Application;
 use App\Models\CoverLetter;
 use App\Models\ResumeVersion;
 use App\Models\User;
-use App\Resumes\PdfRenderer;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -93,55 +90,15 @@ final class Show extends Component
     }
 
     /** Keeps a copy of the chosen CV version and letter with the application. */
-    public function recordDocuments(PdfRenderer $pdf): void
+    public function recordDocuments(SentDocuments $documents): void
     {
-        $application = $this->application($this->applicationId);
         $version = $this->cvVersion !== '' ? $this->versions()->findOrFail((int) $this->cvVersion) : null;
         $letter = $this->letter !== '' ? $this->user()->coverLetters()->findOrFail((int) $this->letter) : null;
-        if ($letter !== null && ! $letter->sendable()) {
-            $this->addError('letter', __('Open this letter and confirm or remove what is marked first.'));
+        $error = $documents->record($this->application($this->applicationId), $version, $letter);
+        if ($error !== null) {
+            $this->addError($error['field'], $error['message']);
 
             return;
-        }
-
-        // Both PDFs are in hand before anything is written, so a failure leaves the copies
-        // recorded before as they were.
-        $cv = $version !== null ? Storage::disk('local')->get($version->pdf_path) : null;
-        if ($version !== null && $cv === null) {
-            $this->addError('cvVersion', __('The PDF of this CV version is missing. Save the CV again in the CV editor.'));
-
-            return;
-        }
-        $letterPdf = null;
-        $letterName = null;
-        if ($letter !== null) {
-            $doc = new LetterDocument($letter);
-            $letterName = $letter->subject !== '' ? $letter->subject : $doc->title();
-            try {
-                $letterPdf = $pdf->renderHtml($doc->render(pdf: true), $doc->fontFiles(), $doc->title(), $doc->name());
-            } catch (ConnectionException|RequestException $exception) {
-                report($exception);
-                $this->addError('letter', __('The PDF could not be made. Check that the PDF service is running: docker compose up -d gotenberg'));
-
-                return;
-            }
-        }
-
-        $hadDocuments = $application->cv_path !== null || $application->letter_path !== null;
-        $directory = Application::directory($application->id);
-        $disk = Storage::disk('local');
-        $cv !== null ? $disk->put("{$directory}/cv.pdf", $cv) : $disk->delete("{$directory}/cv.pdf");
-        $letterPdf !== null ? $disk->put("{$directory}/letter.pdf", $letterPdf) : $disk->delete("{$directory}/letter.pdf");
-        $application->update([
-            'resume_version_id' => $version?->id,
-            'cv_name' => $version !== null ? __(':name, version :number', ['name' => $version->name, 'number' => $version->number]) : null,
-            'cv_path' => $cv !== null ? "{$directory}/cv.pdf" : null,
-            'cover_letter_id' => $letter?->id,
-            'letter_name' => $letterName,
-            'letter_path' => $letterPdf !== null ? "{$directory}/letter.pdf" : null,
-        ]);
-        if ($cv !== null || $letterPdf !== null || $hadDocuments) {
-            $application->log('documents', ['cv' => $application->cv_name, 'letter' => $letterName]);
         }
         session()->flash('recorded', __('Recorded. These copies stay with the application.'));
     }
