@@ -69,6 +69,26 @@ final class Application extends Model
         return $application;
     }
 
+    /**
+     * A job page's address in one form, so the page an application was tracked from and the
+     * page its form is on match: no "www.", fragment, trailing slash or "/apply", and of the
+     * query only Greenhouse's job id, which tells jobs on one company career page apart.
+     */
+    public static function normaliseUrl(string $url): ?string
+    {
+        $parts = parse_url(trim($url));
+        if (! is_array($parts) || ! isset($parts['host']) || ! in_array($parts['scheme'] ?? '', ['http', 'https'], true)) {
+            return null;
+        }
+        $host = (string) preg_replace('/^www\./', '', strtolower($parts['host']));
+        $path = (string) preg_replace('#/apply/?$#', '', rtrim($parts['path'] ?? '', '/'));
+
+        parse_str($parts['query'] ?? '', $query);
+        $job = $query['gh_jid'] ?? null;
+
+        return $host.rtrim($path, '/').(is_string($job) && $job !== '' ? '?gh_jid='.$job : '');
+    }
+
     /** Where an application's document copies are kept, so deleting it can remove them. */
     public static function directory(int $id): string
     {

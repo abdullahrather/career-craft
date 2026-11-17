@@ -136,6 +136,8 @@
 
         <livewire:settings.mail-account />
 
+        <livewire:settings.extension />
+
         <livewire:settings.devices />
 
         @php($usedToday = \App\Models\AiUsage::tokensToday(auth()->user()))
