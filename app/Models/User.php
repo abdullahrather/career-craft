@@ -69,6 +69,12 @@ final class User extends Authenticatable implements HasLocalePreference, MustVer
         return $this->hasMany(FollowedBoard::class)->orderBy('name');
     }
 
+    /** @return HasMany<DismissedListing, $this> */
+    public function dismissedListings(): HasMany
+    {
+        return $this->hasMany(DismissedListing::class);
+    }
+
     /** @return HasOne<Profile, $this> */
     public function profile(): HasOne
     {

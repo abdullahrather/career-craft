@@ -572,5 +572,18 @@
     "Paste a link to a company's job board on Greenhouse, Lever or Ashby.": "Fügen Sie einen Link zur Jobbörse eines Unternehmens auf Greenhouse, Lever oder Ashby ein.",
     "You already follow this company.": "Sie folgen diesem Unternehmen bereits.",
     "There is no job board at this link. Check the company name in it.": "Unter diesem Link gibt es keine Jobbörse. Prüfen Sie den Unternehmensnamen darin.",
-    "The job board didn't answer. Try again later.": "Die Jobbörse hat nicht geantwortet. Versuchen Sie es später noch einmal."
+    "The job board didn't answer. Try again later.": "Die Jobbörse hat nicht geantwortet. Versuchen Sie es später noch einmal.",
+    "Order": "Reihenfolge",
+    "Best match for your profile": "Beste Übereinstimmung mit Ihrem Profil",
+    "Newest first": "Neueste zuerst",
+    "Work mode": "Arbeitsmodell",
+    "Any": "Alle",
+    "Only with a salary": "Nur mit Gehaltsangabe",
+    "Add skills or job titles to your career profile to see the jobs that fit you best first. Until then, the newest come first.": "Ergänzen Sie Fähigkeiten oder Berufsbezeichnungen in Ihrem Karriereprofil, um die passendsten Jobs zuerst zu sehen. Bis dahin kommen die neuesten zuerst.",
+    "Hidden: :title. Jobs like it will rank lower.": "Ausgeblendet: :title. Ähnliche Jobs erscheinen weiter unten.",
+    "Your skills: :skills": "Ihre Fähigkeiten: :skills",
+    "Not interested": "Kein Interesse",
+    "Not interested in :title": "Kein Interesse an :title",
+    "Previous": "Zurück",
+    "Next": "Weiter"
 }
