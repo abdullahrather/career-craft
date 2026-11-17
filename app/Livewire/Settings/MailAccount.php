@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Settings;
 
 use App\Applications\EmailSender;
+use App\Http\Controllers\GmailConnectController;
 use App\Models\MailAccount as Account;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -37,8 +38,8 @@ final class MailAccount extends Component
     {
         $user = $this->user();
         $account = $user->mailAccount;
-        $this->fill($account !== null
-            ? ['mailHost' => $account->host, 'mailPort' => (string) $account->port, 'mailSecurity' => $account->security, 'mailUsername' => $account->username, 'mailFrom' => $account->from_address, 'mailName' => $account->from_name]
+        $this->fill($account?->provider === 'smtp'
+            ? ['mailHost' => (string) $account->host, 'mailPort' => (string) $account->port, 'mailSecurity' => (string) $account->security, 'mailUsername' => (string) $account->username, 'mailFrom' => $account->from_address, 'mailName' => $account->from_name]
             : ['mailFrom' => $user->email, 'mailName' => $user->name, 'mailUsername' => $user->email]);
     }
 
@@ -51,7 +52,7 @@ final class MailAccount extends Component
             'mailPort' => ['required', 'integer', 'min:1', 'max:65535'],
             'mailSecurity' => ['required', Rule::in(Account::securities())],
             'mailUsername' => ['nullable', 'string', 'max:255'],
-            'mailPassword' => [$account === null ? 'required' : 'nullable', 'string', 'max:500'],
+            'mailPassword' => [$account?->provider !== 'smtp' ? 'required' : 'nullable', 'string', 'max:500'],
             'mailFrom' => ['required', 'email', 'max:255'],
             'mailName' => ['required', 'string', 'max:255'],
         ], attributes: ['mailHost' => __('Mail server'), 'mailPort' => __('Port'), 'mailSecurity' => __('Encryption'), 'mailUsername' => __('User name'), 'mailPassword' => __('Password'), 'mailFrom' => __('Send from'), 'mailName' => __('Your name')]);
@@ -62,30 +63,30 @@ final class MailAccount extends Component
             return;
         }
 
-        $account ??= $user->mailAccount()->make();
-        $account->fill([
+        // A mail server replaces a Gmail connection, but only once its test went through: a
+        // server that can't send leaves the account there was.
+        $settings = [
+            'provider' => 'smtp',
+            'access_token' => null,
+            'refresh_token' => null,
+            'token_expires_at' => null,
             'host' => strtolower($this->mailHost),
             'port' => (int) $this->mailPort,
             'security' => $this->mailSecurity,
             'username' => trim($this->mailUsername),
+            'password' => $this->mailPassword !== '' ? $this->mailPassword : $account?->password,
             'from_address' => trim($this->mailFrom),
             'from_name' => trim($this->mailName),
-            'verified_at' => null,
-        ]);
-        if ($this->mailPassword !== '') {
-            $account->password = $this->mailPassword;
-        }
-        $account->save();
-        $this->reset('mailPassword');
-
-        $error = $sender->test($account);
+        ];
+        $error = $sender->test($user->mailAccount()->make($settings));
         if ($error !== null) {
             $this->addError('test', $error);
 
             return;
         }
-        $account->update(['verified_at' => now()]);
-        session()->flash('mail-saved', __('A test email went to :address. Applications can now be sent from it.', ['address' => $account->from_address]));
+        $saved = $user->mailAccount()->updateOrCreate([], [...$settings, 'verified_at' => now()]);
+        $this->reset('mailPassword');
+        session()->flash('mail-saved', __('A test email went to :address. Applications can now be sent from it.', ['address' => $saved->from_address]));
     }
 
     public function remove(): void
@@ -97,7 +98,7 @@ final class MailAccount extends Component
 
     public function render(): View
     {
-        return view('livewire.settings.mail-account', ['account' => $this->user()->mailAccount, 'securities' => Account::securities()]);
+        return view('livewire.settings.mail-account', ['account' => $this->user()->mailAccount, 'securities' => Account::securities(), 'gmail' => GmailConnectController::enabled()]);
     }
 
     private function user(): User
