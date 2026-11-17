@@ -16,22 +16,27 @@ use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
 
 /**
- * The candidate's own mail server, so applications go out from their address. The password
- * is encrypted, and is never shown again once saved.
+ * The candidate's own mail account, so applications go out from their address: a mail server
+ * (smtp), or a Gmail sign-in (gmail). Passwords and tokens are encrypted, and never shown
+ * again once saved.
  *
  * @property int $id
  * @property int $user_id
- * @property string $host
- * @property int $port
- * @property string $security
- * @property string $username
- * @property string $password
+ * @property string $provider smtp or gmail.
+ * @property string|null $host
+ * @property int|null $port
+ * @property string|null $security
+ * @property string|null $username
+ * @property string|null $password
+ * @property string|null $access_token
+ * @property string|null $refresh_token
+ * @property Carbon|null $token_expires_at
  * @property string $from_address
  * @property string $from_name
  * @property Carbon|null $verified_at
  */
-#[Fillable(['host', 'port', 'security', 'username', 'password', 'from_address', 'from_name', 'verified_at'])]
-#[Hidden(['password'])]
+#[Fillable(['provider', 'host', 'port', 'security', 'username', 'password', 'access_token', 'refresh_token', 'token_expires_at', 'from_address', 'from_name', 'verified_at'])]
+#[Hidden(['password', 'access_token', 'refresh_token'])]
 final class MailAccount extends Model
 {
     /**
@@ -71,11 +76,14 @@ final class MailAccount extends Model
      */
     public function mailer(): Mailer|string
     {
+        if ($this->provider === 'gmail') {
+            return Mail::build(['transport' => 'gmail', 'account' => $this->id]);
+        }
         $settings = $this->transport();
         $pinned = null;
         if (! app()->environment('local', 'testing')) {
-            $addresses = self::addresses($this->host);
-            $problem = self::problem($addresses, $this->port);
+            $addresses = self::addresses((string) $this->host);
+            $problem = self::problem($addresses, (int) $this->port);
             if ($problem !== null) {
                 return $problem;
             }
@@ -104,8 +112,8 @@ final class MailAccount extends Model
             'scheme' => $this->security === 'ssl' ? 'smtps' : 'smtp',
             'host' => $this->host,
             'port' => $this->port,
-            'username' => $this->username !== '' ? $this->username : null,
-            'password' => $this->password !== '' ? $this->password : null,
+            'username' => $this->username ?: null,
+            'password' => $this->password ?: null,
             'timeout' => 15,
             'require_tls' => $this->security === 'starttls',
             'auto_tls' => $this->security !== 'none',
@@ -162,6 +170,6 @@ final class MailAccount extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['password' => 'encrypted', 'port' => 'integer', 'verified_at' => 'datetime'];
+        return ['password' => 'encrypted', 'access_token' => 'encrypted', 'refresh_token' => 'encrypted', 'port' => 'integer', 'token_expires_at' => 'datetime', 'verified_at' => 'datetime'];
     }
 }

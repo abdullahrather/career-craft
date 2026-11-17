@@ -832,5 +832,18 @@
     "Send this application now?": "Diese Bewerbung jetzt senden?",
     "Send": "Senden",
     "Sending…": "Wird gesendet…",
-    "Sent": "Gesendet"
+    "Sent": "Gesendet",
+    "Gmail didn't answer. Try again in a moment.": "Gmail hat nicht geantwortet. Versuchen Sie es gleich noch einmal.",
+    "Gmail refused the email: :reason": "Gmail hat die E-Mail abgelehnt: :reason",
+    "Gmail no longer lets CareerCraft send for you. Connect Gmail again in the settings.": "Gmail erlaubt CareerCraft nicht mehr, für Sie zu senden. Verbinden Sie Gmail in den Einstellungen erneut.",
+    "Connecting Gmail did not work. Please try again.": "Die Verbindung mit Gmail hat nicht geklappt. Bitte versuchen Sie es erneut.",
+    "Gmail was connected without permission to send email. Connect again and allow sending.": "Gmail wurde ohne die Erlaubnis zum Senden verbunden. Verbinden Sie erneut und erlauben Sie das Senden.",
+    "Gmail is connected. A test email went to :address.": "Gmail ist verbunden. Eine Test-E-Mail ging an :address.",
+    "Sending through Gmail from :address, tested :date.": "Versand über Gmail von :address, getestet am :date.",
+    "Not connected": "Nicht verbunden",
+    "Gmail no longer lets CareerCraft send for you. Connect it again.": "Gmail erlaubt CareerCraft nicht mehr, für Sie zu senden. Verbinden Sie es erneut.",
+    "Connect Gmail again": "Gmail erneut verbinden",
+    "Send through Gmail": "Über Gmail senden",
+    "Google asks you to allow sending email only; CareerCraft can't read your inbox.": "Google fragt nur nach der Erlaubnis, E-Mails zu senden; CareerCraft kann Ihr Postfach nicht lesen.",
+    "Or use your provider's mail server:": "Oder nutzen Sie den Mailserver Ihres Anbieters:"
 }

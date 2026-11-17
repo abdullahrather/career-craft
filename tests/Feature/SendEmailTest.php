@@ -8,70 +8,9 @@ use App\Models\Application;
 use App\Models\ApplicationEmail;
 use App\Models\MailAccount;
 use App\Models\User;
-use Illuminate\Mail\Transport\ArrayTransport;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use Symfony\Component\Mailer\Envelope;
-use Symfony\Component\Mailer\Exception\TransportException;
-use Symfony\Component\Mailer\SentMessage;
-use Symfony\Component\Mailer\Transport\TransportInterface;
-use Symfony\Component\Mime\Email as SymfonyEmail;
-use Symfony\Component\Mime\RawMessage;
-
-/** Mail servers the app builds go to memory instead; each one's settings are kept. */
-function fakeMailServer(bool $down = false): object
-{
-    $server = new class
-    {
-        public ArrayTransport $transport;
-
-        public array $settings = [];
-
-        /** @return list<SymfonyEmail> */
-        public function sent(): array
-        {
-            return $this->transport->messages()->map(fn (SentMessage $sent) => $sent->getOriginalMessage())->all();
-        }
-    };
-    $server->transport = new ArrayTransport;
-    Mail::extend('smtp', function (array $settings) use ($server, $down): TransportInterface {
-        $server->settings[] = $settings;
-
-        return $down ? new class implements TransportInterface
-        {
-            public function send(RawMessage $message, ?Envelope $envelope = null): ?SentMessage
-            {
-                throw new TransportException('535 5.7.8 Authentication failed');
-            }
-
-            public function __toString(): string
-            {
-                return 'down';
-            }
-        } : $server->transport;
-    });
-
-    return $server;
-}
-
-function mailAccountFor(User $user, array $values = []): MailAccount
-{
-    return $user->mailAccount()->create(['host' => 'smtp.mailbox.example', 'port' => 587, 'security' => 'starttls', 'username' => 'lena@mailbox.example', 'password' => 'app-password', 'from_address' => 'lena@mailbox.example', 'from_name' => 'Lena Brandt', 'verified_at' => now(), ...$values]);
-}
-
-/** An application with its CV and letter recorded, on the fake disk. */
-function recordedApplication(User $user, array $values = []): Application
-{
-    $application = Application::track($user, ['title' => 'Product Designer', 'company' => 'Nordwind Logistik', ...$values]);
-    $directory = Application::directory($application->id);
-    Storage::disk('local')->put("{$directory}/cv.pdf", '%PDF-1.7 cv');
-    Storage::disk('local')->put("{$directory}/letter.pdf", '%PDF-1.7 letter');
-    $application->update(['cv_name' => 'Design roles, version 2', 'cv_path' => "{$directory}/cv.pdf", 'letter_name' => 'Bewerbung als Product Designer', 'letter_path' => "{$directory}/letter.pdf"]);
-
-    return $application;
-}
 
 describe('The mail account', function (): void {
     it('is saved with an encrypted password, and tested by an email to the person\'s own address', function (): void {

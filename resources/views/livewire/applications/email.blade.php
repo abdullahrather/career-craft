@@ -4,6 +4,11 @@
         <p class="muted mt-1 text-sm">{{ __('From your own address, with the CV and letter recorded above attached. Nothing is sent until you press Send.') }}</p>
     </div>
 
+    {{-- Above the form: a refused sign-in can leave the account unconnected, which hides the form. --}}
+    @error('send')
+        <p class="field-error text-sm" role="alert">{{ $message }}</p>
+    @enderror
+
     @if ($account?->verified_at === null)
         <p class="text-sm">{{ __('Set up your mail account first, and CareerCraft can send applications from your address.') }} <a href="{{ route('settings') }}" class="link">{{ __('Settings') }}</a></p>
     @elseif ($application->cv_path === null && $application->letter_path === null)
@@ -17,9 +22,6 @@
                 {{ __('From') }}: {{ $account->from_name }} &lt;{{ $account->from_address }}&gt; ·
                 {{ __('Attached') }}: {{ implode(', ', array_filter([$application->cv_path !== null ? __('CV') : null, $application->letter_path !== null ? __('Letter') : null])) }}
             </p>
-            @error('send')
-                <p class="field-error text-sm" role="alert">{{ $message }}</p>
-            @enderror
             @if (session('emailed'))
                 <p class="notice" role="status">{{ session('emailed') }}</p>
             @endif

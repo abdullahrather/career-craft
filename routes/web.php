@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\GmailConnectController;
 use App\Http\Controllers\LetterController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ResumeController;
@@ -26,6 +27,9 @@ Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'callback
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::view('/settings', 'settings')->name('settings');
+    // Sending applications through the candidate's Gmail, with their permission.
+    Route::get('/settings/mail/gmail', [GmailConnectController::class, 'redirect'])->name('mail.gmail');
+    Route::get('/settings/mail/gmail/callback', [GmailConnectController::class, 'callback'])->name('mail.gmail.callback');
     Route::view('/profile', 'profile')->name('profile');
     Route::view('/profile/import', 'profile-import')->name('profile.import');
 
