@@ -97,9 +97,11 @@ final class ImapReader implements MailReader
      */
     private function open(Mailbox $mailbox): Imap
     {
+        $host = (string) $mailbox->host;
+        $port = (int) $mailbox->port;
         $imap = new Imap([
-            'host' => $mailbox->host,
-            'port' => $mailbox->port,
+            'host' => $host,
+            'port' => $port,
             'encryption' => $mailbox->security === 'none' ? null : $mailbox->security,
             'username' => $mailbox->username,
             'password' => $mailbox->password,
@@ -109,12 +111,12 @@ final class ImapReader implements MailReader
             if (app()->environment('local', 'testing')) {
                 $imap->connect();
             } else {
-                $addresses = MailAccount::addresses($mailbox->host);
-                $problem = Mailbox::problem($addresses, $mailbox->port);
+                $addresses = MailAccount::addresses($host);
+                $problem = Mailbox::problem($addresses, $port);
                 if ($problem !== null) {
                     throw new MailboxUnavailable($problem);
                 }
-                $imap->connect(new ImapConnection(new PinnedImapStream($addresses[0], $mailbox->host)));
+                $imap->connect(new ImapConnection(new PinnedImapStream($addresses[0], $host)));
             }
         } catch (ImapCommandException) {
             throw new MailboxUnavailable(__('The mail server didn\'t accept the user name or password. Many providers need an app password for this.'), loginFailed: true);

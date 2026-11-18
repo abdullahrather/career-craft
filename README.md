@@ -130,7 +130,7 @@ The `extension/` folder holds a Chrome and Edge extension that fills application
 
 Applications go out from your own address, never from CareerCraft's.
 
-- **Gmail:** "Send through Gmail" in the settings asks Google for permission to send email only (not to read it). The tokens are stored encrypted, the access token is refreshed when it runs out, and a test email is sent on connecting. If Google takes the permission back, the settings ask to connect again. See [Send through Gmail](#send-through-gmail-optional) for the Google setup.
+- **Gmail:** "Send through Gmail" in the settings asks Google for permission to send email only (not to read it). The tokens are stored encrypted, the access token is refreshed when it runs out, and a test email is sent on connecting. If Google takes the permission back, the settings ask to connect again. See [Send and read with Gmail](#send-and-read-with-gmail-optional) for the Google setup.
 - **Outlook:** "Send through Outlook" works the same way for personal and work Microsoft accounts, through Microsoft Graph with permission to send email only. A state value checked on the way back keeps a sign-in someone else started from being slipped in. See [Send through Outlook](#send-through-outlook-optional) for the Microsoft setup.
 - **Your mail account:** under Sending email in the settings, enter your provider's mail server, port and encryption, and your user name and password (some providers, such as Gmail, need an app password). The password is stored encrypted and never shown again. Saving sends a test email to your address; only an account whose test went through can send. Outside development the server must be a public address on a mail port (465, 587, 25 or 2525). In development, Mailpit works as the server (`mailpit`, port 1025, no encryption).
 - **Send by email:** on an application with its CV and letter recorded, check the recipient (an address found in the job post is filled in), the subject and a short note in the letter's language, then press Send. The recorded CV and letter go attached as PDFs.
@@ -141,7 +141,8 @@ Applications go out from your own address, never from CareerCraft's.
 
 Connect your mailbox, and employers' replies show up on the applications they're about.
 
-- **Connect:** under Replies from employers in the settings, enter your provider's IMAP server, port and encryption, and your user name and password. Gmail, Outlook and most others need an app password (for Gmail: `imap.gmail.com`, port 993, SSL/TLS). CareerCraft logs in before saving, and the password is stored encrypted and never shown again. Outside development the server must be a public address on port 993 or 143.
+- **Gmail:** "Read replies in Gmail" in the settings asks Google for permission to read email only (`gmail.readonly`: CareerCraft can't send, change or delete anything). The inbox is read once before it's saved, the tokens are stored encrypted, and the access token is refreshed when it runs out. If Google takes the permission back, checking pauses and the settings ask to connect again. See [Send and read with Gmail](#send-and-read-with-gmail-optional) for the Google setup.
+- **Connect by IMAP:** under Replies from employers in the settings, enter your provider's IMAP server, port and encryption, and your user name and password. Gmail, Outlook and most others need an app password (for Gmail: `imap.gmail.com`, port 993, SSL/TLS). CareerCraft logs in before saving, and the password is stored encrypted and never shown again. Outside development the server must be a public address on port 993 or 143.
 - **What is read:** every 15 minutes the scheduler runs `php artisan careercraft:check-mailboxes`, which looks at the sender, subject and reply headers of new emails in the inbox; the first check goes back 30 days. Only an email about one of your applications has its text read, and only those are kept. Emails stay unread in your mailbox, and nothing is changed or deleted there. "Check now" checks at once, up to four times an hour.
 - **What counts as a reply:** a reply to an application email CareerCraft sent (by its thread), an email from the company's domain or with the company's name as its sender, or one from an applicant tracking system such as Greenhouse, Lever, Personio or Workday that names the company. Job alerts from LinkedIn, Indeed, StepStone and similar, and CareerCraft's own emails, are left alone. When the company has several of your applications, the job named in the subject wins.
 - **On the application:** each reply is listed under Replies with its text, and noted on the timeline.
@@ -241,13 +242,13 @@ There you choose Ollama, Claude or any OpenAI-compatible API, the model, a timeo
 
 The buttons appear once you add your own app keys to `.env`: `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, or `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`. Set the callback URL in the provider's settings to `http://localhost:8000/auth/google/callback` or `http://localhost:8000/auth/github/callback`.
 
-### Send through Gmail (optional)
+### Send and read with Gmail (optional)
 
-The same Google keys let candidates send applications through their Gmail. In the Google Cloud project behind those keys:
+The same Google keys let candidates send applications through their Gmail and read employers' replies in it. In the Google Cloud project behind those keys:
 
 1. Enable the Gmail API.
-2. Add `http://localhost:8000/settings/mail/gmail/callback` as a second authorised redirect URI.
-3. Add the `https://www.googleapis.com/auth/gmail.send` scope to the OAuth consent screen. It is a sensitive scope: while the app is in testing, only the test users you list can connect, and Google reviews the app before anyone else can.
+2. Add `http://localhost:8000/settings/mail/gmail/callback` (sending) and `http://localhost:8000/settings/mailbox/gmail/callback` (replies) as authorised redirect URIs.
+3. Add the `https://www.googleapis.com/auth/gmail.send` and `https://www.googleapis.com/auth/gmail.readonly` scopes to the OAuth consent screen. `gmail.send` is a sensitive scope and `gmail.readonly` a restricted one: while the app is in testing, only the test users you list can connect, and Google reviews the app before anyone else can.
 
 ### Send through Outlook (optional)
 

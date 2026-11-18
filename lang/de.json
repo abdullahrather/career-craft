@@ -894,5 +894,13 @@
     "Check now": "Jetzt prüfen",
     "Checking…": "Wird geprüft…",
     "The last check failed: :reason. It's tried again with the next check.": "Die letzte Prüfung ist fehlgeschlagen: :reason. Beim nächsten Mal wird es wieder versucht.",
-    "Disconnect this mailbox? Replies already found stay on their applications.": "Dieses Postfach trennen? Bereits gefundene Antworten bleiben bei ihren Bewerbungen."
+    "Disconnect this mailbox? Replies already found stay on their applications.": "Dieses Postfach trennen? Bereits gefundene Antworten bleiben bei ihren Bewerbungen.",
+    "Gmail was connected without permission to read email. Connect again and allow reading.": "Gmail wurde ohne die Erlaubnis verbunden, E-Mails zu lesen. Verbinden Sie es erneut und erlauben Sie das Lesen.",
+    "Gmail is connected for replies: :address. CareerCraft checks it every 15 minutes.": "Gmail ist für Antworten verbunden: :address. CareerCraft prüft es alle 15 Minuten.",
+    "Gmail refused to show the inbox: :reason": "Gmail hat den Posteingang nicht freigegeben: :reason",
+    "Gmail no longer lets CareerCraft read your inbox. Connect Gmail again in the settings.": "Gmail erlaubt CareerCraft nicht mehr, Ihren Posteingang zu lesen. Verbinden Sie Gmail in den Einstellungen erneut.",
+    "Gmail:": "Gmail:",
+    "Read replies in Gmail": "Antworten in Gmail lesen",
+    "You allow reading email only; CareerCraft can't send, change or delete anything in your Gmail.": "Sie erlauben nur das Lesen von E-Mails; CareerCraft kann in Ihrem Gmail nichts senden, ändern oder löschen.",
+    "Or use your provider's IMAP server:": "Oder nutzen Sie den IMAP-Server Ihres Anbieters:"
 }

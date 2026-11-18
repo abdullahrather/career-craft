@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Inbox\InboxMessage;
 use App\Inbox\MailboxCheck;
 use App\Inbox\MailboxUnavailable;
-use App\Inbox\MailReader;
 use App\Inbox\ReplyMatcher;
 use App\Jobs\CheckMailbox;
 use App\Livewire\Applications\Show;
@@ -14,65 +13,10 @@ use App\Models\Application;
 use App\Models\MailAccount;
 use App\Models\Mailbox;
 use App\Models\User;
-use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
-
-/**
- * A mailbox for the tests: what logging in answers, and the emails it holds. Each read is
- * recorded; an email's text can be read only when $readable says so.
- */
-function fakeInbox(array $messages = [], ?string $login = null, ?string $failure = null, bool $loginFails = false): object
-{
-    $inbox = new class($messages, $login, $failure, $loginFails) implements MailReader
-    {
-        /** @var list<array{?int, CarbonInterface, int}> */
-        public array $reads = [];
-
-        public ?Mailbox $tested = null;
-
-        public function __construct(public array $messages, public ?string $login, public ?string $failure, public bool $loginFails) {}
-
-        public function test(Mailbox $mailbox): ?string
-        {
-            $this->tested = $mailbox;
-
-            return $this->login;
-        }
-
-        public function read(Mailbox $mailbox, ?int $afterUid, CarbonInterface $since, int $limit): array
-        {
-            $this->reads[] = [$afterUid, $since, $limit];
-            if ($this->failure !== null) {
-                throw new MailboxUnavailable($this->failure, loginFailed: $this->loginFails);
-            }
-
-            return array_values(array_filter($this->messages, fn (InboxMessage $message): bool => $afterUid === null || $message->uid > $afterUid));
-        }
-    };
-    app()->instance(MailReader::class, $inbox);
-
-    return $inbox;
-}
-
-/** An email by its headers. Its text, when $body is null, must never be read. */
-function inboxEmail(int $uid, string $from, string $subject, string $name = '', array $references = [], ?string $body = 'Vielen Dank für Ihre Bewerbung.', ?string $messageId = null): InboxMessage
-{
-    return new InboxMessage($uid, $messageId ?? "m{$uid}@mail.example", $from, $name, $subject, now()->subHour(), $references, function () use ($body, $uid): string {
-        if ($body === null) {
-            throw new LogicException("Email {$uid} matched nothing, so its text must not be read.");
-        }
-
-        return $body;
-    });
-}
-
-function mailboxFor(User $user, array $values = []): Mailbox
-{
-    return $user->mailbox()->create(['host' => 'imap.mailbox.example', 'port' => 993, 'security' => 'ssl', 'username' => 'lena@mailbox.example', 'password' => 'app-password', ...$values]);
-}
 
 describe('Connecting a mailbox', function (): void {
     it('logs in first, and saves it with the password encrypted', function (): void {
