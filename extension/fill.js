@@ -82,17 +82,23 @@ globalThis.careerCraftFill = function (data) {
         used.add(key);
     }
 
-    for (const field of document.querySelectorAll('input[type=file]')) {
-        if (field.files.length > 0) {
-            continue;
-        }
+    const fileFields = [...document.querySelectorAll('input[type=file]')].map((field) => {
         const text = describe(field);
         const key = /cover|letter|anschreiben|motivation/i.test(text) ? 'letter' : /resume|cv|lebenslauf/i.test(text) ? 'cv' : null;
-        if (key && data.files[key] && !used.has(key)) {
+        return { field, text, key };
+    });
+    for (const { field, key } of fileFields) {
+        if (field.files.length === 0 && key && data.files[key] && !used.has(key)) {
             setFile(field, data.files[key]);
             filled.push(key);
             used.add(key);
         }
+    }
+    // Forms without a letter slot, like Personio's, take further documents under "Other".
+    const other = fileFields.find(({ field, text, key }) => key === null && field.files.length === 0 && /other|andere|additional|weitere|sonstige/i.test(text));
+    if (other && data.files.letter && !fileFields.some(({ key }) => key === 'letter')) {
+        setFile(other.field, data.files.letter);
+        filled.push('letter');
     }
 
     return { filled };

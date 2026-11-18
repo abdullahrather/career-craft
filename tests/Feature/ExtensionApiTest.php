@@ -87,6 +87,14 @@ describe('The extension API', function (): void {
             ->assertStatus(409)->assertJson(['message' => 'Several of your applications are for this page. Keep one, then fill the form.']);
     });
 
+    it('finds a Workday job from the page of each step of applying', function (): void {
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer', 'url' => 'https://nordwind.wd3.myworkdayjobs.com/en-US/Careers/job/Hamburg/Designer_R123']);
+
+        $this->withToken(extensionToken($user))->getJson(route('extension.application', ['url' => 'https://nordwind.wd3.myworkdayjobs.com/Careers/job/Hamburg/Designer_R123/apply/applyManually']))
+            ->assertOk()->assertJsonPath('id', $application->id);
+    });
+
     it('says when the job isn\'t tracked', function (): void {
         $user = User::factory()->create();
         Application::track($user, ['title' => 'Designer', 'url' => 'https://jobs.lever.co/nordwind/abc-123']);
@@ -147,6 +155,10 @@ it('matches job page addresses in one form', function (string $url, ?string $nor
 })->with([
     ['https://jobs.lever.co/nordwind/abc-123/apply', 'jobs.lever.co/nordwind/abc-123'],
     ['https://WWW.Job-Boards.Greenhouse.io/gitlab/jobs/89/?gh_src=x#app', 'job-boards.greenhouse.io/gitlab/jobs/89'],
+    ['https://jobs.personio.de/job/2502124/apply?language=de', 'jobs.personio.de/job/2502124'],
+    ['https://nordwind.wd3.myworkdayjobs.com/en-US/Careers/job/Hamburg/Designer_R123/apply/applyManually', 'nordwind.wd3.myworkdayjobs.com/Careers/job/Hamburg/Designer_R123'],
+    ['https://nordwind.wd3.myworkdayjobs.com/Careers/job/Hamburg/Designer_R123/apply', 'nordwind.wd3.myworkdayjobs.com/Careers/job/Hamburg/Designer_R123'],
+    ['https://nordwind.example/de-DE/careers/apply/manual', 'nordwind.example/de-DE/careers/apply/manual'],
     ['http://example.com/', 'example.com'],
     ['ftp://example.com/job', null],
     ['not a url', null],

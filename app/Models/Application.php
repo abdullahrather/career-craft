@@ -82,6 +82,11 @@ final class Application extends Model
         }
         $host = (string) preg_replace('/^www\./', '', strtolower($parts['host']));
         $path = (string) preg_replace('#/apply/?$#', '', rtrim($parts['path'] ?? '', '/'));
+        // Workday: links may carry a language (/en-US/…), and each way of applying has its own
+        // page under the job's (/apply/applyManually).
+        if (str_ends_with($host, '.myworkdayjobs.com')) {
+            $path = (string) preg_replace(['#^/[a-z]{2}-[A-Z]{2}(?=/)#', '#/apply(/[A-Za-z]+)?$#'], '', $path);
+        }
 
         parse_str($parts['query'] ?? '', $query);
         $job = $query['gh_jid'] ?? null;

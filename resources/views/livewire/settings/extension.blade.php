@@ -1,6 +1,6 @@
 <section class="card" aria-labelledby="extension">
     <h2 id="extension" class="card-title">{{ __('Browser extension') }}</h2>
-    <p class="muted mt-2 text-sm">{{ __('The CareerCraft extension for Chrome and Edge fills application forms on Greenhouse and Lever with your details, CV and letter. You check the form and submit it yourself. Make a token here and paste it into the extension.') }}</p>
+    <p class="muted mt-2 text-sm">{{ __('The CareerCraft extension for Chrome and Edge fills application forms on Greenhouse, Lever, Personio and Workday with your details, CV and letter. You check the form and submit it yourself. Make a token here and paste it into the extension.') }}</p>
 
     @if ($token !== null)
         <div class="notice mt-4" role="status">
