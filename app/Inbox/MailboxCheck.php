@@ -10,7 +10,8 @@ use Illuminate\Support\Str;
 /**
  * Checks a mailbox once: new emails are matched to the candidate's applications by their
  * headers, and only the matching ones are read and kept, on the application's page and
- * timeline. A mailbox that can't be read keeps the reason, for the settings.
+ * timeline. A mailbox that can't be read keeps the reason, for the settings, and whether the
+ * server refused the login.
  */
 final class MailboxCheck
 {
@@ -51,11 +52,11 @@ final class MailboxCheck
                 $last = max($last ?? 0, $message->uid);
             }
         } catch (MailboxUnavailable $exception) {
-            $mailbox->update(['last_uid' => $last, 'checked_at' => now(), 'error' => $exception->getMessage()]);
+            $mailbox->update(['last_uid' => $last, 'checked_at' => now(), 'error' => $exception->getMessage(), 'login_failed' => $exception->loginFailed]);
 
             return $kept;
         }
-        $mailbox->update(['last_uid' => $last, 'checked_at' => now(), 'error' => null]);
+        $mailbox->update(['last_uid' => $last, 'checked_at' => now(), 'error' => null, 'login_failed' => false]);
 
         return $kept;
     }

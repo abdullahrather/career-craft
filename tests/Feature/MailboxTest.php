@@ -24,16 +24,16 @@ use Livewire\Livewire;
  * A mailbox for the tests: what logging in answers, and the emails it holds. Each read is
  * recorded; an email's text can be read only when $readable says so.
  */
-function fakeInbox(array $messages = [], ?string $login = null, ?string $failure = null): object
+function fakeInbox(array $messages = [], ?string $login = null, ?string $failure = null, bool $loginFails = false): object
 {
-    $inbox = new class($messages, $login, $failure) implements MailReader
+    $inbox = new class($messages, $login, $failure, $loginFails) implements MailReader
     {
         /** @var list<array{?int, CarbonInterface, int}> */
         public array $reads = [];
 
         public ?Mailbox $tested = null;
 
-        public function __construct(public array $messages, public ?string $login, public ?string $failure) {}
+        public function __construct(public array $messages, public ?string $login, public ?string $failure, public bool $loginFails) {}
 
         public function test(Mailbox $mailbox): ?string
         {
@@ -46,7 +46,7 @@ function fakeInbox(array $messages = [], ?string $login = null, ?string $failure
         {
             $this->reads[] = [$afterUid, $since, $limit];
             if ($this->failure !== null) {
-                throw new MailboxUnavailable($this->failure);
+                throw new MailboxUnavailable($this->failure, loginFailed: $this->loginFails);
             }
 
             return array_values(array_filter($this->messages, fn (InboxMessage $message): bool => $afterUid === null || $message->uid > $afterUid));
@@ -105,11 +105,11 @@ describe('Connecting a mailbox', function (): void {
     it('keeps the saved password when left empty, and starts afresh only for another account', function (): void {
         $inbox = fakeInbox();
         $user = User::factory()->create();
-        mailboxFor($user, ['last_uid' => 40, 'checked_at' => now(), 'error' => 'Login failed.']);
+        mailboxFor($user, ['last_uid' => 40, 'checked_at' => now(), 'error' => 'Login failed.', 'login_failed' => true]);
 
         Livewire::actingAs($user)->test(MailboxSettings::class)->call('save')->assertHasNoErrors();
         expect($inbox->tested?->password)->toBe('app-password')
-            ->and($user->mailbox()->sole()->only(['last_uid', 'error']))->toBe(['last_uid' => 40, 'error' => null]);
+            ->and($user->mailbox()->sole()->only(['last_uid', 'error', 'login_failed']))->toBe(['last_uid' => 40, 'error' => null, 'login_failed' => false]);
 
         Livewire::actingAs($user)->test(MailboxSettings::class)->set('boxUsername', 'lena@other.example')->call('save')->assertHasNoErrors();
         expect($user->mailbox()->sole()->only(['username', 'last_uid', 'checked_at']))->toBe(['username' => 'lena@other.example', 'last_uid' => null, 'checked_at' => null]);
@@ -251,19 +251,29 @@ describe('Checking a mailbox', function (): void {
             ->and($mailbox->refresh()->only(['last_uid', 'error']))->toBe(['last_uid' => 2, 'error' => null]);
     });
 
-    it('keeps why a check failed, and carries on from where it got to once it works again', function (): void {
+    it('stops checking after a refused login until the settings are saved or it\'s checked by hand', function (): void {
         $user = User::factory()->create();
         $mailbox = mailboxFor($user, ['last_uid' => 5]);
-        $inbox = fakeInbox(failure: 'The mail server didn\'t accept the user name or password.');
+        $inbox = fakeInbox(failure: 'The mail server didn\'t accept the user name or password.', loginFails: true);
 
         app(MailboxCheck::class)->run($mailbox);
-        expect($mailbox->refresh()->only(['last_uid', 'error']))->toBe(['last_uid' => 5, 'error' => 'The mail server didn\'t accept the user name or password.']);
+        expect($mailbox->refresh()->only(['last_uid', 'error', 'login_failed']))->toBe(['last_uid' => 5, 'error' => 'The mail server didn\'t accept the user name or password.', 'login_failed' => true]);
 
         Livewire::actingAs($user)->test(MailboxSettings::class)->assertSee(['Not checking', 'didn\'t accept the user name']);
 
         $inbox->failure = null;
         Livewire::actingAs($user)->test(MailboxSettings::class)->call('check')->assertSee('No new replies');
-        expect($mailbox->refresh()->error)->toBeNull()->and($inbox->reads[1][0])->toBe(5);
+        expect($mailbox->refresh()->only(['error', 'login_failed']))->toBe(['error' => null, 'login_failed' => false])->and($inbox->reads[1][0])->toBe(5);
+    });
+
+    it('keeps checking after a passing problem, such as a server that didn\'t answer', function (): void {
+        $user = User::factory()->create();
+        $mailbox = mailboxFor($user);
+        fakeInbox(failure: 'CareerCraft couldn\'t reach this mail server: timed out');
+
+        app(MailboxCheck::class)->run($mailbox);
+        expect($mailbox->refresh()->only(['error', 'login_failed']))->toBe(['error' => 'CareerCraft couldn\'t reach this mail server: timed out', 'login_failed' => false]);
+        Livewire::actingAs($user)->test(MailboxSettings::class)->assertSee(['Connected', 'The last check failed: CareerCraft couldn\'t reach this mail server: timed out. It\'s tried again with the next check.'])->assertDontSee('Not checking');
     });
 
     it('keeps the emails done before one whose text couldn\'t be read, and tries that one again', function (): void {
@@ -293,13 +303,15 @@ describe('Checking a mailbox', function (): void {
         expect($inbox->reads)->toHaveCount(4);
     });
 
-    it('runs every 15 minutes for mailboxes whose last check worked', function (): void {
+    it('runs every 15 minutes for every mailbox whose login wasn\'t refused', function (): void {
         Queue::fake();
         $working = mailboxFor(User::factory()->create());
-        mailboxFor(User::factory()->create(), ['error' => 'Login failed.']);
+        $unreachable = mailboxFor(User::factory()->create(), ['error' => 'CareerCraft couldn\'t reach this mail server: timed out']);
+        mailboxFor(User::factory()->create(), ['error' => 'Login failed.', 'login_failed' => true]);
 
         Artisan::call('careercraft:check-mailboxes');
-        Queue::assertPushed(CheckMailbox::class, 1);
+        Queue::assertPushed(CheckMailbox::class, 2);
         Queue::assertPushed(CheckMailbox::class, fn (CheckMailbox $job): bool => $job->mailboxId === $working->id);
+        Queue::assertPushed(CheckMailbox::class, fn (CheckMailbox $job): bool => $job->mailboxId === $unreachable->id);
     });
 });

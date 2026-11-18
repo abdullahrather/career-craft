@@ -9,11 +9,14 @@
 
     @if ($mailbox !== null)
         <p class="mt-3 text-sm">
-            @if ($mailbox->error !== null)
+            @if ($mailbox->login_failed)
                 <span class="badge">{{ __('Not checking') }}</span> {{ $mailbox->error }}
             @else
                 <span class="badge badge-brand">{{ __('Connected') }}</span>
                 {{ $mailbox->checked_at !== null ? __(':address, last checked :date.', ['address' => $mailbox->username, 'date' => $mailbox->checked_at->translatedFormat('j M Y, H:i')]) : __(':address, not checked yet.', ['address' => $mailbox->username]) }}
+                @if ($mailbox->error !== null)
+                    <span class="field-error block">{{ __('The last check failed: :reason. It\'s tried again with the next check.', ['reason' => rtrim($mailbox->error, '.')]) }}</span>
+                @endif
             @endif
         </p>
     @endif

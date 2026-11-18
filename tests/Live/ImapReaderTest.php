@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Inbox\ImapReader;
+use App\Inbox\MailboxUnavailable;
 use App\Models\Mailbox;
 use Illuminate\Support\Facades\Mail;
 
@@ -29,6 +30,13 @@ it('logs in, reads new emails by their headers, and their text only when asked',
 
     expect($reader->test($mailbox))->toBeNull()
         ->and($reader->test(new Mailbox([...$mailbox->only(['host', 'port', 'security', 'username']), 'password' => 'wrong'])))->toContain('didn\'t accept the user name or password');
+
+    try {
+        $reader->read(new Mailbox([...$mailbox->only(['host', 'port', 'security', 'username']), 'password' => 'wrong']), null, now()->subDay(), 200);
+        $this->fail('A refused login must throw.');
+    } catch (MailboxUnavailable $exception) {
+        expect($exception->loginFailed)->toBeTrue();
+    }
 
     $emails = collect($reader->read($mailbox, null, now()->subDay(), 200));
     $email = $emails->firstWhere('subject', $subject);

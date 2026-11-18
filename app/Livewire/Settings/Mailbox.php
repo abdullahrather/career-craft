@@ -74,7 +74,7 @@ final class Mailbox extends Component
         }
         // Another server or account starts afresh; the same one carries on where it was.
         $same = $mailbox !== null && $mailbox->host === $settings['host'] && $mailbox->username === $settings['username'];
-        $user->mailbox()->updateOrCreate([], [...$settings, 'error' => null, ...($same ? [] : ['last_uid' => null, 'checked_at' => null])]);
+        $user->mailbox()->updateOrCreate([], [...$settings, 'error' => null, 'login_failed' => false, ...($same ? [] : ['last_uid' => null, 'checked_at' => null])]);
         $this->reset('boxPassword');
         session()->flash('mailbox-saved', __('Connected. CareerCraft checks it every 15 minutes; the first check looks back :days days.', ['days' => Box::FIRST_DAYS]));
     }

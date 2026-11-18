@@ -117,7 +117,7 @@ final class ImapReader implements MailReader
                 $imap->connect(new ImapConnection(new PinnedImapStream($addresses[0], $mailbox->host)));
             }
         } catch (ImapCommandException) {
-            throw new MailboxUnavailable(__('The mail server didn\'t accept the user name or password. Many providers need an app password for this.'));
+            throw new MailboxUnavailable(__('The mail server didn\'t accept the user name or password. Many providers need an app password for this.'), loginFailed: true);
         } catch (ImapException $exception) {
             throw new MailboxUnavailable(__('CareerCraft couldn\'t reach this mail server: :reason', ['reason' => Str::limit($exception->getMessage(), 200)]), previous: $exception);
         }

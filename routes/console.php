@@ -66,11 +66,11 @@ Artisan::command('careercraft:send-reminders', function (): int {
     return 0;
 })->purpose('Email people their tasks, interviews and follow-ups for the day');
 
-// Connected mailboxes, for employers' replies. One whose last check failed waits until the
-// candidate saves its settings again or checks it by hand, so a changed password isn't retried
-// against their server every quarter hour.
+// Connected mailboxes, for employers' replies. One whose server refused the login waits until
+// the candidate saves its settings again or checks it by hand, so a changed password isn't
+// retried against their server every quarter hour. Other failures are simply tried again.
 Artisan::command('careercraft:check-mailboxes', function (): int {
-    $mailboxes = Mailbox::query()->whereNull('error')->get(['id']);
+    $mailboxes = Mailbox::query()->where('login_failed', false)->get(['id']);
     foreach ($mailboxes as $mailbox) {
         CheckMailbox::dispatch($mailbox->id);
     }

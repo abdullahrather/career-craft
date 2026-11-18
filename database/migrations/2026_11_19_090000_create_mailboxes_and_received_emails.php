@@ -30,6 +30,9 @@ return new class extends Migration
             $table->timestamp('checked_at')->nullable();
             // Why the last check failed, shown in the settings until a check works again.
             $table->string('error', 500)->nullable();
+            // The server refused the login: scheduled checks wait until the settings are saved
+            // again or it's checked by hand. Other failures are retried with the next check.
+            $table->boolean('login_failed')->default(false);
             $table->timestamps();
         });
 

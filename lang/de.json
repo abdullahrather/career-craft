@@ -893,5 +893,6 @@
     "Logging in…": "Anmeldung läuft…",
     "Check now": "Jetzt prüfen",
     "Checking…": "Wird geprüft…",
+    "The last check failed: :reason. It's tried again with the next check.": "Die letzte Prüfung ist fehlgeschlagen: :reason. Beim nächsten Mal wird es wieder versucht.",
     "Disconnect this mailbox? Replies already found stay on their applications.": "Dieses Postfach trennen? Bereits gefundene Antworten bleiben bei ihren Bewerbungen."
 }
