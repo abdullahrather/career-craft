@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\GmailConnectController;
+use App\Http\Controllers\GmailMailboxController;
 use App\Http\Controllers\LetterController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OutlookConnectController;
@@ -33,6 +34,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('/settings/mail/gmail/callback', [GmailConnectController::class, 'callback'])->name('mail.gmail.callback');
     Route::get('/settings/mail/outlook', [OutlookConnectController::class, 'redirect'])->name('mail.outlook');
     Route::get('/settings/mail/outlook/callback', [OutlookConnectController::class, 'callback'])->name('mail.outlook.callback');
+    // Reading the candidate's Gmail for employers' replies, with read-only permission.
+    Route::get('/settings/mailbox/gmail', [GmailMailboxController::class, 'redirect'])->name('mailbox.gmail');
+    Route::get('/settings/mailbox/gmail/callback', [GmailMailboxController::class, 'callback'])->name('mailbox.gmail.callback');
     Route::view('/profile', 'profile')->name('profile');
     Route::view('/profile/import', 'profile-import')->name('profile.import');
 

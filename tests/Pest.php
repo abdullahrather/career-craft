@@ -2,20 +2,29 @@
 
 declare(strict_types=1);
 
+use App\Inbox\InboxMessage;
+use App\Inbox\MailboxUnavailable;
+use App\Inbox\MailReader;
 use App\JobSources\FoundJob;
 use App\JobSources\ListingStore;
+use App\Mail\GmailTransport;
 use App\Models\AiUsage;
 use App\Models\Application;
 use App\Models\CoverLetter;
 use App\Models\JobListing;
 use App\Models\MailAccount;
+use App\Models\Mailbox;
 use App\Models\Resume;
 use App\Models\ResumeVersion;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Mail\Transport\ArrayTransport;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\GoogleProvider;
+use Laravel\Socialite\Two\User as GoogleUser;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\SentMessage;
@@ -205,4 +214,74 @@ function recordedApplication(User $user, array $values = []): Application
     $application->update(['cv_name' => 'Design roles, version 2', 'cv_path' => "{$directory}/cv.pdf", 'letter_name' => 'Bewerbung als Product Designer', 'letter_path' => "{$directory}/letter.pdf"]);
 
     return $application;
+}
+
+/** What Google gives back after the person allows sending (or reading) email. */
+function googleUser(array $scopes = ['openid', GmailTransport::SCOPE], ?string $refreshToken = 'refresh-1'): GoogleUser
+{
+    return (new GoogleUser)->setRaw([])->map(['id' => 'g-1', 'email' => 'lena.brandt@gmail.example', 'name' => 'Lena Brandt'])
+        ->setToken('access-1')->setRefreshToken($refreshToken)->setExpiresIn(3600)->setApprovedScopes($scopes);
+}
+
+/** Google, as the controllers drive it, answering with this user. */
+function fakeGoogle(GoogleUser $user): void
+{
+    $google = Mockery::mock(GoogleProvider::class);
+    $google->shouldReceive('redirectUrl')->andReturnSelf();
+    $google->shouldReceive('user')->andReturn($user);
+    Socialite::shouldReceive('driver')->with('google')->andReturn($google);
+}
+
+/**
+ * A mailbox for the tests: what logging in answers, and the emails it holds. Each read is
+ * recorded; an email's text can be read only when $readable says so.
+ */
+function fakeInbox(array $messages = [], ?string $login = null, ?string $failure = null, bool $loginFails = false): object
+{
+    $inbox = new class($messages, $login, $failure, $loginFails) implements MailReader
+    {
+        /** @var list<array{?int, CarbonInterface, int}> */
+        public array $reads = [];
+
+        public ?Mailbox $tested = null;
+
+        public function __construct(public array $messages, public ?string $login, public ?string $failure, public bool $loginFails) {}
+
+        public function test(Mailbox $mailbox): ?string
+        {
+            $this->tested = $mailbox;
+
+            return $this->login;
+        }
+
+        public function read(Mailbox $mailbox, ?int $afterUid, CarbonInterface $since, int $limit): array
+        {
+            $this->reads[] = [$afterUid, $since, $limit];
+            if ($this->failure !== null) {
+                throw new MailboxUnavailable($this->failure, loginFailed: $this->loginFails);
+            }
+
+            return array_values(array_filter($this->messages, fn (InboxMessage $message): bool => $afterUid === null || $message->uid > $afterUid));
+        }
+    };
+    app()->instance(MailReader::class, $inbox);
+
+    return $inbox;
+}
+
+/** An email by its headers. Its text, when $body is null, must never be read. */
+function inboxEmail(int $uid, string $from, string $subject, string $name = '', array $references = [], ?string $body = 'Vielen Dank für Ihre Bewerbung.', ?string $messageId = null): InboxMessage
+{
+    return new InboxMessage($uid, $messageId ?? "m{$uid}@mail.example", $from, $name, $subject, now()->subHour(), $references, function () use ($body, $uid): string {
+        if ($body === null) {
+            throw new LogicException("Email {$uid} matched nothing, so its text must not be read.");
+        }
+
+        return $body;
+    });
+}
+
+function mailboxFor(User $user, array $values = []): Mailbox
+{
+    return $user->mailbox()->create(['host' => 'imap.mailbox.example', 'port' => 993, 'security' => 'ssl', 'username' => 'lena@mailbox.example', 'password' => 'app-password', ...$values]);
 }

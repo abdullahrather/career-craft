@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Settings;
 
+use App\Http\Controllers\GmailConnectController;
 use App\Inbox\MailboxCheck;
 use App\Inbox\MailReader;
 use App\Models\MailAccount;
@@ -16,8 +17,9 @@ use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 /**
- * The candidate's mailbox, read over IMAP for employers' replies. Saving logs in first; only
- * a mailbox that let CareerCraft in is saved.
+ * The candidate's mailbox, read for employers' replies: over IMAP, or through their Gmail
+ * sign-in (GmailMailboxController). Saving logs in first; only a mailbox that let
+ * CareerCraft in is saved.
  */
 final class Mailbox extends Component
 {
@@ -36,8 +38,8 @@ final class Mailbox extends Component
     {
         $user = $this->user();
         $mailbox = $user->mailbox;
-        $this->fill($mailbox !== null
-            ? ['boxHost' => $mailbox->host, 'boxPort' => (string) $mailbox->port, 'boxSecurity' => $mailbox->security, 'boxUsername' => $mailbox->username]
+        $this->fill($mailbox?->provider === 'imap'
+            ? ['boxHost' => (string) $mailbox->host, 'boxPort' => (string) $mailbox->port, 'boxSecurity' => (string) $mailbox->security, 'boxUsername' => $mailbox->username]
             : ['boxUsername' => $user->email]);
     }
 
@@ -50,7 +52,7 @@ final class Mailbox extends Component
             'boxPort' => ['required', 'integer', 'min:1', 'max:65535'],
             'boxSecurity' => ['required', Rule::in(MailAccount::securities())],
             'boxUsername' => ['required', 'string', 'max:255'],
-            'boxPassword' => [$mailbox === null ? 'required' : 'nullable', 'string', 'max:500'],
+            'boxPassword' => [$mailbox?->provider !== 'imap' ? 'required' : 'nullable', 'string', 'max:500'],
         ], attributes: ['boxHost' => __('Mail server'), 'boxPort' => __('Port'), 'boxSecurity' => __('Encryption'), 'boxUsername' => __('User name'), 'boxPassword' => __('Password')]);
         $problem = Box::hostProblem($this->boxHost, (int) $this->boxPort);
         if ($problem !== null) {
@@ -59,7 +61,12 @@ final class Mailbox extends Component
             return;
         }
 
+        // An IMAP server replaces a Gmail connection, but only once its login worked.
         $settings = [
+            'provider' => 'imap',
+            'access_token' => null,
+            'refresh_token' => null,
+            'token_expires_at' => null,
             'host' => strtolower($this->boxHost),
             'port' => (int) $this->boxPort,
             'security' => $this->boxSecurity,
@@ -73,7 +80,7 @@ final class Mailbox extends Component
             return;
         }
         // Another server or account starts afresh; the same one carries on where it was.
-        $same = $mailbox !== null && $mailbox->host === $settings['host'] && $mailbox->username === $settings['username'];
+        $same = $mailbox?->provider === 'imap' && $mailbox->host === $settings['host'] && $mailbox->username === $settings['username'];
         $user->mailbox()->updateOrCreate([], [...$settings, 'error' => null, 'login_failed' => false, ...($same ? [] : ['last_uid' => null, 'checked_at' => null])]);
         $this->reset('boxPassword');
         session()->flash('mailbox-saved', __('Connected. CareerCraft checks it every 15 minutes; the first check looks back :days days.', ['days' => Box::FIRST_DAYS]));
@@ -108,7 +115,7 @@ final class Mailbox extends Component
 
     public function render(): View
     {
-        return view('livewire.settings.mailbox', ['mailbox' => $this->user()->mailbox()->first(), 'securities' => MailAccount::securities()]);
+        return view('livewire.settings.mailbox', ['mailbox' => $this->user()->mailbox()->first(), 'securities' => MailAccount::securities(), 'gmail' => GmailConnectController::enabled()]);
     }
 
     private function user(): User

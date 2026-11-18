@@ -13,12 +13,23 @@
                 <span class="badge">{{ __('Not checking') }}</span> {{ $mailbox->error }}
             @else
                 <span class="badge badge-brand">{{ __('Connected') }}</span>
+                @if ($mailbox->provider === 'gmail')
+                    {{ __('Gmail:') }}
+                @endif
                 {{ $mailbox->checked_at !== null ? __(':address, last checked :date.', ['address' => $mailbox->username, 'date' => $mailbox->checked_at->translatedFormat('j M Y, H:i')]) : __(':address, not checked yet.', ['address' => $mailbox->username]) }}
                 @if ($mailbox->error !== null)
                     <span class="field-error block">{{ __('The last check failed: :reason. It\'s tried again with the next check.', ['reason' => rtrim($mailbox->error, '.')]) }}</span>
                 @endif
             @endif
         </p>
+    @endif
+
+    @if ($gmail)
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+            <a href="{{ route('mailbox.gmail') }}" class="button">{{ $mailbox?->provider === 'gmail' ? __('Connect Gmail again') : __('Read replies in Gmail') }}</a>
+        </div>
+        <p class="muted mt-2 text-sm">{{ __('You allow reading email only; CareerCraft can\'t send, change or delete anything in your Gmail.') }}</p>
+        <p class="muted mt-4 text-sm">{{ __('Or use your provider\'s IMAP server:') }}</p>
     @endif
 
     <form wire:submit="save" class="mt-4 grid gap-4 sm:grid-cols-2">
@@ -33,7 +44,7 @@
             </select>
         </label>
         <x-wire.input model="boxUsername" :label="__('User name')" :hint="__('Usually your email address')" />
-        <x-wire.input model="boxPassword" type="password" :label="__('Password')" :hint="$mailbox !== null ? __('Leave empty to keep the saved one.') : __('Stored encrypted.')" autocomplete="new-password" />
+        <x-wire.input model="boxPassword" type="password" :label="__('Password')" :hint="$mailbox?->provider === 'imap' ? __('Leave empty to keep the saved one.') : __('Stored encrypted.')" autocomplete="new-password" />
         <div class="flex flex-wrap items-center gap-3 sm:col-span-2">
             <button type="submit" class="button button-primary" wire:loading.attr="disabled" wire:target="save">
                 <span wire:loading.remove wire:target="save">{{ __('Connect') }}</span>

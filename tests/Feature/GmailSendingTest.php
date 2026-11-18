@@ -11,28 +11,9 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Two\GoogleProvider;
-use Laravel\Socialite\Two\User as GoogleUser;
 use Livewire\Livewire;
 
 beforeEach(fn () => config(['services.google.client_id' => 'google-client', 'services.google.client_secret' => 'google-secret']));
-
-/** What Google gives back after the person allows sending. */
-function googleUser(array $scopes = ['openid', GmailTransport::SCOPE], ?string $refreshToken = 'refresh-1'): GoogleUser
-{
-    return (new GoogleUser)->setRaw([])->map(['id' => 'g-1', 'email' => 'lena.brandt@gmail.example', 'name' => 'Lena Brandt'])
-        ->setToken('access-1')->setRefreshToken($refreshToken)->setExpiresIn(3600)->setApprovedScopes($scopes);
-}
-
-/** Google, as the controller drives it, answering with this user. */
-function fakeGoogle(GoogleUser $user): void
-{
-    $google = Mockery::mock(GoogleProvider::class);
-    $google->shouldReceive('redirectUrl')->andReturnSelf();
-    $google->shouldReceive('user')->andReturn($user);
-    Socialite::shouldReceive('driver')->with('google')->andReturn($google);
-}
 
 function gmailAccount(User $user, array $values = []): MailAccount
 {
