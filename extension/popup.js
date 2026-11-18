@@ -47,10 +47,20 @@ async function collect(pageUrl, config) {
 
 /** The job filled in a tab, until it is logged as submitted. */
 const tabKey = (tab) => `filled-${tab.id}`;
+const hostOf = (tab) => (tab.url ? new URL(tab.url).host : '');
 
 async function activeTab() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     return tab;
+}
+
+/**
+ * The job filled in this tab, while the tab is still on that job's site (its confirmation
+ * page included). A tab moved on to another site, or a reused tab id, gets nothing.
+ */
+async function filledHere(tab) {
+    const filled = (await chrome.storage.session.get(tabKey(tab)))[tabKey(tab)];
+    return filled && filled.host === hostOf(tab) ? filled : null;
 }
 
 async function fill() {
@@ -66,7 +76,7 @@ async function fill() {
         $('result').textContent = result.filled.length > 0
             ? `Filled ${result.filled.length} fields for ${application.title}. Check them, add anything missing, and submit.`
             : 'No empty fields matched. Fill this form by hand.';
-        await chrome.storage.session.set({ [tabKey(tab)]: { id: application.id, title: application.title } });
+        await chrome.storage.session.set({ [tabKey(tab)]: { id: application.id, title: application.title, host: hostOf(tab) } });
         await showSubmitted();
     } catch (error) {
         $('result').className = 'error';
@@ -81,7 +91,10 @@ async function logSubmitted() {
     button.disabled = true;
     try {
         const tab = await activeTab();
-        const filled = (await chrome.storage.session.get(tabKey(tab)))[tabKey(tab)];
+        const filled = await filledHere(tab);
+        if (!filled) {
+            throw new Error('This tab has moved on from the job\'s site. Log it on CareerCraft instead.');
+        }
         const { status } = await api(`/api/extension/applications/${filled.id}/submitted`, await settings(), false, 'POST');
         await chrome.storage.session.remove(tabKey(tab));
         $('submitted').hidden = true;
@@ -99,8 +112,7 @@ async function logSubmitted() {
 
 /** Offers "I submitted it" when this tab's form was filled and not logged yet. */
 async function showSubmitted() {
-    const tab = await activeTab();
-    const filled = (await chrome.storage.session.get(tabKey(tab)))[tabKey(tab)];
+    const filled = await filledHere(await activeTab());
     $('submitted').hidden = !filled;
     if (filled) {
         $('submitted-title').textContent = filled.title;
