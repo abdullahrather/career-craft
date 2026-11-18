@@ -7,6 +7,7 @@ use App\Http\Controllers\GmailMailboxController;
 use App\Http\Controllers\LetterController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OutlookConnectController;
+use App\Http\Controllers\OutlookMailboxController;
 use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\SocialLoginController;
 use App\Models\User;
@@ -34,9 +35,11 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('/settings/mail/gmail/callback', [GmailConnectController::class, 'callback'])->name('mail.gmail.callback');
     Route::get('/settings/mail/outlook', [OutlookConnectController::class, 'redirect'])->name('mail.outlook');
     Route::get('/settings/mail/outlook/callback', [OutlookConnectController::class, 'callback'])->name('mail.outlook.callback');
-    // Reading the candidate's Gmail for employers' replies, with read-only permission.
+    // Reading the candidate's Gmail or Outlook for employers' replies, with read-only permission.
     Route::get('/settings/mailbox/gmail', [GmailMailboxController::class, 'redirect'])->name('mailbox.gmail');
     Route::get('/settings/mailbox/gmail/callback', [GmailMailboxController::class, 'callback'])->name('mailbox.gmail.callback');
+    Route::get('/settings/mailbox/outlook', [OutlookMailboxController::class, 'redirect'])->name('mailbox.outlook');
+    Route::get('/settings/mailbox/outlook/callback', [OutlookMailboxController::class, 'callback'])->name('mailbox.outlook.callback');
     Route::view('/profile', 'profile')->name('profile');
     Route::view('/profile/import', 'profile-import')->name('profile.import');
 

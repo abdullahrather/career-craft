@@ -901,6 +901,12 @@
     "Gmail no longer lets CareerCraft read your inbox. Connect Gmail again in the settings.": "Gmail erlaubt CareerCraft nicht mehr, Ihren Posteingang zu lesen. Verbinden Sie Gmail in den Einstellungen erneut.",
     "Gmail:": "Gmail:",
     "Read replies in Gmail": "Antworten in Gmail lesen",
-    "You allow reading email only; CareerCraft can't send, change or delete anything in your Gmail.": "Sie erlauben nur das Lesen von E-Mails; CareerCraft kann in Ihrem Gmail nichts senden, ändern oder löschen.",
-    "Or use your provider's IMAP server:": "Oder nutzen Sie den IMAP-Server Ihres Anbieters:"
+    "You allow reading email only; CareerCraft can't send, change or delete anything in your mailbox.": "Sie erlauben nur das Lesen von E-Mails; CareerCraft kann in Ihrem Postfach nichts senden, ändern oder löschen.",
+    "Or use your provider's IMAP server:": "Oder nutzen Sie den IMAP-Server Ihres Anbieters:",
+    "Outlook was connected without permission to read email. Connect again and allow reading.": "Outlook wurde ohne die Erlaubnis verbunden, E-Mails zu lesen. Verbinden Sie es erneut und erlauben Sie das Lesen.",
+    "Outlook is connected for replies: :address. CareerCraft checks it every 15 minutes.": "Outlook ist für Antworten verbunden: :address. CareerCraft prüft es alle 15 Minuten.",
+    "Outlook refused to show the inbox: :reason": "Outlook hat den Posteingang nicht freigegeben: :reason",
+    "Outlook no longer lets CareerCraft read your inbox. Connect Outlook again in the settings.": "Outlook erlaubt CareerCraft nicht mehr, Ihren Posteingang zu lesen. Verbinden Sie Outlook in den Einstellungen erneut.",
+    "Outlook:": "Outlook:",
+    "Read replies in Outlook": "Antworten in Outlook lesen"
 }
