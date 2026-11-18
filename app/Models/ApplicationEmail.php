@@ -17,9 +17,10 @@ use Illuminate\Support\Carbon;
  * @property string $subject
  * @property string $body
  * @property list<string> $attachments
+ * @property string|null $message_id Its Message-ID header, to find replies to it.
  * @property Carbon $created_at
  */
-#[Fillable(['to', 'subject', 'body', 'attachments'])]
+#[Fillable(['to', 'subject', 'body', 'attachments', 'message_id'])]
 final class ApplicationEmail extends Model
 {
     public const null UPDATED_AT = null;

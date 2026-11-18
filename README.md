@@ -137,6 +137,17 @@ Applications go out from your own address, never from CareerCraft's.
 - **Log and limits:** every email sent is listed on the application with its text and attachments, and noted on its timeline; an application in Saved moves to Applied. Up to 20 application emails a day.
 - **Job board submission:** Greenhouse, Lever and Ashby only take applications through their APIs with a key from the employer, so CareerCraft sends by email instead.
 
+## Replies from employers
+
+Connect your mailbox, and employers' replies show up on the applications they're about.
+
+- **Connect:** under Replies from employers in the settings, enter your provider's IMAP server, port and encryption, and your user name and password. Gmail, Outlook and most others need an app password (for Gmail: `imap.gmail.com`, port 993, SSL/TLS). CareerCraft logs in before saving, and the password is stored encrypted and never shown again. Outside development the server must be a public address on port 993 or 143.
+- **What is read:** every 15 minutes the scheduler runs `php artisan careercraft:check-mailboxes`, which looks at the sender, subject and reply headers of new emails in the inbox; the first check goes back 30 days. Only an email about one of your applications has its text read, and only those are kept. Emails stay unread in your mailbox, and nothing is changed or deleted there. "Check now" checks at once, up to four times an hour.
+- **What counts as a reply:** a reply to an application email CareerCraft sent (by its thread), an email from the company's domain or with the company's name as its sender, or one from an applicant tracking system such as Greenhouse, Lever, Personio or Workday that names the company. Job alerts from LinkedIn, Indeed, StepStone and similar, and CareerCraft's own emails, are left alone. When the company has several of your applications, the job named in the subject wins.
+- **On the application:** each reply is listed under Replies with its text, and noted on the timeline.
+- **When a check fails:** the reason shows in the settings, and checking pauses until you save the settings again or press Check now, so a changed password isn't tried against your server every quarter hour.
+- **Try it locally:** Docker Compose runs GreenMail, a demo mailbox (Mailpit can't be read over IMAP). Connect server `greenmail`, port 3143, no encryption, user `demo`, password `demo`; emails sent through `greenmail:3025` to `demo@careercraft.test` land in it.
+
 ## Applications
 
 A board of every job you are going for: Saved, Applied, Interviewing, Offer and Rejected.
@@ -167,7 +178,8 @@ A board of every job you are going for: Saved, Applied, Interviewing, Offer and 
 | Backend | PHP 8.5, Laravel 13 |
 | Interface | Livewire 4, Alpine.js, Tailwind CSS 4, Vite 8 |
 | Data | PostgreSQL 18, Redis 8 |
-| Email in development | Mailpit |
+| Email in development | Mailpit, and GreenMail as a demo mailbox |
+| Reading mailboxes | ImapEngine (IMAP) |
 | PDF | Gotenberg (headless Chromium), PhpWord for Word files |
 | Accounts | Laravel Fortify, Laravel Socialite |
 | AI | Laravel AI SDK: Ollama (free, local) by default, or Claude or an OpenAI-compatible API |
@@ -192,6 +204,7 @@ docker compose up
 | http://localhost:8000 | The app |
 | http://localhost:8025 | Mailpit, which catches every email the app sends |
 | (inside Docker only) | Gotenberg, which makes the PDFs |
+| (inside Docker only) | GreenMail, a demo mailbox for trying replies (IMAP on port 3143) |
 | localhost:5433 | PostgreSQL, for a database tool (user and password `careercraft`) |
 
 The first `docker compose up` installs the frontend packages, which takes a minute.

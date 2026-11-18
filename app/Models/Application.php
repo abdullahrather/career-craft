@@ -106,6 +106,12 @@ final class Application extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<ReceivedEmail, $this> Newest first. */
+    public function receivedEmails(): HasMany
+    {
+        return $this->hasMany(ReceivedEmail::class)->latest('received_at')->latest('id');
+    }
+
     /** @return HasMany<ApplicationEmail, $this> Newest first. */
     public function emails(): HasMany
     {

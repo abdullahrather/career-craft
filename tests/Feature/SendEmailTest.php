@@ -124,6 +124,10 @@ describe('Sending an application', function (): void {
             ->and($email->getAttachments()[0]->getBody())->toBe('%PDF-1.7 cv');
 
         $application->refresh();
+        // Its own Message-ID, kept, so the employer's reply is found by its thread.
+        $messageId = $application->emails()->sole()->message_id;
+        expect($messageId)->toEndWith('@mailbox.example')
+            ->and($email->getHeaders()->get('Message-ID')?->getBodyAsString())->toBe("<{$messageId}>");
         expect($application->emails()->sole()->only(['to', 'subject', 'attachments']))->toBe(['to' => 'jobs@nordwind.example', 'subject' => 'Bewerbung als Product Designer', 'attachments' => ['design-roles-version-2.pdf', 'bewerbung-als-product-designer.pdf']])
             ->and($application->status)->toBe('applied')
             ->and($application->events()->first()->text())->toBe('Moved from Saved to Applied')

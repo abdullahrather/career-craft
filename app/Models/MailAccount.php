@@ -133,7 +133,7 @@ final class MailAccount extends Model
      *
      * @return list<string>
      */
-    private static function addresses(string $host): array
+    public static function addresses(string $host): array
     {
         if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
             return [$host];
@@ -157,6 +157,17 @@ final class MailAccount extends Model
         if (! in_array($port, self::PORTS, true)) {
             return __('Use your mail server\'s port for sending: 465, 587, 25 or 2525.');
         }
+
+        return self::networkProblem($addresses);
+    }
+
+    /**
+     * Why a server at these addresses can't be used: none found, or one on a private network.
+     *
+     * @param  list<string>  $addresses
+     */
+    public static function networkProblem(array $addresses): ?string
+    {
         if ($addresses === []) {
             return __('This mail server can\'t be found. Check its name.');
         }

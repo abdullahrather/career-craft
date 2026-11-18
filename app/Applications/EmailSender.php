@@ -47,11 +47,13 @@ final readonly class EmailSender
             return __('You can send :count application emails a day. Send the rest tomorrow.', ['count' => ApplicationEmail::DAILY]);
         }
 
-        $error = $this->deliver($account, $to, $subject, $body, $files);
+        // Its own Message-ID, so the employer's reply is found by its thread.
+        $messageId = Str::uuid()->toString().'@'.Str::after($account->from_address, '@');
+        $error = $this->deliver($account, $to, $subject, $body, $files, $messageId);
         if ($error !== null) {
             return $error;
         }
-        $application->emails()->create(['to' => $to, 'subject' => $subject, 'body' => $body, 'attachments' => array_keys($files)]);
+        $application->emails()->create(['to' => $to, 'subject' => $subject, 'body' => $body, 'attachments' => array_keys($files), 'message_id' => $messageId]);
         $application->log('emailed', ['to' => $to]);
         if ($application->status === 'saved') {
             $application->moveTo('applied');
@@ -93,14 +95,14 @@ final readonly class EmailSender
     }
 
     /** @param  array<string, string>  $files */
-    private function deliver(MailAccount $account, string $to, string $subject, string $body, array $files): ?string
+    private function deliver(MailAccount $account, string $to, string $subject, string $body, array $files, ?string $messageId = null): ?string
     {
         $mailer = $account->mailer();
         if (is_string($mailer)) {
             return $mailer;
         }
         try {
-            $mailer->to($to)->send(new ApplicationMail($account->from_address, $account->from_name, $subject, $body, $files));
+            $mailer->to($to)->send(new ApplicationMail($account->from_address, $account->from_name, $subject, $body, $files, $messageId));
         } catch (TransportExceptionInterface $exception) {
             $reason = Str::limit($exception->getMessage(), 300);
 

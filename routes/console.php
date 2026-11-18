@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Applications\DailyReminders;
+use App\Jobs\CheckMailbox;
 use App\Jobs\ImportCompanyBoard;
 use App\Jobs\ImportJobListings;
 use App\JobSearch\JobAlerts;
 use App\Models\FollowedBoard;
 use App\Models\JobListing;
+use App\Models\Mailbox;
 use App\Models\SavedSearch;
 use App\Models\User;
 use Illuminate\Foundation\Inspiring;
@@ -64,6 +66,20 @@ Artisan::command('careercraft:send-reminders', function (): int {
     return 0;
 })->purpose('Email people their tasks, interviews and follow-ups for the day');
 
+// Connected mailboxes, for employers' replies. One whose last check failed waits until the
+// candidate saves its settings again or checks it by hand, so a changed password isn't retried
+// against their server every quarter hour.
+Artisan::command('careercraft:check-mailboxes', function (): int {
+    $mailboxes = Mailbox::query()->whereNull('error')->get(['id']);
+    foreach ($mailboxes as $mailbox) {
+        CheckMailbox::dispatch($mailbox->id);
+    }
+    $this->info("Checking {$mailboxes->count()} mailboxes.");
+
+    return 0;
+})->purpose('Check connected mailboxes for replies to applications');
+
 Schedule::command('careercraft:refresh-jobs')->dailyAt('06:00');
+Schedule::command('careercraft:check-mailboxes')->everyFifteenMinutes();
 Schedule::command('careercraft:send-job-alerts')->dailyAt('07:00');
 Schedule::command('careercraft:send-reminders')->dailyAt('07:30');
