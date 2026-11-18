@@ -151,8 +151,11 @@ final class GmailReader implements MailReader
         if ($response->failed()) {
             $reason = $response->json('error.message');
             $reason = is_string($reason) ? $reason : (string) $response->status();
-            // Not allowed (any more): connecting again is the only way, so checks wait for it.
-            throw new MailboxUnavailable(__('Gmail refused to show the inbox: :reason', ['reason' => Str::limit($reason, 200)]), loginFailed: in_array($response->status(), [401, 403], true));
+            // The sign-in or its permission is gone: connecting again is the only way, so checks
+            // wait for it. Other refusals, such as a rate limit (also a 403), pass by themselves.
+            $why = $response->json('error.errors.0.reason');
+            $refused = $response->status() === 401 || ($response->status() === 403 && in_array($why, ['insufficientPermissions', 'forbidden'], true));
+            throw new MailboxUnavailable(__('Gmail refused to show the inbox: :reason', ['reason' => Str::limit($reason, 200)]), loginFailed: $refused);
         }
 
         return $response;

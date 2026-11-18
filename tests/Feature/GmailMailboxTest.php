@@ -180,10 +180,21 @@ describe('Reading Gmail', function (): void {
         'Google having a bad moment' => [500, ['error' => 'internal_failure'], false],
     ]);
 
-    it('stops checking when Gmail no longer allows reading, but not when it doesn\'t answer', function (): void {
+    it('stops checking when Gmail no longer allows reading, and only then', function (int $status, string $reason, bool $loginFailed): void {
         $mailbox = gmailMailbox(User::factory()->create());
-        Http::fake(['gmail.googleapis.com/*' => Http::response(['error' => ['message' => 'Request had insufficient authentication scopes.']], 403)]);
-        expect(fn () => (new GmailReader)->read($mailbox, null, now(), 200))->toThrow(fn (MailboxUnavailable $exception) => expect($exception->loginFailed)->toBeTrue());
+        Http::fake(['gmail.googleapis.com/*' => Http::response(['error' => ['code' => $status, 'message' => 'Gmail said no.', 'errors' => [['reason' => $reason]]]], $status)]);
+
+        expect(fn () => (new GmailReader)->read($mailbox, null, now(), 200))->toThrow(fn (MailboxUnavailable $exception) => expect($exception->loginFailed)->toBe($loginFailed));
+    })->with([
+        'sign-in no longer valid' => [401, 'authError', true],
+        'permission missing' => [403, 'insufficientPermissions', true],
+        'forbidden' => [403, 'forbidden', true],
+        'too many requests for now' => [403, 'rateLimitExceeded', false],
+        'too many requests from this user for now' => [403, 'userRateLimitExceeded', false],
+    ]);
+
+    it('keeps checking when Gmail doesn\'t answer', function (): void {
+        $mailbox = gmailMailbox(User::factory()->create());
 
         Http::fake(['gmail.googleapis.com/*' => fn () => throw new ConnectionException('timed out')]);
         app(MailboxCheck::class)->run($mailbox);
