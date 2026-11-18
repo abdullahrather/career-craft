@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Inbox\ImapReader;
+use App\Inbox\MailReader;
 use App\Mail\GmailTransport;
 use App\Mail\OutlookTransport;
 use App\Models\MailAccount;
@@ -19,7 +21,8 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Employers' replies are read from the candidate's mailbox over IMAP.
+        $this->app->bind(MailReader::class, ImapReader::class);
     }
 
     /**

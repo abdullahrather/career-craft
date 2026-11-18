@@ -42,6 +42,7 @@ final class ApplicationEvent extends Model
             'emailed' => __('Sent by email to :to', ['to' => $data['to'] ?? '']),
             'submitted' => ($data['site'] ?? '') !== '' ? __('Submitted on :site with the browser extension', ['site' => $data['site']]) : __('Submitted with the browser extension'),
             'queue' => __('Prepared with the apply queue'),
+            'reply' => __('Email from :from: “:subject”', ['from' => $data['from'] ?? '', 'subject' => $data['subject'] ?? '']),
             'contact' => __('Added :name as a contact', ['name' => $data['name'] ?? '']),
             'task' => __('Added the task “:title”, due :date', ['title' => $data['title'] ?? '', 'date' => Carbon::parse((string) ($data['due_on'] ?? 'today'))->translatedFormat('j M Y')]),
             'task_done' => __('Done: :title', ['title' => $data['title'] ?? '']),

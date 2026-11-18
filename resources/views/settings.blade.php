@@ -136,6 +136,8 @@
 
         <livewire:settings.mail-account />
 
+        <livewire:settings.mailbox />
+
         <livewire:settings.extension />
 
         <livewire:settings.devices />

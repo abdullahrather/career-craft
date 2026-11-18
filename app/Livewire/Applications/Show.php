@@ -124,6 +124,7 @@ final class Show extends Component
         return view('livewire.applications.show', [
             'application' => $application,
             'events' => $application->events()->get(),
+            'replies' => $application->receivedEmails()->get(),
             'statuses' => Application::statusNames(),
             // The CV versions and letters made for this job come first.
             'versions' => $this->versions()->with('resume')->orderBy('created_at', 'desc')->get()

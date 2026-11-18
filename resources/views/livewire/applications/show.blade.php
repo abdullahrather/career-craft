@@ -96,6 +96,25 @@
             </form>
         </section>
 
+        @if ($replies->isNotEmpty())
+            <section class="card" aria-labelledby="replies">
+                <h2 id="replies" class="card-title">{{ __('Replies') }}</h2>
+                <ul class="mt-3 flex flex-col gap-3 text-sm">
+                    @foreach ($replies as $reply)
+                        <li wire:key="reply-{{ $reply->id }}">
+                            <details>
+                                <summary class="cursor-pointer">
+                                    <span class="font-semibold wrap-break-word">{{ $reply->subject !== '' ? $reply->subject : __('(no subject)') }}</span>
+                                    <span class="muted block text-xs">{{ $reply->from_name !== '' ? $reply->from_name.' <'.$reply->from_address.'>' : $reply->from_address }} · <time datetime="{{ $reply->received_at->toIso8601String() }}">{{ $reply->received_at->translatedFormat('j M Y, H:i') }}</time></span>
+                                </summary>
+                                <p class="mt-2 whitespace-pre-line wrap-break-word">{{ $reply->body }}</p>
+                            </details>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
         <livewire:applications.email :application-id="$application->id" />
 
         <livewire:applications.tasks :application-id="$application->id" />

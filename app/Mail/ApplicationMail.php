@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 
 /**
  * An application, or a test, sent from the candidate's own address: their text as plain
@@ -17,11 +18,16 @@ use Illuminate\Mail\Mailables\Envelope;
 final class ApplicationMail extends Mailable
 {
     /** @param  array<string, string>  $files  Attachment names, each with its path on the local disk. */
-    public function __construct(private string $fromAddress, private string $fromName, private string $mailSubject, private string $text, private array $files = []) {}
+    public function __construct(private string $fromAddress, private string $fromName, private string $mailSubject, private string $text, private array $files = [], private ?string $messageId = null) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(from: new Address($this->fromAddress, $this->fromName), replyTo: [new Address($this->fromAddress, $this->fromName)], subject: $this->mailSubject);
+    }
+
+    public function headers(): Headers
+    {
+        return new Headers(messageId: $this->messageId);
     }
 
     public function content(): Content
