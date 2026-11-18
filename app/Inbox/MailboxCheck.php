@@ -31,10 +31,11 @@ final class MailboxCheck
                 $match = $matcher->match($message);
                 if ($match !== null) {
                     [$application, $matchedBy] = $match;
-                    $id = $message->messageId !== '' ? $message->messageId : "uid-{$message->uid}@{$mailbox->host}";
+                    // Shortened once, so the check for an email already kept looks for what was saved.
+                    $id = Str::limit($message->messageId !== '' ? $message->messageId : "uid-{$message->uid}@{$mailbox->host}", 255, '');
                     if (! $application->receivedEmails()->where('message_id', $id)->exists()) {
                         $application->receivedEmails()->create([
-                            'message_id' => Str::limit($id, 255, ''),
+                            'message_id' => $id,
                             'from_address' => Str::limit($message->fromAddress, 255, ''),
                             'from_name' => Str::limit($message->fromName, 255, ''),
                             'subject' => Str::limit($message->subject, 500, ''),

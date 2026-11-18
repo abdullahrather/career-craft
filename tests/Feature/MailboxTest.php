@@ -235,6 +235,22 @@ describe('Checking a mailbox', function (): void {
             ->assertSee(['Replies', 'Ihre Bewerbung als Product Designer', 'wir laden Sie gern ein.']);
     });
 
+    it('keeps an email with an overlong Message-ID once, however often it comes back', function (): void {
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer', 'company' => 'Nordwind Logistik']);
+        $mailbox = mailboxFor($user);
+        $longId = str_repeat('a', 300).'@nordwind-logistik.de';
+        $inbox = fakeInbox([inboxEmail(1, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung', messageId: $longId)]);
+
+        app(MailboxCheck::class)->run($mailbox);
+        // The same email again under a new UID, as after the server renumbers its emails.
+        $inbox->messages[] = inboxEmail(2, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung', messageId: $longId);
+        app(MailboxCheck::class)->run($mailbox);
+
+        expect($application->receivedEmails()->count())->toBe(1)
+            ->and($mailbox->refresh()->only(['last_uid', 'error']))->toBe(['last_uid' => 2, 'error' => null]);
+    });
+
     it('keeps why a check failed, and carries on from where it got to once it works again', function (): void {
         $user = User::factory()->create();
         $mailbox = mailboxFor($user, ['last_uid' => 5]);
