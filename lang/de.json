@@ -798,6 +798,8 @@
     "Kind regards": "Mit freundlichen Grüßen",
     "The email could not be sent. Your mail server said: :reason": "Die E-Mail konnte nicht gesendet werden. Ihr Mailserver meldete: :reason",
     "Sent by email to :to": "Per E-Mail an :to gesendet",
+    "Submitted on :site with the browser extension": "Auf :site mit der Browser-Erweiterung abgeschickt",
+    "Submitted with the browser extension": "Mit der Browser-Erweiterung abgeschickt",
     "Mail server": "Mailserver",
     "Port": "Port",
     "Encryption": "Verschlüsselung",

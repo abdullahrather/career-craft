@@ -40,6 +40,7 @@ final class ApplicationEvent extends Model
             },
             'note' => __('Added a note'),
             'emailed' => __('Sent by email to :to', ['to' => $data['to'] ?? '']),
+            'submitted' => ($data['site'] ?? '') !== '' ? __('Submitted on :site with the browser extension', ['site' => $data['site']]) : __('Submitted with the browser extension'),
             'queue' => __('Prepared with the apply queue'),
             'contact' => __('Added :name as a contact', ['name' => $data['name'] ?? '']),
             'task' => __('Added the task “:title”, due :date', ['title' => $data['title'] ?? '', 'date' => Carbon::parse((string) ($data['due_on'] ?? 'today'))->translatedFormat('j M Y')]),

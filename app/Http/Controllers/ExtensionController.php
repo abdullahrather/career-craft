@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 /**
  * What the browser extension reads to fill an application form: the person's details, and
  * for the job page they're on, the tracked application with the CV and letter recorded for
- * it. Reading only; the person submits the form themselves.
+ * it. The person submits the form themselves, then tells the extension, which logs it here.
  */
 final class ExtensionController
 {
@@ -88,6 +88,23 @@ final class ExtensionController
         abort_if($path === null || ! Storage::disk('local')->exists($path), 404);
 
         return Storage::disk('local')->response($path, null, ['Content-Type' => 'application/pdf']);
+    }
+
+    /**
+     * The person submitted the form on the job's site: it goes on the timeline, once, and a
+     * saved application moves to Applied.
+     */
+    public function submitted(Request $request, int $id): JsonResponse
+    {
+        $application = $this->user($request)->applications()->findOrFail($id);
+        if (! $application->events()->where('type', 'submitted')->exists()) {
+            $application->log('submitted', ['site' => (string) parse_url((string) $application->url, PHP_URL_HOST)]);
+        }
+        if ($application->status === 'saved') {
+            $application->moveTo('applied');
+        }
+
+        return response()->json(['status' => $application->status]);
     }
 
     private function user(Request $request): User

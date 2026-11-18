@@ -104,6 +104,30 @@ describe('The extension API', function (): void {
         $this->withToken(extensionToken($user))->getJson(route('extension.application', ['url' => 'javascript:alert(1)']))->assertNotFound();
     });
 
+    it('logs a form submitted on the job\'s site once, and moves a saved application to Applied', function (): void {
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer', 'url' => 'https://jobs.lever.co/nordwind/abc-123']);
+        $token = extensionToken($user);
+
+        $this->withToken($token)->postJson(route('extension.submitted', ['id' => $application->id]))->assertOk()->assertExactJson(['status' => 'applied']);
+        $this->withToken($token)->postJson(route('extension.submitted', ['id' => $application->id]))->assertOk();
+
+        $application->refresh();
+        expect($application->status)->toBe('applied')
+            ->and($application->applied_on?->isToday())->toBeTrue()
+            ->and($application->events()->where('type', 'submitted')->sole()->text())->toBe('Submitted on jobs.lever.co with the browser extension')
+            ->and($application->events()->where('type', 'status')->count())->toBe(1);
+    });
+
+    it('leaves an application further along the board where it is when logging a submission', function (): void {
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer']);
+        $application->moveTo('interviewing');
+
+        $this->withToken(extensionToken($user))->postJson(route('extension.submitted', ['id' => $application->id]))->assertOk()->assertExactJson(['status' => 'interviewing']);
+        expect($application->events()->where('type', 'submitted')->sole()->text())->toBe('Submitted with the browser extension');
+    });
+
     it('serves each person only their own applications', function (): void {
         Storage::fake('local');
         $application = recordedApplication(User::factory()->create(), ['url' => 'https://jobs.lever.co/nordwind/abc-123']);
@@ -111,6 +135,8 @@ describe('The extension API', function (): void {
 
         $this->withToken($other)->getJson(route('extension.application', ['url' => 'https://jobs.lever.co/nordwind/abc-123']))->assertNotFound();
         $this->withToken($other)->get(route('extension.document', ['id' => $application->id, 'document' => 'cv']))->assertNotFound();
+        $this->withToken($other)->postJson(route('extension.submitted', ['id' => $application->id]))->assertNotFound();
+        expect($application->refresh()->status)->toBe('saved');
     });
 
     it('needs a token made for the extension', function (): void {
@@ -119,6 +145,10 @@ describe('The extension API', function (): void {
         $this->getJson(route('extension.profile'))->assertUnauthorized();
         $this->withToken('1|not-a-real-token')->getJson(route('extension.profile'))->assertUnauthorized();
         $this->withToken($user->createToken('Something else', ['other'])->plainTextToken)->getJson(route('extension.profile'))->assertForbidden();
+        $application = Application::track($user, ['title' => 'Designer']);
+        app('auth')->forgetGuards();
+        $this->withToken($user->createToken('Something else', ['other'])->plainTextToken)->postJson(route('extension.submitted', ['id' => $application->id]))->assertForbidden();
+        expect($application->refresh()->status)->toBe('saved');
         // Signed in on the website isn't enough: without an extension token it is refused.
         app('auth')->forgetGuards();
         $this->actingAs($user)->getJson(route('extension.profile'))->assertForbidden();
