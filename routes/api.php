@@ -11,4 +11,5 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('extension')->group
     Route::get('/application', [ExtensionController::class, 'application'])->name('extension.application');
     Route::get('/applications/{id}/documents/{document}', [ExtensionController::class, 'document'])
         ->whereNumber('id')->whereIn('document', ['cv', 'letter'])->name('extension.document');
+    Route::post('/applications/{id}/submitted', [ExtensionController::class, 'submitted'])->whereNumber('id')->name('extension.submitted');
 });

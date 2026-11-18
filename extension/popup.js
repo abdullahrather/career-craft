@@ -1,5 +1,7 @@
 // The extension's popup: the CareerCraft address and token, and "Fill this form", which asks
 // CareerCraft for the person's details and this job's documents, then fills the open tab.
+// After a fill it remembers the job for that tab, so "I submitted it" can log it on the board,
+// even from the page the site shows once the form is sent.
 
 const $ = (id) => document.getElementById(id);
 
@@ -7,9 +9,9 @@ async function settings() {
     return chrome.storage.local.get({ server: '', token: '' });
 }
 
-/** A GET to CareerCraft's extension API, as JSON or as base64 bytes. */
-async function api(path, { server, token }, asBytes = false) {
-    const response = await fetch(new URL(path, server), { headers: { Authorization: `Bearer ${token}`, Accept: asBytes ? 'application/pdf' : 'application/json' } });
+/** A request to CareerCraft's extension API, answered as JSON or as base64 bytes. */
+async function api(path, { server, token }, asBytes = false, method = 'GET') {
+    const response = await fetch(new URL(path, server), { method, headers: { Authorization: `Bearer ${token}`, Accept: asBytes ? 'application/pdf' : 'application/json' } });
     if (response.status === 401) {
         throw new Error('CareerCraft didn\'t accept the token. Make a new one under Settings → Browser extension.');
     }
@@ -43,24 +45,65 @@ async function collect(pageUrl, config) {
     return { application, data: { values, files } };
 }
 
+/** The job filled in a tab, until it is logged as submitted. */
+const tabKey = (tab) => `filled-${tab.id}`;
+
+async function activeTab() {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    return tab;
+}
+
 async function fill() {
     const button = $('fill-button');
     button.disabled = true;
     $('result').className = '';
     $('result').textContent = 'Filling…';
     try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const tab = await activeTab();
         const { application, data } = await collect(tab.url, await settings());
         await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['fill.js'] });
         const [{ result }] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: (data) => globalThis.careerCraftFill(data), args: [data] });
         $('result').textContent = result.filled.length > 0
             ? `Filled ${result.filled.length} fields for ${application.title}. Check them, add anything missing, and submit.`
             : 'No empty fields matched. Fill this form by hand.';
+        await chrome.storage.session.set({ [tabKey(tab)]: { id: application.id, title: application.title } });
+        await showSubmitted();
     } catch (error) {
         $('result').className = 'error';
         $('result').textContent = error.message;
     } finally {
         button.disabled = false;
+    }
+}
+
+async function logSubmitted() {
+    const button = $('submitted-button');
+    button.disabled = true;
+    try {
+        const tab = await activeTab();
+        const filled = (await chrome.storage.session.get(tabKey(tab)))[tabKey(tab)];
+        const { status } = await api(`/api/extension/applications/${filled.id}/submitted`, await settings(), false, 'POST');
+        await chrome.storage.session.remove(tabKey(tab));
+        $('submitted').hidden = true;
+        $('result').className = '';
+        $('result').textContent = status === 'applied'
+            ? `Logged: ${filled.title} is in Applied on your board.`
+            : `Logged on ${filled.title}'s timeline.`;
+    } catch (error) {
+        $('submitted-result').className = 'error';
+        $('submitted-result').textContent = error.message;
+    } finally {
+        button.disabled = false;
+    }
+}
+
+/** Offers "I submitted it" when this tab's form was filled and not logged yet. */
+async function showSubmitted() {
+    const tab = await activeTab();
+    const filled = (await chrome.storage.session.get(tabKey(tab)))[tabKey(tab)];
+    $('submitted').hidden = !filled;
+    if (filled) {
+        $('submitted-title').textContent = filled.title;
     }
 }
 
@@ -92,9 +135,13 @@ async function show() {
     if (server) {
         $('server').value = server;
     }
+    if (token) {
+        await showSubmitted();
+    }
 }
 
 $('fill-button').addEventListener('click', fill);
+$('submitted-button').addEventListener('click', logSubmitted);
 $('settings').addEventListener('submit', save);
 $('change').addEventListener('click', () => { $('fill').hidden = true; $('settings').hidden = false; });
 show();
