@@ -9,6 +9,7 @@ RUN install-php-extensions pdo_pgsql redis intl zip bcmath pcntl gd exif opcache
 
 # CV files and LinkedIn exports are bigger than PHP's 2 MB upload default.
 COPY uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

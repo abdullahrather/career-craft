@@ -39,9 +39,11 @@ export default defineConfig({
         host: '0.0.0.0',
         hmr: { host: 'localhost' },
         watch: {
-            // File change events don't cross a Windows mount into the container, so poll.
+            // File change events don't cross a Windows mount into the container, so poll. Polling
+            // is costly, so folders that never change the page aren't watched, and twice a second is enough.
             usePolling: true,
-            ignored: ['**/storage/framework/views/**', '**/vendor/**'],
+            interval: 500,
+            ignored: ['**/storage/**', '**/tests/**', '**/vendor/**', '**/extension/**'],
         },
     },
 });
