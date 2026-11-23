@@ -50,6 +50,9 @@ services:
 
   postgres:
     image: postgres:18-alpine
+    # Parallel tests drop and recreate every table in many databases at once, which needs more
+    # locks than the default 64 per transaction.
+    command: postgres -c max_locks_per_transaction=256
     environment:
       POSTGRES_DB: careercraft
       POSTGRES_USER: careercraft

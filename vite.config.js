@@ -39,9 +39,7 @@ export default defineConfig({
         host: '0.0.0.0',
         hmr: { host: 'localhost' },
         watch: {
-            // File change events don't cross a Windows mount into the container, so poll.
-            usePolling: true,
-            ignored: ['**/storage/framework/views/**', '**/vendor/**'],
+            ignored: ['**/storage/framework/views/**'],
         },
     },
 });

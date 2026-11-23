@@ -191,7 +191,7 @@ Everything runs in Docker, so PHP doesn't need to be installed on your machine.
 
 ## Run it
 
-You need Docker.
+You need Docker. On Windows, clone the project inside WSL2 (for example into your Ubuntu home folder) and run the commands there, as Laravel recommends: Docker reads files on a Windows drive so slowly that every page takes seconds, and edits don't reload the page.
 
 ```bash
 cp .env.example .env
