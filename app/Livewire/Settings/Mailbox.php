@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Settings;
 
 use App\Http\Controllers\GmailConnectController;
+use App\Http\Controllers\OutlookConnectController;
 use App\Inbox\MailboxCheck;
 use App\Inbox\MailReader;
 use App\Models\MailAccount;
@@ -17,8 +18,8 @@ use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 /**
- * The candidate's mailbox, read for employers' replies: over IMAP, or through their Gmail
- * sign-in (GmailMailboxController). Saving logs in first; only a mailbox that let
+ * The candidate's mailbox, read for employers' replies: over IMAP, or through their Gmail or
+ * Outlook sign-in (GmailMailboxController, OutlookMailboxController). Saving logs in first; only a mailbox that let
  * CareerCraft in is saved.
  */
 final class Mailbox extends Component
@@ -61,7 +62,7 @@ final class Mailbox extends Component
             return;
         }
 
-        // An IMAP server replaces a Gmail connection, but only once its login worked.
+        // An IMAP server replaces a Gmail or Outlook connection, but only once its login worked.
         $settings = [
             'provider' => 'imap',
             'access_token' => null,
@@ -115,7 +116,7 @@ final class Mailbox extends Component
 
     public function render(): View
     {
-        return view('livewire.settings.mailbox', ['mailbox' => $this->user()->mailbox()->first(), 'securities' => MailAccount::securities(), 'gmail' => GmailConnectController::enabled()]);
+        return view('livewire.settings.mailbox', ['mailbox' => $this->user()->mailbox()->first(), 'securities' => MailAccount::securities(), 'gmail' => GmailConnectController::enabled(), 'outlook' => OutlookConnectController::enabled()]);
     }
 
     private function user(): User

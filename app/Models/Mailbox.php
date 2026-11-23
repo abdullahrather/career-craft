@@ -12,12 +12,12 @@ use Illuminate\Support\Carbon;
 
 /**
  * The candidate's mailbox, read to find employers' replies: over IMAP with an app password,
- * or through their Gmail sign-in with read-only permission. The password and tokens are
+ * or through their Gmail or Outlook sign-in with read-only permission. The password and tokens are
  * encrypted, and never shown again once saved.
  *
  * @property int $id
  * @property int $user_id
- * @property string $provider imap or gmail.
+ * @property string $provider imap, gmail or outlook.
  * @property string|null $host
  * @property int|null $port
  * @property string|null $security ssl, starttls or none.

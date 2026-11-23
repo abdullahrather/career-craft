@@ -15,6 +15,8 @@
                 <span class="badge badge-brand">{{ __('Connected') }}</span>
                 @if ($mailbox->provider === 'gmail')
                     {{ __('Gmail:') }}
+                @elseif ($mailbox->provider === 'outlook')
+                    {{ __('Outlook:') }}
                 @endif
                 {{ $mailbox->checked_at !== null ? __(':address, last checked :date.', ['address' => $mailbox->username, 'date' => $mailbox->checked_at->translatedFormat('j M Y, H:i')]) : __(':address, not checked yet.', ['address' => $mailbox->username]) }}
                 @if ($mailbox->error !== null)
@@ -24,11 +26,16 @@
         </p>
     @endif
 
-    @if ($gmail)
+    @if ($gmail || $outlook)
         <div class="mt-4 flex flex-wrap items-center gap-3">
-            <a href="{{ route('mailbox.gmail') }}" class="button">{{ $mailbox?->provider === 'gmail' ? __('Connect Gmail again') : __('Read replies in Gmail') }}</a>
+            @if ($gmail)
+                <a href="{{ route('mailbox.gmail') }}" class="button">{{ $mailbox?->provider === 'gmail' ? __('Connect Gmail again') : __('Read replies in Gmail') }}</a>
+            @endif
+            @if ($outlook)
+                <a href="{{ route('mailbox.outlook') }}" class="button">{{ $mailbox?->provider === 'outlook' ? __('Connect Outlook again') : __('Read replies in Outlook') }}</a>
+            @endif
         </div>
-        <p class="muted mt-2 text-sm">{{ __('You allow reading email only; CareerCraft can\'t send, change or delete anything in your Gmail.') }}</p>
+        <p class="muted mt-2 text-sm">{{ __('You allow reading email only; CareerCraft can\'t send, change or delete anything in your mailbox.') }}</p>
         <p class="muted mt-4 text-sm">{{ __('Or use your provider\'s IMAP server:') }}</p>
     @endif
 
