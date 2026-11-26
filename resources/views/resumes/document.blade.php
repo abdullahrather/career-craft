@@ -10,16 +10,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $doc->name() }} · {{ $doc->resume->name }}</title>
-    @if ($pdf ?? false)
-        {{-- The PDF service gets the font files next to this page, so it needs nothing else. --}}
-        <style>
-            @foreach ($doc->fontFiles() as $weight => $file)
-                @font-face { font-family: '{{ \App\Models\Resume::FONT_NAMES[$look['font']] }}'; font-weight: {{ $weight }}; src: url('{{ $file }}') format('woff2'); }
-            @endforeach
-        </style>
-    @else
-        @fonts([$look['font']])
-    @endif
+    {{-- The PDF service gets the font files next to this page, so it needs nothing else. --}}
+    <style>
+        @foreach ($doc->fontFiles() as $weight => $file)
+            @font-face { font-family: '{{ \App\Models\Resume::FONT_NAMES[$look['font']] }}'; font-weight: {{ $weight }}; src: url('{{ $file }}') format('woff2'); }
+        @endforeach
+    </style>
     <style>
         /* A4, the same on screen and on paper. One page uses a smaller size and tighter spacing. */
         @page { size: A4; margin: 16mm 18mm; }
@@ -48,10 +44,8 @@
         .when { flex-shrink: 0; white-space: nowrap; color: #57534e; font-size: 0.92em; }
         .entry p + p, .entry p + ul { margin-top: 1mm; }
         .entry li + li { margin-top: 0.4mm; }
-        .page-marker { position: absolute; left: 0; right: 0; border-top: 1px dashed #a8a29e; font: 9px/1 Arial, sans-serif; color: #78716c; text-align: right; padding: 2px 4px 0; }
         @media print {
             .page { width: auto; min-height: 0; padding: 0; }
-            .page-marker { display: none; }
         }
     </style>
 </head>
@@ -61,32 +55,5 @@
             @include('resumes.templates.'.$template, ['doc' => $doc, 'photo' => $photo])
         </div>
     </main>
-
-    @if ($preview)
-        <script>
-            // Marks where each A4 page would end, and tells the editor how many pages there are.
-            (() => {
-                const page = document.querySelector('.page');
-                const content = document.getElementById('content');
-                const mm = page.getBoundingClientRect().width / 210;
-                const usable = (297 - 32) * mm;
-
-                const measure = () => {
-                    page.querySelectorAll('.page-marker').forEach((marker) => marker.remove());
-                    const pages = Math.max(1, Math.ceil(content.offsetHeight / usable));
-                    page.style.minHeight = `${pages * 297}mm`;
-                    for (let number = 2; number <= pages; number++) {
-                        const marker = document.createElement('div');
-                        marker.className = 'page-marker';
-                        marker.style.top = `${16 * mm + (number - 1) * usable}px`;
-                        marker.textContent = @json(__('Page')) + ' ' + number;
-                        page.appendChild(marker);
-                    }
-                    parent.postMessage({ type: 'resume-pages', pages }, location.origin);
-                };
-                document.fonts.ready.then(measure);
-            })();
-        </script>
-    @endif
 </body>
 </html>

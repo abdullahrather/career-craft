@@ -7,9 +7,12 @@ namespace App\Http\Controllers;
 use App\Models\Resume;
 use App\Models\ResumeVersion;
 use App\Models\User;
+use App\Resumes\PdfRenderer;
 use App\Resumes\ResumeDocument;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
@@ -23,10 +26,23 @@ final class ResumeController
         return view('resumes.edit', ['resume' => $this->find($request, $id)]);
     }
 
-    public function preview(Request $request, int $id): Response
+    /**
+     * The CV as the PDF it downloads as, made the same way, so the preview's pages and page
+     * breaks are exactly the file's.
+     */
+    public function preview(Request $request, int $id, PdfRenderer $pdf): Response
     {
-        return response(ResumeDocument::for($this->find($request, $id))->render(preview: true))
-            ->header('Cache-Control', 'no-store');
+        $resume = $this->find($request, $id);
+        try {
+            $file = $pdf->render(ResumeDocument::for($resume));
+        } catch (ConnectionException|RequestException $exception) {
+            report($exception);
+
+            return response(__('The PDF could not be made. Check that the PDF service is running: docker compose up -d gotenberg'), 503)
+                ->header('Content-Type', 'text/plain; charset=utf-8');
+        }
+
+        return response($file, 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'inline', 'Cache-Control' => 'no-store']);
     }
 
     /** A saved version's PDF or Word file. */

@@ -18,7 +18,7 @@ final class PdfRenderer
      */
     public function render(ResumeDocument $doc): string
     {
-        return $this->renderHtml($doc->render(pdf: true), $doc->fontFiles(), $doc->title(), $doc->name());
+        return $this->renderHtml($doc->render(), $doc->fontFiles(), $doc->title(), $doc->name());
     }
 
     /**

@@ -51,12 +51,12 @@ final class ResumeDocument
     }
 
     /**
-     * The whole CV as an HTML page, in the CV's language. The preview adds page markers;
-     * the PDF version loads its fonts from files sent along with it (see fontFiles()).
+     * The whole CV as an HTML page for the PDF service, in the CV's language. It loads its
+     * fonts from files sent along with it (see fontFiles()).
      */
-    public function render(bool $preview = false, bool $pdf = false): string
+    public function render(): string
     {
-        return $this->inLanguage(fn (): string => view('resumes.document', ['doc' => $this, 'preview' => $preview, 'pdf' => $pdf])->render());
+        return $this->inLanguage(fn (): string => view('resumes.document', ['doc' => $this])->render());
     }
 
     /**

@@ -118,11 +118,70 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
-// The CV preview: an A4 page scaled to fit, reloaded after every change.
+// The CV preview: the PDF the CV downloads as, drawn page by page with pdf.js, so its pages
+// and page breaks are exactly the file's. Drawn again after every save.
 document.addEventListener('alpine:init', () => {
-    window.Alpine.data('resumePreview', (url) => ({
-        version: 0,
+    window.Alpine.data('cvPreview', (url, pageLabel) => ({
         pages: null,
+        error: null,
+        loading: false,
+        // Counts draws, so a slower earlier one never replaces a newer one.
+        draws: 0,
+
+        init() {
+            this.draw();
+        },
+
+        get target() {
+            return Number(this.$wire.pages);
+        },
+
+        async draw() {
+            const draw = ++this.draws;
+            this.loading = true;
+            try {
+                // Loaded on the first draw only, so other pages don't carry pdf.js.
+                const [pdfjs, worker] = await Promise.all([import('pdfjs-dist'), import('pdfjs-dist/build/pdf.worker.min.mjs?url')]);
+                pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+
+                const response = await fetch(url, { cache: 'no-store' });
+                if (!response.ok) throw new Error(await response.text());
+                const task = pdfjs.getDocument({ data: await response.arrayBuffer() });
+                const pdf = await task.promise;
+                const count = pdf.numPages;
+                // Drawn at the box's width in screen pixels, so the text stays sharp.
+                const width = Math.max(this.$refs.pages.clientWidth, 320) * window.devicePixelRatio;
+                const canvases = [];
+                for (let number = 1; number <= count; number++) {
+                    const page = await pdf.getPage(number);
+                    const viewport = page.getViewport({ scale: width / page.getViewport({ scale: 1 }).width });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.floor(viewport.width);
+                    canvas.height = Math.floor(viewport.height);
+                    canvas.className = 'block w-full rounded-sm bg-white shadow-sm';
+                    canvas.setAttribute('role', 'img');
+                    canvas.setAttribute('aria-label', pageLabel.replace(':page', number).replace(':pages', count));
+                    await page.render({ canvas, viewport }).promise;
+                    canvases.push(canvas);
+                }
+                await task.destroy();
+                if (draw !== this.draws) return;
+                this.$refs.pages.replaceChildren(...canvases);
+                this.pages = count;
+                this.error = null;
+            } catch (error) {
+                if (draw === this.draws) this.error = error.message;
+            } finally {
+                if (draw === this.draws) this.loading = false;
+            }
+        },
+    }));
+});
+
+// The cover letter preview: an A4 page scaled to fit, reloaded after every change.
+document.addEventListener('alpine:init', () => {
+    window.Alpine.data('letterPreview', (url) => ({
+        version: 0,
         scale: 1,
         height: 1123,
 
@@ -130,13 +189,6 @@ document.addEventListener('alpine:init', () => {
             this.fit();
             this.observer = new ResizeObserver(() => this.fit());
             this.observer.observe(this.$refs.box);
-            // The preview page reports its length; only messages from it count.
-            window.addEventListener('message', (event) => {
-                if (event.origin !== location.origin || !this.$refs.frame || event.source !== this.$refs.frame.contentWindow) return;
-                if (event.data?.type !== 'resume-pages') return;
-                this.pages = event.data.pages;
-                this.loaded();
-            });
         },
 
         // Leaving the page with wire:navigate removes the preview; its watcher goes with it.
@@ -146,10 +198,6 @@ document.addEventListener('alpine:init', () => {
 
         get src() {
             return `${url}?v=${this.version}`;
-        },
-
-        get target() {
-            return Number(this.$wire.pages);
         },
 
         reload() {

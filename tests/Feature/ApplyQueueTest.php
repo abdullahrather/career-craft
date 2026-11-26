@@ -380,7 +380,7 @@ it('keeps the application details on the profile, never on a CV', function (): v
     $profile = $user->careerProfile()->fresh();
     expect($profile->only(['salary_expectation', 'notice_period', 'work_permit']))->toBe(['salary_expectation' => 65000, 'notice_period' => '3 months', 'work_permit' => 'EU citizen'])
         ->and($profile->earliest_start->toDateString())->toBe('2027-02-01');
-    $this->actingAs($user)->get(route('resumes.preview', ['id' => resumeFor($user)->id]))->assertOk()->assertDontSee('65000')->assertDontSee('EU citizen');
+    cvPage($user, resumeFor($user)->id)->assertDontSee('65000')->assertDontSee('EU citizen');
 
     Livewire::actingAs($user)->test(ApplicationDetails::class)->set(['salaryExpectation' => '', 'earliestStart' => ''])->call('save');
     expect($user->careerProfile()->fresh()->salary_expectation)->toBeNull();
