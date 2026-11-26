@@ -7,6 +7,7 @@ namespace App\Livewire\Applications;
 use App\Applications\SentDocuments;
 use App\Models\Application;
 use App\Models\CoverLetter;
+use App\Models\ReceivedEmail;
 use App\Models\ResumeVersion;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -125,6 +126,7 @@ final class Show extends Component
             'application' => $application,
             'events' => $application->events()->get(),
             'replies' => $application->receivedEmails()->get(),
+            'kinds' => ReceivedEmail::kindNames(),
             'statuses' => Application::statusNames(),
             // The CV versions and letters made for this job come first.
             'versions' => $this->versions()->with('resume')->orderBy('created_at', 'desc')->get()

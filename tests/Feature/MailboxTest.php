@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 
+beforeEach(fn () => replyReadAs('other'));
+
 describe('Connecting a mailbox', function (): void {
     it('logs in first, and saves it with the password encrypted', function (): void {
         $inbox = fakeInbox();
