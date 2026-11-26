@@ -105,6 +105,9 @@
                             <details>
                                 <summary class="cursor-pointer">
                                     <span class="font-semibold wrap-break-word">{{ $reply->subject !== '' ? $reply->subject : __('(no subject)') }}</span>
+                                    @if ($reply->kind !== null && $reply->kind !== 'other')
+                                        <span class="badge badge-brand ms-1">{{ $kinds[$reply->kind] }}</span>
+                                    @endif
                                     <span class="muted block text-xs">{{ $reply->from_name !== '' ? $reply->from_name.' <'.$reply->from_address.'>' : $reply->from_address }} · <time datetime="{{ $reply->received_at->toIso8601String() }}">{{ $reply->received_at->translatedFormat('j M Y, H:i') }}</time></span>
                                 </summary>
                                 <p class="mt-2 whitespace-pre-line wrap-break-word">{{ $reply->body }}</p>

@@ -15,7 +15,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 
-beforeEach(fn () => config(['services.google.client_id' => 'google-client', 'services.google.client_secret' => 'google-secret']));
+beforeEach(function (): void {
+    config(['services.google.client_id' => 'google-client', 'services.google.client_secret' => 'google-secret']);
+    replyReadAs('other');
+});
 
 function gmailMailbox(User $user, array $values = []): Mailbox
 {

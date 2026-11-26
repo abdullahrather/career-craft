@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\ReplyReader;
 use App\Inbox\InboxMessage;
 use App\Inbox\MailboxUnavailable;
 use App\Inbox\MailReader;
@@ -230,6 +231,12 @@ function fakeGoogle(GoogleUser $user): void
     $google->shouldReceive('redirectUrl')->andReturnSelf();
     $google->shouldReceive('user')->andReturn($user);
     Socialite::shouldReceive('driver')->with('google')->andReturn($google);
+}
+
+/** Has the AI read every employer's reply as the given kind, with an interview's time, length and place. */
+function replyReadAs(string $kind, string $interviewAt = '', int $minutes = 0, string $where = ''): void
+{
+    ReplyReader::fake(fn (): array => ['kind' => $kind, 'interview_at' => $interviewAt, 'minutes' => $minutes, 'where' => $where]);
 }
 
 /**

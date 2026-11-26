@@ -17,7 +17,10 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Testing\TestResponse;
 use Livewire\Livewire;
 
-beforeEach(fn () => config(['services.microsoft.client_id' => 'ms-client', 'services.microsoft.client_secret' => 'ms-secret', 'services.microsoft.tenant' => 'common']));
+beforeEach(function (): void {
+    config(['services.microsoft.client_id' => 'ms-client', 'services.microsoft.client_secret' => 'ms-secret', 'services.microsoft.tenant' => 'common']);
+    replyReadAs('other');
+});
 
 function outlookMailbox(User $user, array $values = []): Mailbox
 {
