@@ -47,11 +47,15 @@ final class ReplyReader implements Agent, HasProviderOptions, HasStructuredOutpu
         ];
     }
 
-    /** The email as the AI gets it, with the day it arrived for dates such as "next Tuesday", marked off so it reads as data. */
+    /**
+     * The email as the AI gets it, with the day it arrived for dates such as "next Tuesday",
+     * marked off so it reads as data. Its angle brackets are swapped for look-alikes, so no
+     * tag in it, however split or cased, can close the block early.
+     */
     public static function input(ReceivedEmail $email): string
     {
         $text = "Received: {$email->received_at->format('Y-m-d (l)')}\nFrom: {$email->from_name} <{$email->from_address}>\nSubject: {$email->subject}\n\n".mb_substr($email->body, 0, self::TEXT_LENGTH);
 
-        return '<email>'.str_replace(['<email>', '</email>'], '', $text).'</email>';
+        return '<email>'.str_replace(['<', '>'], ['‹', '›'], $text).'</email>';
     }
 }
