@@ -89,6 +89,22 @@ describe('Reading replies', function (): void {
         'not a time at all' => ['next week', 'Nächste Woche um 14 Uhr.'],
     ]);
 
+    it('shows the sender\'s subject and name in its email as text, not as links or formatting', function (): void {
+        replyReadAs('rejection');
+        $user = User::factory()->create();
+        Application::track($user, ['title' => 'Product Designer', 'company' => 'Nordwind Logistik']);
+
+        fakeInbox([inboxEmail(1, 'karriere@nordwind-logistik.de', '[Confirm your account](https://evil.example)', 'Nordwind Logistik **HR**', body: 'Leider nicht.')]);
+        app(MailboxCheck::class)->run(mailboxFor($user));
+
+        Notification::assertSentTo($user, ReplyRead::class, function (ReplyRead $notification) use ($user): bool {
+            $html = (string) $notification->toMail($user)->render();
+
+            return ! str_contains($html, 'href="https://evil.example"') && ! str_contains($html, '<strong>HR</strong>')
+                && str_contains($html, '[Confirm your account](https://evil.example)');
+        });
+    });
+
     it('only labels an email that is none of the kinds it acts on', function (): void {
         replyReadAs('other');
         $user = User::factory()->create();

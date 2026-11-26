@@ -1,7 +1,11 @@
+@php
+    // The sender writes the subject and their name, so Markdown in them stays text, not links or formatting.
+    $text = fn (string $value): string => addcslashes($value, '\\[]*_`');
+@endphp
 <x-mail::message>
-# {{ $kind }}: {{ $title }}
+# {{ $kind }}: {{ $text($title) }}
 
-{{ $company !== '' ? __(':from wrote about your application at :company: “:subject”', ['from' => $from, 'company' => $company, 'subject' => $subject]) : __(':from wrote about your application: “:subject”', ['from' => $from, 'subject' => $subject]) }}
+{{ $company !== '' ? __(':from wrote about your application at :company: “:subject”', ['from' => $text($from), 'company' => $text($company), 'subject' => $text($subject)]) : __(':from wrote about your application: “:subject”', ['from' => $text($from), 'subject' => $text($subject)]) }}
 
 @if ($movedTo !== null)
 {{ __('CareerCraft moved the application to :status.', ['status' => $movedTo]) }}
