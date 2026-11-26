@@ -92,7 +92,7 @@
             </div>
 
             {{-- Livewire leaves the preview alone: Alpine owns the frame and reloads it after each save. --}}
-            <section class="lg:sticky lg:top-6" aria-labelledby="letter-preview" wire:ignore x-data="resumePreview(@js(route('letters.preview', ['id' => $letter->id])))" @letter-saved.window="reload()">
+            <section class="lg:sticky lg:top-6" aria-labelledby="letter-preview" wire:ignore x-data="letterPreview(@js(route('letters.preview', ['id' => $letter->id])))" @letter-saved.window="reload()">
                 <h2 id="letter-preview" class="card-title mb-3">{{ __('Preview') }}</h2>
                 <div x-ref="box" class="min-w-0 overflow-hidden rounded-2xl border border-stone-200 bg-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-800" :style="`height: ${height * scale}px`">
                     <iframe x-ref="frame" :src="src" title="{{ __('Preview of the cover letter') }}" class="origin-top-left border-0 bg-white" style="width: 794px" :style="`width: 794px; height: ${height}px; transform: scale(${scale})`" @load="loaded()"></iframe>

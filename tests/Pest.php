@@ -20,9 +20,12 @@ use App\Models\ResumeVersion;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Mail\Transport\ArrayTransport;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\GoogleProvider;
 use Laravel\Socialite\Two\User as GoogleUser;
@@ -125,6 +128,23 @@ function resumeFor(User $user, string $template = 'classic', string $language = 
         'template' => $template,
         'settings' => [...Resume::defaults($template), ...$settings],
     ]);
+}
+
+/**
+ * Opens a CV's preview as the person, which makes its PDF, and gives back the page the PDF
+ * service was sent, so tests can read what the CV says.
+ */
+function cvPage(User $user, int $resumeId): TestResponse
+{
+    $page = null;
+    Http::fake(['gotenberg:3000/*' => function (HttpRequest $request) use (&$page) {
+        $page = (string) collect($request->data())->firstWhere('filename', 'index.html')['contents'];
+
+        return Http::response(pdfWith(['CV']), 200, ['Content-Type' => 'application/pdf']);
+    }]);
+    test()->actingAs($user)->get(route('resumes.preview', ['id' => $resumeId]))->assertOk()->assertHeader('Content-Type', 'application/pdf');
+
+    return TestResponse::fromBaseResponse(response((string) $page));
 }
 
 /** A fictional candidate: a PHP backend developer. */

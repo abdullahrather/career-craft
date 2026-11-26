@@ -174,18 +174,21 @@
             </section>
         </div>
 
-        {{-- Livewire leaves the preview alone: Alpine owns the frame and reloads it after each save. --}}
-        <section class="lg:sticky lg:top-6" aria-labelledby="cv-preview" wire:ignore x-data="resumePreview(@js(route('resumes.preview', ['id' => $resume->id])))" @resume-saved.window="reload()">
+        {{-- Livewire leaves the preview alone: Alpine draws the pages and draws them again after each save. --}}
+        <section class="lg:sticky lg:top-6" aria-labelledby="cv-preview" wire:ignore x-data="cvPreview(@js(route('resumes.preview', ['id' => $resume->id])), @js(__('Page :page of :pages')))" @resume-saved.window="draw()">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <h2 id="cv-preview" class="card-title">{{ __('Preview') }}</h2>
                 <p class="text-sm" role="status" x-show="pages" style="display: none">
                     <span class="badge" :class="pages > target ? 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200' : 'badge-brand'"
                         x-text="pages === 1 ? @js(__('1 page')) : @js(__(':count pages')).replace(':count', pages)"></span>
                     <span x-show="pages > target" class="muted ml-2">{{ __('Longer than you chose. Hide a section or shorten some entries.') }}</span>
+                    <span x-show="loading" class="muted ml-2">{{ __('Updating…') }}</span>
                 </p>
             </div>
-            <div x-ref="box" class="min-w-0 overflow-hidden rounded-2xl border border-stone-200 bg-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-800" :style="`height: ${height * scale}px`">
-                <iframe x-ref="frame" :src="src" title="{{ __('Preview of :name', ['name' => $resume->name]) }}" class="origin-top-left border-0 bg-white" style="width: 794px" :style="`width: 794px; height: ${height}px; transform: scale(${scale})`" @load="loaded()"></iframe>
+            <p class="alert mb-3" role="alert" x-show="error" x-text="error" style="display: none"></p>
+            <div class="rounded-2xl border border-stone-200 bg-stone-200 p-3 shadow-sm dark:border-stone-800 dark:bg-stone-800" :class="loading && 'opacity-70'" role="group" aria-label="{{ __('Preview of :name', ['name' => $resume->name]) }}">
+                <div x-ref="pages" class="flex min-w-0 flex-col gap-3"></div>
+                <p x-show="pages === null && !error" class="muted py-24 text-center text-sm">{{ __('Making the preview…') }}</p>
             </div>
         </section>
     </div>

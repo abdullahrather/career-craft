@@ -69,8 +69,7 @@ describe('Saving a version', function (): void {
             return str_ends_with($request->url(), '/forms/chromium/convert/html')
                 && $files === ['index.html', 'source-serif-4-400.woff2', 'source-serif-4-600.woff2', 'source-serif-4-700.woff2']
                 && str_contains($page, "url('source-serif-4-400.woff2')")
-                && ! str_contains($page, '5173')
-                && ! str_contains($page, 'resume-pages');
+                && ! str_contains($page, '5173');
         });
     });
 

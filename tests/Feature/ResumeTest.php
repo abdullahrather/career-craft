@@ -6,9 +6,12 @@ use App\Livewire\Profile\Photo;
 use App\Livewire\Resumes\Editor;
 use App\Livewire\Resumes\Index;
 use App\Models\Resume;
+use App\Models\ResumeVersion;
 use App\Models\User;
+use Illuminate\Http\Client\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -24,6 +27,31 @@ describe('CV pages', function (): void {
         Livewire::actingAs($someoneElse)->test(Index::class)->call('delete', $resume->id)->assertNotFound();
 
         $this->actingAs($resume->user)->get("/resumes/{$resume->id}")->assertOk()->assertSee('Design roles');
+    });
+
+    it('previews the CV as the PDF it downloads as, so its pages are the file\'s', function (): void {
+        $user = candidate();
+        $resume = resumeFor($user);
+        Http::fake(['gotenberg:3000/*' => Http::response('%PDF-1.7 three pages', 200, ['Content-Type' => 'application/pdf'])]);
+
+        $this->actingAs($user)->get("/resumes/{$resume->id}/preview")
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertHeader('Content-Disposition', 'inline')
+            ->assertContent('%PDF-1.7 three pages');
+        // Made from the same page as a saved version, with its fonts sent along.
+        Http::assertSent(fn (Request $request): bool => str_ends_with($request->url(), '/forms/chromium/convert/html')
+            && collect($request->data())->pluck('filename')->filter()->values()->all() === ['index.html', 'source-serif-4-400.woff2', 'source-serif-4-600.woff2', 'source-serif-4-700.woff2']);
+        expect(ResumeVersion::query()->count())->toBe(0);
+    });
+
+    it('says what to start when the PDF service isn\'t running', function (): void {
+        $user = candidate();
+        Http::fake(['gotenberg:3000/*' => Http::response('down', 503)]);
+
+        $this->actingAs($user)->get('/resumes/'.resumeFor($user)->id.'/preview')
+            ->assertStatus(503)
+            ->assertSee('Check that the PDF service is running: docker compose up -d gotenberg');
     });
 
     it('makes a new CV from a template, with that template\'s defaults', function (): void {
@@ -53,13 +81,12 @@ describe('The CV itself', function (): void {
         $user = candidate();
         app()->setLocale('en');
 
-        $this->actingAs($user)->get('/resumes/'.resumeFor($user)->id.'/preview')
-            ->assertOk()
+        cvPage($user, resumeFor($user)->id)
             ->assertSee('Work experience')
             ->assertSee('Mar 2021 – Present')
             ->assertSee('German (Native speaker)');
 
-        $this->actingAs($user)->get('/resumes/'.resumeFor($user, 'lebenslauf', 'de')->id.'/preview')
+        cvPage($user, resumeFor($user, 'lebenslauf', 'de')->id)
             ->assertSee('Lebenslauf')
             ->assertSee('Persönliche Daten')
             ->assertSee('Berufserfahrung')
@@ -78,7 +105,7 @@ describe('The CV itself', function (): void {
             ->call('move', 'skills', -1)
             ->call('toggle', 'educations');
 
-        $html = $this->actingAs($user)->get('/resumes/'.$editor->get('resumeId').'/preview')->getContent();
+        $html = cvPage($user, $editor->get('resumeId'))->getContent();
         expect(strpos($html, '<h2>Skills</h2>'))->toBeLessThan(strpos($html, '<h2>Work experience</h2>'))
             ->and($html)->not->toContain('HAW Hamburg')
             ->and($html)->not->toContain('<h2>Projects</h2>');
@@ -90,19 +117,19 @@ describe('The CV itself', function (): void {
         Livewire::actingAs($user)->test(Photo::class)->set('photo', UploadedFile::fake()->image('me.jpg', 600, 800))->call('save');
         $resume = resumeFor($user, 'lebenslauf', 'de');
 
-        $this->actingAs($user)->get("/resumes/{$resume->id}/preview")
+        cvPage($user, $resume->id)
             ->assertSee('src="data:image/jpeg;base64,', escape: false)
             ->assertSee('Hamburg, '.now()->locale('de')->translatedFormat('j. F Y'));
 
         $resume->update(['settings' => [...$resume->settings, 'photo' => false, 'signature' => false]]);
-        $this->actingAs($user)->get("/resumes/{$resume->id}/preview")
+        cvPage($user, $resume->id)
             ->assertDontSee('data:image/jpeg', escape: false)
             ->assertDontSee('class="signature-line"', escape: false);
     });
 
     it('renders every template with the profile in reading order', function (string $template): void {
         $user = candidate();
-        $text = strip_tags($this->actingAs($user)->get('/resumes/'.resumeFor($user, $template)->id.'/preview')->getContent());
+        $text = strip_tags(cvPage($user, resumeFor($user, $template)->id)->getContent());
 
         expect($text)->toContain('Lena Brandt')
             ->and(strpos($text, 'Senior product designer'))->toBeLessThan(strpos($text, 'Raised task completion by 25%'))

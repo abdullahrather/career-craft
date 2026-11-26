@@ -45,8 +45,8 @@ The check combines rules and the AI: numbers and, in English, names are compared
 - Several CVs from the same profile, each with its own name, template and settings. A change in the profile shows up in all of them.
 - Four templates: Classic, Modern and Compact, all single-column with plain text in reading order so applicant tracking systems read them as written, and a German tabular Lebenslauf with personal details, photo and a signature line with place and date.
 - Headings and dates follow the CV's language, so one profile gives an English CV ("Mar 2021 – Present") and a German one ("03/2021 – heute").
-- A live A4 preview that shows where pages end, with a choice of font and colour, one page or two, and sections that can be hidden and reordered. Empty sections are left out by themselves.
-- Saved versions: each one keeps the PDF (made by Gotenberg from the same page as the preview) and a Word file exactly as they were, so it's always clear what was sent. CVs can be duplicated to start a variant.
+- A live preview that is the PDF itself: Gotenberg makes it after every change and pdf.js draws it page by page, so its pages and page breaks are exactly the download's. Choose the font and colour, one page or two, and which sections to show in which order. Empty sections are left out by themselves.
+- Saved versions: each one keeps the PDF (made the same way as the preview) and a Word file exactly as they were, so it's always clear what was sent. CVs can be duplicated to start a variant.
 - A parser check on every version: the PDF is read back as plain text, the way an applicant tracking system reads it, and anything from the CV that doesn't come through as whole words is listed.
 - Compare any two versions line by line, as a parser sees them.
 - Word files use Arial or Georgia, which every computer has, since Word can't carry the CV's web fonts along.
