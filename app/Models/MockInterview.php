@@ -21,9 +21,11 @@ use Illuminate\Support\Carbon;
  * @property list<string> $questions
  * @property list<array{role: string, text: string, kind?: string, index?: int}> $messages
  * @property Carbon|null $finished_at
+ * @property string|null $feedback_status writing, ready or failed.
+ * @property list<array{index: int, story: bool, star: array{situation: bool, task: bool, action: bool, result: bool}, fit: int, feedback: string, example: string}>|null $feedback
  * @property-read Application $application
  */
-#[Fillable(['locale', 'questions', 'messages', 'finished_at'])]
+#[Fillable(['locale', 'questions', 'messages', 'finished_at', 'feedback_status', 'feedback'])]
 final class MockInterview extends Model
 {
     /** The longest answer kept. */
@@ -120,8 +122,35 @@ final class MockInterview extends Model
         $this->update(['messages' => [...$this->messages, ['role' => 'candidate', 'text' => $text]]]);
     }
 
+    /**
+     * Each main question the candidate answered, with the follow-up and the answer to it.
+     *
+     * @return list<array{index: int, question: string, answer: string, follow_up: string|null, follow_up_answer: string|null}>
+     */
+    public function answers(): array
+    {
+        $answers = [];
+        $asked = null;
+        foreach ($this->messages as $message) {
+            if ($message['role'] === 'interviewer') {
+                $asked = $message;
+
+                continue;
+            }
+            $index = (int) ($asked['index'] ?? 0);
+            if (($asked['kind'] ?? '') === 'question') {
+                $answers[$index] = ['index' => $index, 'question' => $this->questions[$index] ?? '', 'answer' => $message['text'], 'follow_up' => null, 'follow_up_answer' => null];
+            } elseif (($asked['kind'] ?? '') === 'follow-up' && isset($answers[$index])) {
+                $answers[$index]['follow_up'] = $asked['text'];
+                $answers[$index]['follow_up_answer'] = $message['text'];
+            }
+        }
+
+        return array_values($answers);
+    }
+
     protected function casts(): array
     {
-        return ['questions' => 'array', 'messages' => 'array', 'finished_at' => 'datetime'];
+        return ['questions' => 'array', 'messages' => 'array', 'finished_at' => 'datetime', 'feedback' => 'array'];
     }
 }

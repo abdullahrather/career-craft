@@ -7,6 +7,7 @@ namespace App\Livewire\Applications;
 use App\Ai\Agents\MockInterviewer;
 use App\Ai\AiLimitReached;
 use App\Ai\AiRunner;
+use App\Jobs\ReviewInterview;
 use App\Models\Application;
 use App\Models\MockInterview as Interview;
 use App\Models\User;
@@ -81,6 +82,9 @@ final class MockInterview extends Component
             return;
         }
         $interview->addQuestion($next, trim($text));
+        if ($interview->finished_at !== null) {
+            $this->review($interview);
+        }
     }
 
     /** Ends the interview before its last question. */
@@ -89,6 +93,15 @@ final class MockInterview extends Component
         $interview = $this->interview();
         abort_unless($interview !== null && $interview->finished_at === null, 404);
         $interview->update(['finished_at' => now()]);
+        $this->review($interview);
+    }
+
+    /** Asks for the feedback when it couldn't start or failed; it goes on from the answer that failed. */
+    public function writeFeedback(): void
+    {
+        $interview = $this->interview();
+        abort_unless($interview !== null && $interview->finished_at !== null && $interview->feedback_status !== 'writing' && $interview->feedback_status !== 'ready', 404);
+        $this->review($interview);
     }
 
     public function render(): View
@@ -102,7 +115,23 @@ final class MockInterview extends Component
             'planned' => $interview === null ? count(Interview::plan($application)) : 0,
             // The interviewer's turn, for a reply that failed or was cut off.
             'due' => $interview?->next() !== null,
+            'answers' => collect($interview?->answers() ?? [])->keyBy('index')->all(),
         ]);
+    }
+
+    /** Has the AI give feedback on each answer, once the interview is over. */
+    private function review(Interview $interview): void
+    {
+        if ($interview->answers() === []) {
+            return;
+        }
+        if (app(AiRunner::class)->remaining($this->user()) === 0) {
+            $this->addError('feedback', (new AiLimitReached)->getMessage());
+
+            return;
+        }
+        $interview->update(['feedback_status' => 'writing']);
+        ReviewInterview::dispatch($interview);
     }
 
     /** The latest interview for the application. */
