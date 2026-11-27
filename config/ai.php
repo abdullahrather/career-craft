@@ -147,6 +147,13 @@ return [
             'key' => env('OPENAI_COMPATIBLE_API_KEY'),
         ],
 
+        // A Whisper server for spoken answers, such as a local speaches. Its address and
+        // model are set in the app (AiSettings).
+        'whisper' => [
+            'driver' => 'openai-compatible',
+            'url' => null,
+        ],
+
         'openrouter' => [
             'driver' => 'openrouter',
             'key' => env('OPENROUTER_API_KEY'),

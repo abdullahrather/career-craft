@@ -35,15 +35,28 @@
             @endif
 
             @if ($interview->awaitsAnswer())
-                <form wire:submit="send" class="flex flex-col gap-3" wire:loading.remove wire:target="reply, start, send">
+                <form wire:submit="send" class="flex flex-col gap-3" wire:loading.remove wire:target="reply, start, send"
+                    x-data="spokenAnswer(@js($whisper), @js($interview->locale === 'de' ? 'de-DE' : 'en-GB'), @js(['denied' => __('The browser may not use the microphone. Allow it in the address bar, or type your answer.'), 'failed' => __('Your speech could not be turned into text. Try again, or type your answer.')]))">
                     <label class="field" for="answer">
                         <span>{{ __('Your answer') }}</span>
-                        <textarea id="answer" wire:model="answer" rows="5" maxlength="{{ \App\Models\MockInterview::ANSWER_LENGTH }}" autofocus></textarea>
+                        <textarea id="answer" x-ref="answer" wire:model="answer" rows="5" maxlength="{{ \App\Models\MockInterview::ANSWER_LENGTH }}" autofocus></textarea>
                         @error('answer')
                             <span class="field-error">{{ $message }}</span>
                         @enderror
                     </label>
-                    <button type="submit" class="button button-primary self-start">{{ __('Send answer') }}</button>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button type="submit" class="button button-primary" x-bind:disabled="busy">{{ __('Send answer') }}</button>
+                        <button type="button" x-show="supported" x-cloak x-on:click="toggle" x-bind:disabled="busy" x-bind:aria-pressed="listening" class="button">
+                            <span x-show="! listening">{{ __('Speak your answer') }}</span>
+                            <span x-show="listening">{{ __('Stop speaking') }}</span>
+                        </button>
+                        <span class="muted text-sm" role="status">
+                            <span x-show="listening" x-cloak>{{ __('Listening…') }}</span>
+                            <span x-show="busy" x-cloak>{{ __('Turning your recording into text…') }}</span>
+                        </span>
+                    </div>
+                    <p class="field-error text-sm" role="alert" x-show="error" x-cloak x-text="error"></p>
+                    <p class="muted text-sm" x-show="supported" x-cloak>{{ $whisper ? __('Your recording is turned into text by the Whisper server set up for this app, and added to the box when you stop.') : __('Your browser turns your speech into text as you speak. Chrome and Edge send the audio to Google or Microsoft for this.') }}</p>
                 </form>
             @endif
 

@@ -1015,5 +1015,20 @@
     ":part: missing": ":part: fehlt",
     "A stronger answer": "Eine stärkere Antwort",
     "Built from your answer, but the AI may add details: keep only what is true for you, and fill in the parts in [brackets].": "Aus Ihrer Antwort gebaut, aber die KI kann Details hinzufügen: Behalten Sie nur, was für Sie stimmt, und füllen Sie die Teile in [Klammern] aus.",
-    "[number]": "[Zahl]"
+    "[number]": "[Zahl]",
+    "Spoken answers": "Gesprochene Antworten",
+    "Optional. A Whisper server that speaks the OpenAI API turns spoken answers in mock interviews into text, such as speaches running on this computer. Without one, the browser's own speech recognition is used.": "Optional. Ein Whisper-Server mit der OpenAI-API macht aus gesprochenen Antworten in Probegesprächen Text, etwa speaches auf diesem Computer. Ohne ihn wird die Spracherkennung des Browsers genutzt.",
+    "Address of the Whisper server": "Adresse des Whisper-Servers",
+    "Whisper model": "Whisper-Modell",
+    "Recording": "Aufnahme",
+    "Your recording could not be turned into text. Try again, or type your answer.": "Aus Ihrer Aufnahme konnte kein Text werden. Versuchen Sie es noch einmal, oder tippen Sie Ihre Antwort.",
+    "No words were heard in the recording.": "In der Aufnahme waren keine Worte zu hören.",
+    "The browser may not use the microphone. Allow it in the address bar, or type your answer.": "Der Browser darf das Mikrofon nicht nutzen. Erlauben Sie es in der Adressleiste, oder tippen Sie Ihre Antwort.",
+    "Your speech could not be turned into text. Try again, or type your answer.": "Aus Ihrer Sprache konnte kein Text werden. Versuchen Sie es noch einmal, oder tippen Sie Ihre Antwort.",
+    "Speak your answer": "Antwort sprechen",
+    "Stop speaking": "Sprechen beenden",
+    "Listening…": "Hört zu …",
+    "Turning your recording into text…": "Ihre Aufnahme wird zu Text …",
+    "Your recording is turned into text by the Whisper server set up for this app, and added to the box when you stop.": "Ihre Aufnahme wird vom Whisper-Server dieser App zu Text und beim Beenden ins Feld übernommen.",
+    "Your browser turns your speech into text as you speak. Chrome and Edge send the audio to Google or Microsoft for this.": "Ihr Browser macht aus Ihrer Sprache Text, während Sie sprechen. Chrome und Edge schicken den Ton dafür an Google oder Microsoft."
 }

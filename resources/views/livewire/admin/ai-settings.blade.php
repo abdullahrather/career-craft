@@ -84,6 +84,23 @@
             </label>
         </div>
 
+        <fieldset class="flex flex-col gap-3">
+            <legend class="text-sm font-semibold">{{ __('Spoken answers') }}</legend>
+            <p class="muted text-sm">{{ __('Optional. A Whisper server that speaks the OpenAI API turns spoken answers in mock interviews into text, such as speaches running on this computer. Without one, the browser\'s own speech recognition is used.') }}</p>
+            <div class="grid gap-3 sm:grid-cols-2">
+                <label class="field">
+                    <span>{{ __('Address of the Whisper server') }}</span>
+                    <input type="url" wire:model="whisperUrl" placeholder="http://host.docker.internal:8001/v1">
+                    @error('whisperUrl') <span class="field-error">{{ $message }}</span> @enderror
+                </label>
+                <label class="field">
+                    <span>{{ __('Whisper model') }}</span>
+                    <input type="text" wire:model="whisperModel" maxlength="100" placeholder="Systran/faster-whisper-small">
+                    @error('whisperModel') <span class="field-error">{{ $message }}</span> @enderror
+                </label>
+            </div>
+        </fieldset>
+
         <div class="flex flex-wrap items-center gap-3">
             <button type="submit" class="button button-primary">{{ __('Save') }}</button>
             @if ($saved)
