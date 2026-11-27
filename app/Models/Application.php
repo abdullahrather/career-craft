@@ -32,13 +32,15 @@ use Illuminate\Support\Carbon;
  * @property string|null $letter_name
  * @property string|null $letter_path
  * @property Carbon|null $nudged_at
+ * @property string|null $questions_status writing, ready or failed.
+ * @property list<array{question: string, about: string}>|null $questions Interview questions from the job post.
  * @property-read JobPost|null $jobPost
  * @property-read User $user
  * @property-read Collection<int, ApplicationContact> $contacts
  * @property-read Collection<int, ApplicationNote> $notes
  * @property-read Collection<int, ApplicationEvent> $events
  */
-#[Fillable(['job_post_id', 'title', 'company', 'location', 'url', 'source', 'status', 'position', 'applied_on', 'resume_version_id', 'cv_name', 'cv_path', 'cover_letter_id', 'letter_name', 'letter_path'])]
+#[Fillable(['job_post_id', 'title', 'company', 'location', 'url', 'source', 'status', 'position', 'applied_on', 'resume_version_id', 'cv_name', 'cv_path', 'cover_letter_id', 'letter_name', 'letter_path', 'questions_status', 'questions'])]
 final class Application extends Model
 {
     public const array STATUSES = ['saved', 'applied', 'interviewing', 'offer', 'rejected'];
@@ -190,6 +192,6 @@ final class Application extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['applied_on' => 'date', 'position' => 'integer', 'nudged_at' => 'datetime'];
+        return ['applied_on' => 'date', 'position' => 'integer', 'nudged_at' => 'datetime', 'questions' => 'array'];
     }
 }

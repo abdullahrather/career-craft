@@ -167,6 +167,14 @@ A board of every job you are going for: Saved, Applied, Interviewing, Offer and 
 - **Follow-ups:** an application in Applied with no news for 7 days (you choose, under Reminders in the settings) and no open task is suggested for a follow-up on the dashboard.
 - **Morning email:** at 07:30 the scheduler runs `php artisan careercraft:send-reminders`. It emails tasks due, interviews today and tomorrow, and applications to follow up. A follow-up is mentioned once per quiet spell, not every morning. Nothing to say, no email; it can be turned off in the settings, and only confirmed email addresses get it.
 
+## Interview prep
+
+"Practise for the interview" on an application's page lists the questions you are likely to be asked, to answer out loud.
+
+- **About this job:** for an application tracked from an analysed job post, "Write questions" has the AI write six questions from the post: its duties, the skills it asks for and its level, each with what it tests. The AI gets only the post, nothing from your profile. With the local model it takes about 5 to 15 seconds, in the background; the questions are kept with the application and can be written again.
+- **Common questions:** behavioural questions for everyone, then questions for the kind of role the job title names (software, data, design, product or sales), for its level (from the analysed post, or words such as "Senior" or "Werkstudent" in the title), and about the company.
+- **In the interview's language:** the questions are in the job post's language, so a German post gets German questions whatever language the page is in. Without an analysed post, they follow the page.
+
 ## Accounts
 
 - Sign up with email confirmation, sign in, and reset a forgotten password. The reset form answers the same whether or not an account exists, so it can't be used to find out who has one.

@@ -75,6 +75,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
         return view('applications.show', ['application' => $user->applications()->findOrFail($id)]);
     })->whereNumber('id')->name('applications.show');
+    Route::get('/applications/{id}/practice', function (int $id): View {
+        $user = request()->user();
+        abort_unless($user instanceof User, 403);
+
+        return view('applications.practice', ['application' => $user->applications()->findOrFail($id)]);
+    })->whereNumber('id')->name('applications.practice');
     // The copies of the CV and letter sent; only their owner gets them.
     Route::get('/applications/{id}/{document}', function (int $id, string $document): StreamedResponse {
         $user = request()->user();
