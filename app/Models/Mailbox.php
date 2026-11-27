@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $refresh_token
  * @property Carbon|null $token_expires_at
  * @property int|null $last_uid
+ * @property int|null $uid_validity The IMAP server's UIDVALIDITY when last_uid was taken.
  * @property Carbon|null $checked_at
  * @property string|null $error
  * @property bool $login_failed The server refused the login; scheduled checks wait for new settings.
@@ -79,6 +80,6 @@ final class Mailbox extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['password' => 'encrypted', 'access_token' => 'encrypted', 'refresh_token' => 'encrypted', 'token_expires_at' => 'datetime', 'port' => 'integer', 'last_uid' => 'integer', 'checked_at' => 'datetime', 'login_failed' => 'boolean'];
+        return ['password' => 'encrypted', 'access_token' => 'encrypted', 'refresh_token' => 'encrypted', 'token_expires_at' => 'datetime', 'port' => 'integer', 'last_uid' => 'integer', 'uid_validity' => 'integer', 'checked_at' => 'datetime', 'login_failed' => 'boolean'];
     }
 }

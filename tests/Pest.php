@@ -272,6 +272,9 @@ function fakeInbox(array $messages = [], ?string $login = null, ?string $failure
 
         public ?Mailbox $tested = null;
 
+        /** The server numbered its emails afresh since the last check. */
+        public bool $renumbered = false;
+
         public function __construct(public array $messages, public ?string $login, public ?string $failure, public bool $loginFails) {}
 
         public function test(Mailbox $mailbox): ?string
@@ -286,6 +289,9 @@ function fakeInbox(array $messages = [], ?string $login = null, ?string $failure
             $this->reads[] = [$afterUid, $since, $limit];
             if ($this->failure !== null) {
                 throw new MailboxUnavailable($this->failure, loginFailed: $this->loginFails);
+            }
+            if ($this->renumbered) {
+                [$afterUid, $mailbox->last_uid] = [null, null];
             }
 
             return array_values(array_filter($this->messages, fn (InboxMessage $message): bool => $afterUid === null || $message->uid > $afterUid));

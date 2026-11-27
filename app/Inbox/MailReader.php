@@ -15,7 +15,9 @@ interface MailReader
 
     /**
      * New emails in the inbox, by their headers, oldest first and at most $limit: those with a
-     * UID above $afterUid, or when there is none yet, those received since $since.
+     * UID above $afterUid, or when there is none yet, those received since $since. A reader
+     * whose server renumbered its emails reads since $since and sets the mailbox's last_uid
+     * to null; the check saves that.
      *
      * @return list<InboxMessage>
      *

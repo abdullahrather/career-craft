@@ -40,7 +40,17 @@ final class ImapReader implements MailReader
     {
         $imap = $this->open($mailbox);
         try {
-            $query = $this->inbox($imap)->messages()->withHeaders()->oldest()->limit($limit);
+            $inbox = $this->inbox($imap);
+            // A new UIDVALIDITY means the server numbered its emails afresh, so the last UID says
+            // nothing any more: the inbox is read by date again, and emails already kept are
+            // skipped by their Message-ID.
+            $status = $inbox->status()['UIDVALIDITY'] ?? 0;
+            $validity = is_numeric($status) ? (int) $status : 0;
+            $renumbered = $afterUid !== null && $mailbox->uid_validity !== null && $mailbox->uid_validity !== $validity;
+            if ($renumbered) {
+                $afterUid = null;
+            }
+            $query = $inbox->messages()->withHeaders()->oldest()->limit($limit);
             // These add to the query's search in place.
             if ($afterUid !== null) {
                 $query->uid($afterUid + 1, INF);
@@ -55,6 +65,11 @@ final class ImapReader implements MailReader
                 }
                 $messages[] = $this->message($message);
             }
+            // Only once the emails were found, so a failed read leaves both as they were.
+            if ($renumbered) {
+                $mailbox->last_uid = null;
+            }
+            $mailbox->uid_validity = $validity;
 
             return $messages;
         } catch (ImapException $exception) {

@@ -197,6 +197,55 @@ describe('Checking a mailbox', function (): void {
             ->and($mailbox->refresh()->only(['last_uid', 'error']))->toBe(['last_uid' => 2, 'error' => null]);
     });
 
+    it('reads the inbox again after the server renumbered its emails, and keeps only what is new', function (): void {
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer', 'company' => 'Nordwind Logistik']);
+        $mailbox = mailboxFor($user);
+        $inbox = fakeInbox([inboxEmail(40, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung')]);
+        app(MailboxCheck::class)->run($mailbox);
+
+        // Now numbered from 1: the old email is 3, and a new reply is 5, below the last UID 40.
+        $inbox->messages = [inboxEmail(3, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung', messageId: 'm40@mail.example'), inboxEmail(5, 'jobs@nordwind-logistik.de', 'Einladung')];
+        $inbox->renumbered = true;
+        expect(app(MailboxCheck::class)->run($mailbox))->toBe(1)
+            ->and($application->receivedEmails()->pluck('subject')->all())->toEqualCanonicalizing(['Eingangsbestätigung', 'Einladung'])
+            ->and($inbox->reads[1][1]->isSameDay(now()->subDays(30)))->toBeTrue()
+            ->and($mailbox->refresh()->last_uid)->toBe(5);
+
+        $inbox->renumbered = false;
+        $inbox->messages[] = inboxEmail(6, 'jobs@nordwind-logistik.de', 'Termin');
+        expect(app(MailboxCheck::class)->run($mailbox))->toBe(1)
+            ->and($inbox->reads[2][0])->toBe(5);
+    });
+
+    it('tells emails without a Message-ID apart by themselves, not by their UID, after a renumbering', function (): void {
+        $this->freezeTime();
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer', 'company' => 'Nordwind Logistik']);
+        $mailbox = mailboxFor($user);
+        $inbox = fakeInbox([inboxEmail(40, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung', messageId: '')]);
+        app(MailboxCheck::class)->run($mailbox);
+
+        // The old email is now 3, and a new one took its old UID 40.
+        $inbox->messages = [inboxEmail(3, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung', messageId: ''), inboxEmail(40, 'jobs@nordwind-logistik.de', 'Einladung', messageId: '')];
+        $inbox->renumbered = true;
+        expect(app(MailboxCheck::class)->run($mailbox))->toBe(1)
+            ->and($application->receivedEmails()->pluck('subject')->all())->toEqualCanonicalizing(['Eingangsbestätigung', 'Einladung']);
+    });
+
+    it('knows an email without a Message-ID kept under the old UID-based ID after a renumbering', function (): void {
+        $this->freezeTime();
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer', 'company' => 'Nordwind Logistik']);
+        $mailbox = mailboxFor($user, ['last_uid' => 40]);
+        $application->receivedEmails()->create(['message_id' => 'uid-40@imap.mailbox.example', 'from_address' => 'jobs@nordwind-logistik.de', 'from_name' => '', 'subject' => 'Eingangsbestätigung', 'body' => 'Danke.', 'matched_by' => 'sender', 'received_at' => now()->subHour()]);
+        $inbox = fakeInbox([inboxEmail(3, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung', messageId: ''), inboxEmail(4, 'jobs@nordwind-logistik.de', 'Einladung', messageId: '')]);
+        $inbox->renumbered = true;
+
+        expect(app(MailboxCheck::class)->run($mailbox))->toBe(1)
+            ->and($application->receivedEmails()->pluck('subject')->all())->toEqualCanonicalizing(['Eingangsbestätigung', 'Einladung']);
+    });
+
     it('stops checking after a refused login until the settings are saved or it\'s checked by hand', function (): void {
         $user = User::factory()->create();
         $mailbox = mailboxFor($user, ['last_uid' => 5]);
