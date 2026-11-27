@@ -43,11 +43,13 @@
                             <span class="field-error">{{ $message }}</span>
                         @enderror
                     </label>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <button type="submit" class="button button-primary">{{ __('Send answer') }}</button>
-                        <button type="button" wire:click="finish" wire:confirm="{{ __('End the interview now?') }}" class="button">{{ __('End the interview') }}</button>
-                    </div>
+                    <button type="submit" class="button button-primary self-start">{{ __('Send answer') }}</button>
                 </form>
+            @endif
+
+            {{-- Also when the interviewer keeps failing, so it never blocks a new interview. --}}
+            @if ($interview->finished_at === null)
+                <button type="button" wire:click="finish" wire:confirm="{{ __('End the interview now?') }}" wire:loading.remove wire:target="reply, start, send" class="button self-start">{{ __('End the interview') }}</button>
             @endif
 
             @if ($interview->finished_at !== null)

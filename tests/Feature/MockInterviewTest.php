@@ -114,6 +114,25 @@ describe('A mock interview', function (): void {
         $page->call('reply')->assertHasNoErrors()->assertSee(['Hello. Tell me about yourself.', 'Send answer'])->assertDontSee('Let the interviewer go on');
     });
 
+    it('can be ended while the interviewer keeps failing, so a new one can start', function (): void {
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Recruiter']);
+        MockInterviewer::fake(['Hello. Tell me about yourself.']);
+        $page = Livewire::actingAs($user)->test(MockInterviewPage::class, ['id' => $application->id])
+            ->call('start')->call('reply')
+            ->set('answer', 'I recruit drivers.')->call('send');
+
+        MockInterviewer::fake(fn () => throw new RuntimeException('Ollama is not running.'));
+        $page->call('reply')
+            ->assertSee(['Let the interviewer go on', 'End the interview'])
+            ->call('finish')
+            ->assertSee('Start a new interview')
+            ->call('start')
+            ->assertHasNoErrors();
+
+        expect($application->mockInterviews()->count())->toBe(2);
+    });
+
     it('stops at the day\'s AI allowance', function (): void {
         $user = User::factory()->create();
         $application = Application::track($user, ['title' => 'Recruiter']);
