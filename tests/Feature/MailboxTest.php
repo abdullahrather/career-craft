@@ -218,6 +218,21 @@ describe('Checking a mailbox', function (): void {
             ->and($inbox->reads[2][0])->toBe(5);
     });
 
+    it('tells emails without a Message-ID apart by themselves, not by their UID, after a renumbering', function (): void {
+        $this->freezeTime();
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer', 'company' => 'Nordwind Logistik']);
+        $mailbox = mailboxFor($user);
+        $inbox = fakeInbox([inboxEmail(40, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung', messageId: '')]);
+        app(MailboxCheck::class)->run($mailbox);
+
+        // The old email is now 3, and a new one took its old UID 40.
+        $inbox->messages = [inboxEmail(3, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung', messageId: ''), inboxEmail(40, 'jobs@nordwind-logistik.de', 'Einladung', messageId: '')];
+        $inbox->renumbered = true;
+        expect(app(MailboxCheck::class)->run($mailbox))->toBe(1)
+            ->and($application->receivedEmails()->pluck('subject')->all())->toEqualCanonicalizing(['Eingangsbestätigung', 'Einladung']);
+    });
+
     it('stops checking after a refused login until the settings are saved or it\'s checked by hand', function (): void {
         $user = User::factory()->create();
         $mailbox = mailboxFor($user, ['last_uid' => 5]);

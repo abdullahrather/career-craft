@@ -36,7 +36,8 @@ final class MailboxCheck
                 if ($match !== null) {
                     [$application, $matchedBy] = $match;
                     // Shortened once, so the check for an email already kept looks for what was saved.
-                    $id = Str::limit($message->messageId !== '' ? $message->messageId : "uid-{$message->uid}@".($mailbox->host ?? $mailbox->provider), 255, '');
+                    // Without a Message-ID, one made from the email itself, as UIDs are reused after a renumbering.
+                    $id = Str::limit($message->messageId !== '' ? $message->messageId : 'no-id-'.sha1("{$message->fromAddress}\n{$message->subject}\n{$message->date->getTimestamp()}").'@'.($mailbox->host ?? $mailbox->provider), 255, '');
                     if (! $application->receivedEmails()->where('message_id', $id)->exists()) {
                         $email = $application->receivedEmails()->create([
                             'message_id' => $id,
