@@ -40,12 +40,13 @@
             <h2 class="card-title">{{ __('Password') }}</h2>
             @if ($user->password === null)
                 <p class="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
-                    {{ __('You sign in with Google or GitHub. To also sign in with a password, request a link to set one.') }}
+                    {{ __('You sign in with Google or GitHub. Set a password to also sign in with your email.') }}
                 </p>
-                <form method="POST" action="{{ route('password.email') }}" class="mt-4">
+                <form method="POST" action="{{ route('password.set') }}" class="mt-4 flex flex-col gap-4">
                     @csrf
-                    <input type="hidden" name="email" value="{{ $user->email }}">
-                    <button type="submit" class="button">{{ __('Email me a link to set a password') }}</button>
+                    <x-field name="password" type="password" :label="__('New password (at least 8 characters)')" bag="updatePassword" autocomplete="new-password" required />
+                    <x-field name="password_confirmation" type="password" :label="__('Password again')" bag="updatePassword" autocomplete="new-password" required />
+                    <div><button type="submit" class="button button-primary">{{ __('Set password') }}</button></div>
                 </form>
             @else
                 <form method="POST" action="{{ route('user-password.update') }}" class="mt-4 flex flex-col gap-4">

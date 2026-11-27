@@ -127,6 +127,33 @@ describe('Resetting a password', function (): void {
         $this->post('/login', ['email' => $user->email, 'password' => 'a-brand-new-password']);
         $this->assertAuthenticatedAs($user);
     });
+
+    it('lets someone who signs in only with Google or GitHub set a password in the settings', function (): void {
+        $user = User::factory()->create(['password' => null]);
+        $this->actingAs($user)->get('/settings')->assertOk()
+            ->assertSee('Set a password to also sign in with your email.')
+            ->assertSee('action="'.route('password.set').'"', escape: false);
+
+        $this->actingAs($user)->from('/settings')->post('/settings/password', ['password' => 'a-first-password', 'password_confirmation' => 'a-first-password'])
+            ->assertRedirect('/settings')
+            ->assertSessionHas('status', 'Password set. You can now also sign in with your email and password.');
+        expect(Hash::check('a-first-password', (string) $user->refresh()->password))->toBeTrue();
+
+        auth()->logout();
+        $this->post('/login', ['email' => $user->email, 'password' => 'a-first-password']);
+        $this->assertAuthenticatedAs($user);
+    });
+
+    it('checks the first password like any other, and changes one that exists only with the current one', function (): void {
+        $user = User::factory()->create(['password' => null]);
+        $this->actingAs($user)->from('/settings')->post('/settings/password', ['password' => 'short', 'password_confirmation' => 'other'])
+            ->assertSessionHasErrorsIn('updatePassword', 'password');
+        expect($user->refresh()->password)->toBeNull();
+
+        $member = member();
+        $this->actingAs($member)->post('/settings/password', ['password' => 'taken-over-password', 'password_confirmation' => 'taken-over-password'])->assertForbidden();
+        expect(Hash::check(PASSWORD, (string) $member->refresh()->password))->toBeTrue();
+    });
 });
 
 describe('Two-factor login', function (): void {
