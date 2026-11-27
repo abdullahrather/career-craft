@@ -26,6 +26,7 @@
                 @if ($application->url !== null)
                     <a href="{{ $application->url }}" class="link text-sm" target="_blank" rel="noopener noreferrer nofollow">{{ __('The job online') }} ↗</a>
                 @endif
+                <a href="{{ route('applications.practice', ['id' => $application->id]) }}" class="link text-sm" wire:navigate>{{ __('Practise for the interview') }}</a>
             </div>
             @if (session('saved'))
                 <p class="text-sm" role="status">{{ session('saved') }}</p>
