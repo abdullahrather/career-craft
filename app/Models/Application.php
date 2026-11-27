@@ -132,6 +132,12 @@ final class Application extends Model
         return $this->hasMany(ApplicationTask::class)->orderByRaw('done_at is not null')->orderBy('due_on')->orderBy('id');
     }
 
+    /** @return HasMany<MockInterview, $this> */
+    public function mockInterviews(): HasMany
+    {
+        return $this->hasMany(MockInterview::class);
+    }
+
     /** @return HasMany<ApplicationInterview, $this> In time order. */
     public function interviews(): HasMany
     {
