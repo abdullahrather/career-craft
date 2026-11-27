@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /** An application's interviews, each one ready to add to a calendar. */
@@ -42,6 +43,10 @@ final class Interviews extends Component
     {
         $this->application()->interviews()->whereKey($id)->delete();
     }
+
+    /** A corrected reply label can take back the interview it added. */
+    #[On('reply-relabelled')]
+    public function refreshInterviews(): void {}
 
     public function render(): View
     {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Applications;
 
 use App\Applications\SentDocuments;
+use App\Jobs\ReadReply;
 use App\Models\Application;
 use App\Models\CoverLetter;
 use App\Models\ReceivedEmail;
@@ -103,6 +104,25 @@ final class Show extends Component
         }
         session()->flash('recorded', __('Recorded. These copies stay with the application.'));
         $this->dispatch('application-changed');
+    }
+
+    /** The candidate's own label for a reply, which takes back what the old one did. */
+    public function relabel(int $replyId, string $kind): void
+    {
+        abort_unless(in_array($kind, ReceivedEmail::KINDS, true), 422);
+        $application = $this->application($this->applicationId);
+        $reply = $application->receivedEmails()->findOrFail($replyId);
+        if ($reply->kind === $kind) {
+            return;
+        }
+
+        ReadReply::correct($reply, $kind);
+        $application->refresh();
+        $this->status = $application->status;
+        $this->appliedOn = (string) $application->applied_on?->toDateString();
+        session()->flash('relabelled', __('Saved. The same email gets your label again, for example for another job.'));
+        // Only the interviews below listen; this page shows the rest as it renders now.
+        $this->dispatch('reply-relabelled');
     }
 
     public function delete(): void

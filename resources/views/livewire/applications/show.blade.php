@@ -112,9 +112,26 @@
                                 </summary>
                                 <p class="mt-2 whitespace-pre-line wrap-break-word">{{ $reply->body }}</p>
                             </details>
+                            <label class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                                <span class="muted">{{ __('This email is') }}</span>
+                                <select wire:change="relabel({{ $reply->id }}, $event.target.value)" class="rounded-lg border border-stone-300 bg-white px-2 py-1 dark:border-stone-700 dark:bg-stone-950">
+                                    @if ($reply->kind === null)
+                                        <option value="" selected disabled>{{ __('Not read yet') }}</option>
+                                    @endif
+                                    @foreach ($kinds as $value => $name)
+                                        <option value="{{ $value }}" @selected($reply->kind === $value)>{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                @if ($reply->corrected_at !== null)
+                                    <span class="muted">{{ __('Labelled by you') }}</span>
+                                @endif
+                            </label>
                         </li>
                     @endforeach
                 </ul>
+                @if (session('relabelled'))
+                    <p class="mt-3 text-sm" role="status">{{ session('relabelled') }}</p>
+                @endif
             </section>
         @endif
 
