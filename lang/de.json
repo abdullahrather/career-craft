@@ -983,5 +983,22 @@
     "How do you build trust in a team you have just joined?": "Wie bauen Sie Vertrauen in einem Team auf, zu dem Sie gerade gekommen sind?",
     "How do you decide what to delegate?": "Wie entscheiden Sie, was Sie delegieren?",
     "What would you like to achieve in your first six months at :company?": "Was möchten Sie in Ihren ersten sechs Monaten bei :company erreichen?",
-    "What questions do you have for us?": "Welche Fragen haben Sie an uns?"
+    "What questions do you have for us?": "Welche Fragen haben Sie an uns?",
+    "Mock interview": "Probegespräch",
+    "Mock interview: :title": "Probegespräch: :title",
+    "An AI interviewer asks the questions for :title one at a time and follows up on each answer. Type your answers as you would say them.": "Eine KI stellt als Interviewerin die Fragen für :title nacheinander und hakt bei jeder Antwort nach. Schreiben Sie Ihre Antworten so, wie Sie sie sagen würden.",
+    ":count questions, each with a follow-up on your answer. The interviewer doesn't judge your answers, so treat it like the real thing.": ":count Fragen, jede mit einer Nachfrage zu Ihrer Antwort. Die Interviewerin bewertet Ihre Antworten nicht, also üben Sie wie im echten Gespräch.",
+    "Start the interview": "Gespräch beginnen",
+    "The conversation": "Das Gespräch",
+    "Interviewer:": "Interviewerin:",
+    "You:": "Sie:",
+    "The interviewer is thinking…": "Die Interviewerin überlegt …",
+    "Let the interviewer go on": "Die Interviewerin fortfahren lassen",
+    "Your answer": "Ihre Antwort",
+    "Send answer": "Antwort senden",
+    "End the interview now?": "Das Gespräch jetzt beenden?",
+    "End the interview": "Gespräch beenden",
+    "The interview is over.": "Das Gespräch ist beendet.",
+    "Start a new interview": "Neues Gespräch beginnen",
+    "The interviewer could not answer. Try again in a moment.": "Die Interviewerin konnte nicht antworten. Versuchen Sie es gleich noch einmal."
 }

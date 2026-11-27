@@ -240,7 +240,7 @@ describe('Prompts', function (): void {
     it('are each used by an agent, with no placeholder left unfilled', function (): void {
         $code = collect(Finder::create()->files()->in(app_path('Ai'))->name('*.php'))->map(fn ($file) => $file->getContents())->implode("\n");
         // The values agents fill in, by prompt.
-        $values = ['writing-translate' => ['language' => 'German']];
+        $values = ['writing-translate' => ['language' => 'German'], 'mock-interviewer' => ['title' => 'Designer', 'company' => 'Nordwind Logistik', 'language' => 'German']];
 
         foreach (Finder::create()->files()->in(resource_path('prompts'))->name('*.md') as $file) {
             $name = $file->getBasename('.md');

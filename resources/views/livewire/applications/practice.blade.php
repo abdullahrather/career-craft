@@ -5,6 +5,7 @@
     <div>
         <h1 class="text-2xl font-semibold">{{ __('Practise for the interview') }}</h1>
         <p class="muted mt-1 text-sm">{{ __('Questions interviewers are likely to ask for :title at :company. Answer each one out loud: a short situation, what you did, and the result works best.', ['title' => $application->title, 'company' => $application->company !== '' ? $application->company : __('this company')]) }}</p>
+        <a href="{{ route('applications.mock-interview', ['id' => $application->id]) }}" class="button button-primary mt-3" wire:navigate>{{ __('Mock interview') }}</a>
         @if ($locale !== app()->getLocale())
             <p class="muted mt-1 text-sm">{{ __('The questions are in :language, the language of the job post.', ['language' => $locale === 'de' ? __('German') : __('English')]) }}</p>
         @endif
