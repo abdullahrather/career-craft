@@ -43,7 +43,10 @@ final class ApplicationEvent extends Model
             'submitted' => ($data['site'] ?? '') !== '' ? __('Submitted on :site with the browser extension', ['site' => $data['site']]) : __('Submitted with the browser extension'),
             'queue' => __('Prepared with the apply queue'),
             'reply' => __('Email from :from: “:subject”', ['from' => $data['from'] ?? '', 'subject' => $data['subject'] ?? '']),
-            'reply_kind' => __('The AI read the email as: :kind', ['kind' => ReceivedEmail::kindNames()[$data['kind'] ?? ''] ?? $data['kind']]),
+            'reply_kind' => isset($data['like'])
+                ? __('Labelled the email as: :kind, as you labelled “:subject”', ['kind' => ReceivedEmail::kindNames()[$data['kind'] ?? ''] ?? $data['kind'], 'subject' => $data['like']])
+                : __('The AI read the email as: :kind', ['kind' => ReceivedEmail::kindNames()[$data['kind'] ?? ''] ?? $data['kind']]),
+            'reply_corrected' => __('You labelled the email “:subject” as: :kind', ['subject' => $data['subject'] ?? '', 'kind' => ReceivedEmail::kindNames()[$data['kind'] ?? ''] ?? $data['kind']]),
             'contact' => __('Added :name as a contact', ['name' => $data['name'] ?? '']),
             'task' => __('Added the task “:title”, due :date', ['title' => $data['title'] ?? '', 'date' => Carbon::parse((string) ($data['due_on'] ?? 'today'))->translatedFormat('j M Y')]),
             'task_done' => __('Done: :title', ['title' => $data['title'] ?? '']),

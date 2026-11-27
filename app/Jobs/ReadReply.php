@@ -7,7 +7,6 @@ namespace App\Jobs;
 use App\Ai\Agents\ReplyReader;
 use App\Ai\AiLimitReached;
 use App\Ai\AiRunner;
-use App\Models\Application;
 use App\Models\ApplicationInterview;
 use App\Models\ReceivedEmail;
 use App\Notifications\ReplyRead;
@@ -23,7 +22,9 @@ use Throwable;
  * Has the AI read an employer's reply, then acts on it: the application moves along the
  * board, an interview with a stated time goes into its interviews, and the candidate gets an
  * email. A reply that is none of the kinds the app acts on, such as a confirmation that the
- * application arrived, is only labelled.
+ * application arrived, is only labelled. The candidate can correct the label, which takes
+ * back what the old one did and acts on the new one, and is used again for the same email
+ * later, such as the same template for another job.
  */
 #[DeleteWhenMissingModels]
 final class ReadReply implements ShouldQueue
@@ -60,21 +61,30 @@ final class ReadReply implements ShouldQueue
 
         $answer = $response instanceof StructuredAgentResponse ? $response->toArray() : [];
         $kind = in_array($answer['kind'] ?? null, ReceivedEmail::KINDS, true) ? $answer['kind'] : 'other';
+        // The candidate's label on the same email before beats the AI's reading.
+        $like = $email->likeCorrected();
+        $kind = $like->kind ?? $kind;
         $email->update(['kind' => $kind]);
         if ($kind === 'other') {
             return;
         }
-        $application->log('reply_kind', ['kind' => $kind]);
+        $application->log('reply_kind', $like !== null ? ['kind' => $kind, 'like' => $like->subject] : ['kind' => $kind]);
 
-        $movedTo = self::MOVES[$kind] ?? null;
-        if ($movedTo !== null && self::movesForward($application->status, $movedTo)) {
-            $application->moveTo($movedTo);
-        } else {
-            $movedTo = null;
-        }
-        $interview = $kind === 'interview' ? $this->interview($answer, $application) : null;
+        $movedTo = self::act($email, $answer);
+        $application->user->notify(new ReplyRead($kind, $application->id, $application->title, $application->company, $email->from_name !== '' ? $email->from_name : $email->from_address, $email->subject, $movedTo, $email->interview_id));
+    }
 
-        $application->user->notify(new ReplyRead($kind, $application->id, $application->title, $application->company, $email->from_name !== '' ? $email->from_name : $email->from_address, $email->subject, $movedTo, $interview?->id));
+    /**
+     * The candidate's own label for an email: what the old label did is taken back, the new
+     * one is acted on, and the AI gets the email as an example from then on.
+     */
+    public static function correct(ReceivedEmail $email, string $kind): void
+    {
+        $email->application->log('reply_corrected', ['subject' => $email->subject, 'kind' => $kind]);
+        self::undo($email);
+        $email->kind = $kind;
+        $email->corrected_at = now();
+        self::act($email);
     }
 
     /**
@@ -91,6 +101,58 @@ final class ReadReply implements ShouldQueue
         return $to === 'rejected' || (int) array_search($to, self::ORDER, true) > (int) array_search($from, self::ORDER, true);
     }
 
+    /** Whether the text gives the hour as a time: "14:00", "14.30", "14 Uhr", "2 pm", "2:30 p.m.". */
+    public static function statesHour(string $text, int $hour): bool
+    {
+        $twelve = $hour % 12 === 0 ? 12 : $hour % 12;
+        $patterns = [
+            // Not a date such as 10.12.2026.
+            '/(?<!\d)0?'.$hour.'(?:[:.]\d{2}(?!\.?\d)|\s?(?:uhr|h)\b)/iu',
+            '/(?<!\d)0?'.$twelve.'(?:[:.]\d{2})?\s?(?:'.($hour < 12 ? 'am|a\.m\.' : 'pm|p\.m\.').')/iu',
+        ];
+
+        return preg_match($patterns[0], $text) === 1 || preg_match($patterns[1], $text) === 1;
+    }
+
+    /**
+     * Moves the application as the email's kind says, and adds the interview the AI's answer
+     * gives, noting both on the email so a correction can take them back. Returns the column
+     * it moved to.
+     *
+     * @param  array<mixed>  $answer
+     */
+    private static function act(ReceivedEmail $email, array $answer = []): ?string
+    {
+        $application = $email->application;
+        $movedTo = self::MOVES[(string) $email->kind] ?? null;
+        if ($movedTo !== null && self::movesForward($application->status, $movedTo)) {
+            $email->moved_from = $application->status;
+            $application->moveTo($movedTo);
+        } else {
+            $movedTo = null;
+        }
+        $email->interview_id = $email->kind === 'interview' ? self::interview($email, $answer)?->id : null;
+        $email->save();
+
+        return $movedTo;
+    }
+
+    /**
+     * Takes back what the email's label did, as far as nothing changed it since: the
+     * application goes back while it's still in the column the email moved it to, and the
+     * interview it added is deleted.
+     */
+    private static function undo(ReceivedEmail $email): void
+    {
+        $application = $email->application;
+        if ($email->moved_from !== null && $application->status === (self::MOVES[(string) $email->kind] ?? null)) {
+            $application->moveTo($email->moved_from);
+        }
+        $email->interview?->delete();
+        $email->moved_from = null;
+        $email->interview_id = null;
+    }
+
     /**
      * Adds the interview the email fixes a time for, when that time is after the email came,
      * within a year, and its hour is written in the email, so a time the AI made up is left
@@ -98,9 +160,9 @@ final class ReadReply implements ShouldQueue
      *
      * @param  array<mixed>  $answer
      */
-    private function interview(array $answer, Application $application): ?ApplicationInterview
+    private static function interview(ReceivedEmail $email, array $answer): ?ApplicationInterview
     {
-        $email = $this->email;
+        $application = $email->application;
         $at = is_string($answer['interview_at'] ?? null) ? trim($answer['interview_at']) : '';
         if (! Carbon::canBeCreatedFromFormat($at, 'Y-m-d H:i')) {
             return null;
@@ -118,18 +180,5 @@ final class ReadReply implements ShouldQueue
         $application->log('interview', ['starts_at' => $interview->starts_at->format('Y-m-d H:i')]);
 
         return $interview;
-    }
-
-    /** Whether the text gives the hour as a time: "14:00", "14.30", "14 Uhr", "2 pm", "2:30 p.m.". */
-    public static function statesHour(string $text, int $hour): bool
-    {
-        $twelve = $hour % 12 === 0 ? 12 : $hour % 12;
-        $patterns = [
-            // Not a date such as 10.12.2026.
-            '/(?<!\d)0?'.$hour.'(?:[:.]\d{2}(?!\.?\d)|\s?(?:uhr|h)\b)/iu',
-            '/(?<!\d)0?'.$twelve.'(?:[:.]\d{2})?\s?(?:'.($hour < 12 ? 'am|a\.m\.' : 'pm|p\.m\.').')/iu',
-        ];
-
-        return preg_match($patterns[0], $text) === 1 || preg_match($patterns[1], $text) === 1;
     }
 }
