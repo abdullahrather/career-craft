@@ -170,7 +170,7 @@ A board of every job you are going for: Saved, Applied, Interviewing, Offer and 
 
 - Sign up with email confirmation, sign in, and reset a forgotten password. The reset form answers the same whether or not an account exists, so it can't be used to find out who has one.
 - Two-factor login with an authenticator app, and one-use recovery codes.
-- Optional sign-in with Google or GitHub. A Google or GitHub account only links to an existing CareerCraft account when the provider has confirmed the email address, and two-factor login still applies.
+- Optional sign-in with Google or GitHub. A Google or GitHub account only links to an existing CareerCraft account when the provider has confirmed the email address, and two-factor login still applies. Someone who signs in only this way can set a password in the settings.
 - A list of signed-in devices, and signing out all the others.
 - Emails go out in the language the person uses the site in.
 

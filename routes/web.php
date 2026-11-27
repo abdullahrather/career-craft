@@ -9,6 +9,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OutlookConnectController;
 use App\Http\Controllers\OutlookMailboxController;
 use App\Http\Controllers\ResumeController;
+use App\Http\Controllers\SetPasswordController;
 use App\Http\Controllers\SocialLoginController;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -111,6 +112,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
         return Storage::disk('local')->response($path, headers: ['Cache-Control' => 'private, max-age=31536000, immutable']);
     })->name('profile.photo');
+
+    Route::post('/settings/password', SetPasswordController::class)->name('password.set');
 
     // Only while another way in remains: a password or another connected account.
     Route::delete('/settings/connections/{provider}', function (string $provider): RedirectResponse {
