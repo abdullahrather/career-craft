@@ -46,3 +46,24 @@ it('logs in, reads new emails by their headers, and their text only when asked',
         ->and(trim($email->body()))->toBe("Hallo Lena,\n\nwir laden Sie gern ein.")
         ->and($reader->read($mailbox, $emails->max('uid'), now()->subDay(), 200))->toBe([]);
 });
+
+it('reads by date again when the server numbered its emails afresh', function (): void {
+    $subject = 'Ihre Bewerbung '.uniqid();
+    Mail::build(['transport' => 'smtp', 'host' => 'greenmail', 'port' => 3025, 'auto_tls' => false])
+        ->raw('Wir melden uns.', fn ($message) => $message->from('jobs@nordwind-logistik.example', 'Nordwind Logistik')->to('demo@careercraft.test')->subject($subject));
+    $reader = new ImapReader;
+    $mailbox = new Mailbox(['host' => 'greenmail', 'port' => 3143, 'security' => 'none', 'username' => 'demo', 'password' => 'demo']);
+    $reader->read($mailbox, null, now()->subDay(), 200);
+    $validity = $mailbox->uid_validity;
+    expect($validity)->toBeGreaterThan(0);
+
+    // UIDs far above any on the server: nothing is new while the numbering stays.
+    $mailbox->last_uid = 999999;
+    expect($reader->read($mailbox, 999999, now()->subDay(), 200))->toBe([])
+        ->and($mailbox->last_uid)->toBe(999999);
+
+    $mailbox->uid_validity = $validity + 1;
+    expect(collect($reader->read($mailbox, 999999, now()->subDay(), 200))->pluck('subject'))->toContain($subject)
+        ->and($mailbox->last_uid)->toBeNull()
+        ->and($mailbox->uid_validity)->toBe($validity);
+});

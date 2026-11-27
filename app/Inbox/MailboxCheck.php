@@ -28,6 +28,8 @@ final class MailboxCheck
         $kept = 0;
         try {
             $messages = $this->reader->read($mailbox, $last, now()->subDays(Mailbox::FIRST_DAYS), Mailbox::BATCH);
+            // Null when the server renumbered its emails and the reader started over.
+            $last = $mailbox->last_uid;
             $matcher = new ReplyMatcher($mailbox->user()->firstOrFail());
             foreach ($messages as $message) {
                 $match = $matcher->match($message);

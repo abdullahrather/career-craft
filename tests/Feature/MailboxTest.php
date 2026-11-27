@@ -197,6 +197,27 @@ describe('Checking a mailbox', function (): void {
             ->and($mailbox->refresh()->only(['last_uid', 'error']))->toBe(['last_uid' => 2, 'error' => null]);
     });
 
+    it('reads the inbox again after the server renumbered its emails, and keeps only what is new', function (): void {
+        $user = User::factory()->create();
+        $application = Application::track($user, ['title' => 'Designer', 'company' => 'Nordwind Logistik']);
+        $mailbox = mailboxFor($user);
+        $inbox = fakeInbox([inboxEmail(40, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung')]);
+        app(MailboxCheck::class)->run($mailbox);
+
+        // Now numbered from 1: the old email is 3, and a new reply is 5, below the last UID 40.
+        $inbox->messages = [inboxEmail(3, 'jobs@nordwind-logistik.de', 'Eingangsbestätigung', messageId: 'm40@mail.example'), inboxEmail(5, 'jobs@nordwind-logistik.de', 'Einladung')];
+        $inbox->renumbered = true;
+        expect(app(MailboxCheck::class)->run($mailbox))->toBe(1)
+            ->and($application->receivedEmails()->pluck('subject')->all())->toEqualCanonicalizing(['Eingangsbestätigung', 'Einladung'])
+            ->and($inbox->reads[1][1]->isSameDay(now()->subDays(30)))->toBeTrue()
+            ->and($mailbox->refresh()->last_uid)->toBe(5);
+
+        $inbox->renumbered = false;
+        $inbox->messages[] = inboxEmail(6, 'jobs@nordwind-logistik.de', 'Termin');
+        expect(app(MailboxCheck::class)->run($mailbox))->toBe(1)
+            ->and($inbox->reads[2][0])->toBe(5);
+    });
+
     it('stops checking after a refused login until the settings are saved or it\'s checked by hand', function (): void {
         $user = User::factory()->create();
         $mailbox = mailboxFor($user, ['last_uid' => 5]);
