@@ -10,8 +10,11 @@ use App\Models\Application;
 use App\Models\JobPost;
 use App\Models\MockInterview;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Laravel\Ai\Messages\MessageRole;
 use Laravel\Ai\Prompts\AgentPrompt;
+use Laravel\Ai\Prompts\TranscriptionPrompt;
+use Laravel\Ai\Transcription;
 use Livewire\Livewire;
 
 describe('A mock interview', function (): void {
@@ -294,5 +297,67 @@ describe('Feedback on a mock interview', function (): void {
         $page()->call('writeFeedback')->assertNotFound();
         $mock->update(['feedback_status' => 'ready']);
         $page()->call('writeFeedback')->assertNotFound();
+    });
+});
+
+describe('A spoken answer', function (): void {
+    /** An interview waiting for the candidate's first answer. */
+    $waiting = function (User $user, string $locale = 'en'): MockInterview {
+        return Application::track($user, ['title' => 'Recruiter'])->mockInterviews()->create(['locale' => $locale, 'questions' => ['Tell me about yourself.'], 'messages' => [
+            ['role' => 'interviewer', 'text' => 'Hello. Tell me about yourself.', 'kind' => 'question', 'index' => 0],
+        ]]);
+    };
+    // A tenth of a second of silence, as a real WAV file.
+    $recording = function (): UploadedFile {
+        $data = str_repeat("\0", 1600);
+
+        return UploadedFile::fake()->createWithContent('answer.wav', 'RIFF'.pack('V', 36 + strlen($data)).'WAVEfmt '.pack('VvvVVvv', 16, 1, 1, 8000, 16000, 2, 16).'data'.pack('V', strlen($data)).$data);
+    };
+    $whisper = fn () => (new AiSettings(whisperUrl: 'http://host.docker.internal:8001/v1', whisperModel: 'Systran/faster-whisper-small'))->save();
+
+    it('is turned into text by the Whisper server, in the interview\'s language, and added to the answer', function () use ($waiting, $recording, $whisper): void {
+        $user = User::factory()->create();
+        $mock = $waiting($user, 'de');
+        $whisper();
+        Transcription::fake(['Ich stelle Fahrer ein.']);
+
+        Livewire::actingAs($user)->test(MockInterviewPage::class, ['id' => $mock->application_id])
+            ->assertSee(['Speak your answer', 'Your recording is turned into text by the Whisper server'])
+            ->set('answer', 'Guten Tag.')
+            ->set('recording', $recording())
+            ->call('transcribe')
+            ->assertHasNoErrors()
+            ->assertSet('answer', 'Guten Tag. Ich stelle Fahrer ein.')
+            ->assertSet('recording', null);
+        Transcription::assertGenerated(fn (TranscriptionPrompt $prompt): bool => $prompt->language === 'de' && $prompt->model === 'Systran/faster-whisper-small');
+        expect(config('ai.providers.whisper.url'))->toBe('http://host.docker.internal:8001/v1');
+    });
+
+    it('says so when the Whisper server fails or hears nothing', function () use ($waiting, $recording, $whisper): void {
+        $user = User::factory()->create();
+        $mock = $waiting($user);
+        $whisper();
+        $page = fn () => Livewire::actingAs($user)->test(MockInterviewPage::class, ['id' => $mock->application_id]);
+
+        Transcription::fake(fn () => throw new RuntimeException('Connection refused.'));
+        $page()->set('recording', $recording())->call('transcribe')->assertHasErrors('answer')->assertSee('Your recording could not be turned into text.');
+        Transcription::fake(['  ']);
+        $page()->set('answer', 'Typed.')->set('recording', $recording())->call('transcribe')->assertSee('No words were heard in the recording.')->assertSet('answer', 'Typed.');
+    });
+
+    it('goes to the Whisper server only when there is one, in turn, and as audio', function () use ($waiting, $recording, $whisper): void {
+        $user = User::factory()->create();
+        $mock = $waiting($user);
+        Transcription::fake();
+        $page = fn () => Livewire::actingAs($user)->test(MockInterviewPage::class, ['id' => $mock->application_id]);
+
+        // Without one, the browser's own speech recognition is offered.
+        $page()->assertSee(['Speak your answer', 'Chrome and Edge send the audio to Google or Microsoft'])
+            ->set('recording', $recording())->call('transcribe')->assertNotFound();
+        $whisper();
+        $page()->set('recording', UploadedFile::fake()->createWithContent('answer.txt', 'Not a recording.'))->call('transcribe')->assertHasErrors('recording');
+        $mock->addAnswer('Done.');
+        $page()->set('recording', $recording())->call('transcribe')->assertNotFound();
+        Transcription::assertNothingGenerated();
     });
 });

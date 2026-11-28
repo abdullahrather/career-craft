@@ -39,6 +39,10 @@ final class AiSettings extends Component
     /** @var array<string, array{0: float|int|string, 1: float|int|string}> Provider => [input, output] dollars per million tokens. */
     public array $prices = [];
 
+    public string $whisperUrl = '';
+
+    public string $whisperModel = '';
+
     public bool $saved = false;
 
     public string $answer = '';
@@ -55,6 +59,8 @@ final class AiSettings extends Component
         $this->compatibleUrl = $settings->compatibleUrl;
         $this->timeout = $settings->timeout;
         $this->dailyTokens = $settings->dailyTokens;
+        $this->whisperUrl = $settings->whisperUrl;
+        $this->whisperModel = $settings->whisperModel;
         foreach (Settings::PROVIDERS as $provider) {
             $this->models[$provider] = $settings->model($provider);
             $this->prices[$provider] = $settings->price($provider);
@@ -72,7 +78,11 @@ final class AiSettings extends Component
             'timeout' => ['required', 'integer', 'between:10,180'],
             'dailyTokens' => ['required', 'integer', 'between:0,100000000'],
             'prices.*.*' => ['required', 'numeric', 'between:0,1000'],
+            'whisperUrl' => ['nullable', 'url:http,https', 'max:255'],
+            'whisperModel' => ['nullable', 'string', 'max:100', Rule::requiredIf(trim($this->whisperUrl) !== '')],
         ], attributes: [
+            'whisperUrl' => __('Address of the Whisper server'),
+            'whisperModel' => __('Whisper model'),
             "models.{$this->provider}" => __('Model'),
             'compatibleUrl' => __('Address of the API'),
             'timeout' => __('Timeout'),
@@ -144,6 +154,8 @@ final class AiSettings extends Component
             timeout: $this->timeout,
             dailyTokens: $this->dailyTokens,
             prices: array_map(fn (array $pair): array => [(float) $pair[0], (float) $pair[1]], $this->prices),
+            whisperUrl: trim($this->whisperUrl),
+            whisperModel: trim($this->whisperModel),
         );
     }
 

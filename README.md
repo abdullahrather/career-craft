@@ -178,6 +178,7 @@ A board of every job you are going for: Saved, Applied, Interviewing, Offer and 
 - **No verdict during the interview:** the interviewer is told not to judge or praise answers or give tips, so it stays like a real interview. The local model sometimes still says something like "That sounds effective". End an interview at any time and start a new one; each is kept with the application.
 - **Feedback afterwards:** when the interview ends, the AI reviews each answer together with its follow-up, in the interview's language. It scores from 1 to 5 how well the answer shows what the job asks for (its title, level and required skills from the analysed post). For a question that asks for an example, it marks which parts of the STAR method are there: the situation, your task, what you did and the result. Then it writes what works, the most important thing to improve, and a stronger answer built from yours, with gaps left as placeholders in [brackets] for you to fill in. A number in that answer that you never said becomes a placeholder too. With the local model it takes about 5 seconds per answer, in the background; if it fails, "Try again" goes on from the answer that failed. An answer telling the AI to give a high score is ignored.
 - **Limit:** the local model sometimes still adds details of its own to the stronger answer, such as a result in words or, when you gave no example, a whole made-up one. The page says so under each one: keep only what is true for you.
+- **Spoken answers:** "Speak your answer" under the answer box turns what you say into text, added after anything you typed, so you can correct it before sending. By default the browser does this as you speak, in the interview's language. Chrome and Edge send the audio to Google or Microsoft for it, and the page says so; browsers without speech recognition, such as Firefox, don't show the button. With a [local Whisper server](#spoken-answers-with-whisper-optional) set up, the browser records instead, and the app has your recording turned into text when you stop, so the audio stays on your machine. With the small Whisper model on the processor, a ten-second answer took about 6 seconds.
 
 ## Accounts
 
@@ -252,6 +253,17 @@ docker compose exec app php artisan careercraft:admin you@example.com
 ```
 
 There you choose Ollama, Claude or any OpenAI-compatible API, the model, a timeout, a daily token allowance per person and token prices, and send a test that streams the answer. Keys for paid providers go in `.env` (`ANTHROPIC_API_KEY`, `OPENAI_COMPATIBLE_API_KEY`) and are never stored in the database. Every AI request is recorded with its tokens and cost, by person and by model.
+
+### Spoken answers with Whisper (optional)
+
+Spoken answers in mock interviews work without setup through the browser's speech recognition. To keep the audio on your machine instead, run [speaches](https://speaches.ai), a free Whisper server with the OpenAI API, and download a model once:
+
+```bash
+docker run -d --name speaches -p 8001:8000 -v speaches-hf:/home/ubuntu/.cache/huggingface ghcr.io/speaches-ai/speaches:latest-cpu
+curl -X POST http://localhost:8001/v1/models/Systran/faster-whisper-small
+```
+
+Then, in **AI settings**, set the address of the Whisper server to `http://host.docker.internal:8001/v1` and the model to `Systran/faster-whisper-small`. Any other Whisper server with the OpenAI API works the same way. The small model understands English and German; a larger one, such as `Systran/faster-whisper-medium`, mishears fewer words but is slower.
 
 ### Sign in with Google or GitHub (optional)
 

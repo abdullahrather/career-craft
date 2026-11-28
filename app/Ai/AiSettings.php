@@ -21,6 +21,7 @@ final readonly class AiSettings
     /**
      * @param  array<string, string>  $models  Provider => model.
      * @param  array<string, array{float, float}>  $prices  Provider => US dollars per million input and output tokens.
+     * @param  string  $whisperUrl  An OpenAI-compatible Whisper server for spoken answers; empty for the browser's speech recognition.
      */
     public function __construct(
         public string $provider = 'ollama',
@@ -29,6 +30,8 @@ final readonly class AiSettings
         public int $timeout = 120,
         public int $dailyTokens = 0,
         public array $prices = [],
+        public string $whisperUrl = '',
+        public string $whisperModel = '',
     ) {}
 
     public static function current(): self
@@ -61,6 +64,8 @@ final readonly class AiSettings
                 fn (mixed $pair): array => is_array($pair) ? [self::money($pair[0] ?? null), self::money($pair[1] ?? null)] : [0.0, 0.0],
                 array_intersect_key($prices, array_flip(self::PROVIDERS)),
             ),
+            whisperUrl: is_string($saved['whisperUrl'] ?? null) ? $saved['whisperUrl'] : '',
+            whisperModel: is_string($saved['whisperModel'] ?? null) ? $saved['whisperModel'] : '',
         );
     }
 
@@ -83,6 +88,8 @@ final readonly class AiSettings
             'timeout' => $this->timeout,
             'dailyTokens' => $this->dailyTokens,
             'prices' => $this->prices,
+            'whisperUrl' => $this->whisperUrl,
+            'whisperModel' => $this->whisperModel,
         ];
     }
 

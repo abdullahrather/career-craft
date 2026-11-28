@@ -178,6 +178,21 @@ describe('The admin page', function (): void {
         $page->set('timeout', 5)->call('save')->assertHasErrors('timeout');
     });
 
+    it('saves a Whisper server for spoken answers, with its model', function (): void {
+        $page = Livewire::actingAs(admin())->test(AiSettingsPage::class)
+            ->set('whisperUrl', 'http://host.docker.internal:8001/v1')
+            ->call('save')
+            ->assertHasErrors('whisperModel');
+        $page->set('whisperModel', 'Systran/faster-whisper-small')->call('save')->assertHasNoErrors();
+        expect(AiSettings::current())
+            ->whisperUrl->toBe('http://host.docker.internal:8001/v1')
+            ->whisperModel->toBe('Systran/faster-whisper-small');
+
+        $page->set('whisperUrl', 'not an address')->call('save')->assertHasErrors('whisperUrl');
+        $page->set('whisperUrl', '')->set('whisperModel', '')->call('save')->assertHasNoErrors();
+        expect(AiSettings::current()->whisperUrl)->toBe('');
+    });
+
     it('asks Ollama for its models once, not on every change', function (): void {
         Livewire::actingAs(admin())->test(AiSettingsPage::class)
             ->set('provider', 'anthropic')

@@ -215,6 +215,104 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
+// A spoken answer in a mock interview, added to the answer box: recorded and sent to the
+// app's Whisper server when there is one, or else turned into text by the browser itself.
+document.addEventListener('alpine:init', () => {
+    window.Alpine.data('spokenAnswer', (whisper, language, messages) => ({
+        listening: false,
+        busy: false,
+        error: '',
+        recognition: null,
+        recorder: null,
+
+        get supported() {
+            return whisper
+                ? Boolean(navigator.mediaDevices?.getUserMedia && window.MediaRecorder)
+                : Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+        },
+
+        destroy() {
+            this.recognition?.abort();
+            if (this.recorder?.state === 'recording') {
+                this.recorder.onstop = null;
+                this.recorder.stop();
+            }
+            this.recorder?.stream.getTracks().forEach((track) => track.stop());
+        },
+
+        toggle() {
+            this.error = '';
+            if (this.listening) {
+                whisper ? this.recorder.stop() : this.recognition.stop();
+
+                return;
+            }
+            whisper ? this.record() : this.recognise();
+        },
+
+        // The browser's own speech recognition, writing into the box as the person speaks.
+        recognise() {
+            const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const box = this.$refs.answer;
+            const before = box.value.trim();
+            this.recognition = new Recognition();
+            this.recognition.lang = language;
+            this.recognition.continuous = true;
+            this.recognition.interimResults = true;
+            this.recognition.onresult = (event) => {
+                const spoken = Array.from(event.results, (result) => result[0].transcript).join('');
+                box.value = [before, spoken.trim()].filter(Boolean).join(' ');
+                box.dispatchEvent(new Event('input'));
+            };
+            this.recognition.onerror = (event) => {
+                this.error = event.error === 'not-allowed' ? messages.denied : messages.failed;
+            };
+            this.recognition.onend = () => {
+                this.listening = false;
+            };
+            this.recognition.start();
+            this.listening = true;
+        },
+
+        // A recording for the Whisper server, which the app adds to the box.
+        async record() {
+            let stream;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch {
+                this.error = messages.denied;
+
+                return;
+            }
+            const chunks = [];
+            this.recorder = new MediaRecorder(stream);
+            this.recorder.ondataavailable = (event) => chunks.push(event.data);
+            this.recorder.onstop = () => {
+                stream.getTracks().forEach((track) => track.stop());
+                this.listening = false;
+                const type = this.recorder.mimeType.split(';')[0] || 'audio/webm';
+                const file = new File(chunks, `answer.${type.split('/')[1]}`, { type });
+                this.busy = true;
+                // Typed text goes to the server first, so the spoken words are added to it.
+                this.$wire.answer = this.$refs.answer.value;
+                this.$wire.upload(
+                    'recording',
+                    file,
+                    () => this.$wire.transcribe().finally(() => {
+                        this.busy = false;
+                    }),
+                    () => {
+                        this.busy = false;
+                        this.error = messages.failed;
+                    },
+                );
+            };
+            this.recorder.start();
+            this.listening = true;
+        },
+    }));
+});
+
 // The theme toggle in the header: switch, and remember the choice.
 document.addEventListener('click', (event) => {
     const toggle = event.target.closest('[data-theme-toggle]');

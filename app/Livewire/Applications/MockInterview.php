@@ -7,6 +7,7 @@ namespace App\Livewire\Applications;
 use App\Ai\Agents\MockInterviewer;
 use App\Ai\AiLimitReached;
 use App\Ai\AiRunner;
+use App\Ai\Whisper;
 use App\Jobs\ReviewInterview;
 use App\Models\Application;
 use App\Models\MockInterview as Interview;
@@ -15,18 +16,25 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 use Throwable;
 
 /**
  * A mock interview for one application, written: the interviewer's words appear as the AI
- * writes them, and the candidate types each answer.
+ * writes them, and the candidate types or speaks each answer.
  */
 final class MockInterview extends Component
 {
+    use WithFileUploads;
+
     #[Locked]
     public int $applicationId;
 
     public string $answer = '';
+
+    /** @var TemporaryUploadedFile|null A spoken answer, for the Whisper server. */
+    public $recording = null;
 
     public function mount(int $id): void
     {
@@ -50,6 +58,33 @@ final class MockInterview extends Component
         $interview->addAnswer(trim($this->answer));
         $this->answer = '';
         $this->js('$wire.reply()');
+    }
+
+    /** Adds a spoken answer, turned into text by the Whisper server, to the answer box. */
+    public function transcribe(Whisper $whisper): void
+    {
+        $interview = $this->interview();
+        abort_unless($interview?->awaitsAnswer() === true && Whisper::enabled(), 404);
+        $this->validate(['recording' => ['required', 'file', 'max:12288', 'mimetypes:audio/webm,video/webm,audio/ogg,audio/mp4,video/mp4,audio/mpeg,audio/wav,audio/x-wav']], attributes: ['recording' => __('Recording')]);
+        $recording = $this->recording;
+        abort_unless($recording instanceof TemporaryUploadedFile, 422);
+        try {
+            $text = $whisper->transcribe($recording, $interview->locale);
+        } catch (Throwable $exception) {
+            report($exception);
+            $this->addError('answer', __('Your recording could not be turned into text. Try again, or type your answer.'));
+
+            return;
+        } finally {
+            $recording->delete();
+            $this->recording = null;
+        }
+        if ($text === '') {
+            $this->addError('answer', __('No words were heard in the recording.'));
+
+            return;
+        }
+        $this->answer = trim($this->answer.' '.$text);
     }
 
     /** The interviewer's next words, shown as they arrive. */
@@ -116,6 +151,7 @@ final class MockInterview extends Component
             // The interviewer's turn, for a reply that failed or was cut off.
             'due' => $interview?->next() !== null,
             'answers' => collect($interview?->answers() ?? [])->keyBy('index')->all(),
+            'whisper' => Whisper::enabled(),
         ]);
     }
 
